@@ -27,7 +27,7 @@ class PromoSeeder extends Seeder
                 'applicable_for' => json_encode(['menu']),
                 'max_usage' => 100,
                 'used_count' => 0,
-                'is_active' => true
+                'is_active' => true,
             ],
             [
                 'title' => 'Buy 1 Get 1 Tiket Kolam',
@@ -45,7 +45,7 @@ class PromoSeeder extends Seeder
                 'applicable_for' => json_encode(['ticket']),
                 'max_usage' => 50,
                 'used_count' => 0,
-                'is_active' => true
+                'is_active' => true,
             ],
             [
                 'title' => 'Early Bird Reservasi',
@@ -63,7 +63,25 @@ class PromoSeeder extends Seeder
                 'applicable_for' => json_encode(['reservation']),
                 'max_usage' => 200,
                 'used_count' => 0,
-                'is_active' => true
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Weekend Special',
+                'slug' => 'weekend-special',
+                'description' => 'Diskon 15% setiap Sabtu dan Minggu',
+                'banner_image' => 'promos/weekend.jpg',
+                'discount_type' => 'percentage',
+                'discount_value' => 15,
+                'promo_code' => 'WEEKEND15',
+                'promo_type' => 'menu',
+                'min_purchase' => 100000,
+                'max_discount' => 75000,
+                'start_date' => Carbon::now(),
+                'end_date' => Carbon::now()->addDays(60),
+                'applicable_for' => json_encode(['menu']),
+                'max_usage' => null,
+                'used_count' => 0,
+                'is_active' => true,
             ],
         ];
 

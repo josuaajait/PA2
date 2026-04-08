@@ -5,7 +5,7 @@
 @section('content')
 <!-- Hero Section dengan Parallax efek -->
 <div class="page-header min-vh-100 position-relative d-flex align-items-center" 
-     style="background-image: url('https://images.unsplash.com/photo-1630752708689-02c8636b9141?ixlib=rb-1.2.1&auto=format&fit=crop&w=2490&q=80'); background-attachment: fixed; background-size: cover; background-position: center;">
+     style="background-image: url('https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=1600'); background-attachment: fixed; background-size: cover; background-position: center;">
     
     <!-- Dark Overlay -->
     <span class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-dark opacity-6" style="z-index: 1;"></span>
@@ -14,20 +14,18 @@
         <div class="row">
             <div class="col-lg-8 mx-auto text-center text-white">
                 <span class="badge bg-gradient-primary mb-4 px-4 py-2" style="font-size: 0.9rem; letter-spacing: 1px; display: inline-block;">
-                    ✨ Welcome to the future ✨
+                    🏊 Family Fun & Culinary Experience 🍽️
                 </span>
-                <h1 class="display-3 fw-bold mb-3">Build Beautiful Products</h1>
-                <p class="lead fs-4 mb-5 opacity-75">with the most advanced Material Design system</p>
+                <h1 class="display-3 fw-bold mb-3">Caldera Resto & Pool</h1>
+                <p class="lead fs-4 mb-5 opacity-75">The perfect destination for family gathering and relaxation</p>
                 <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    <a href="#" class="btn btn-lg bg-gradient-primary px-5 py-3 hover-lift" 
-                       onclick="event.preventDefault(); window.showNotification();"
+                    <a href="{{ route('reservation.table') }}" class="btn btn-lg bg-gradient-primary px-5 py-3 hover-lift" 
                        style="min-width: 180px;">
-                        <i class="fas fa-download me-2"></i>Get Started
+                        <i class="fas fa-calendar-alt me-2"></i>Book a Table
                     </a>
-                    <a href="#" class="btn btn-lg btn-outline-light px-5 py-3 hover-lift" 
-                       onclick="event.preventDefault(); window.showNotification();"
+                    <a href="{{ route('reservation.ticket') }}" class="btn btn-lg btn-outline-light px-5 py-3 hover-lift" 
                        style="min-width: 180px; border-width: 2px;">
-                        <i class="fas fa-play me-2"></i>Watch Demo
+                        <i class="fas fa-ticket-alt me-2"></i>Buy Pool Ticket
                     </a>
                 </div>
             </div>
@@ -71,144 +69,294 @@
         <h2 class="display-5 fw-bold mb-3">Why Choose Us?</h2>
         <p class="lead text-secondary mb-5">Discover what makes us different from the rest</p>
         
-        <div class="row g-4">
-            @php
-                $features = [
-                    [
-                        'icon' => 'fa-paint-brush',
-                        'gradient' => 'primary',
-                        'title' => 'Modern Design',
-                        'description' => 'Beautiful and intuitive interface with smooth animations and interactions.',
-                        'feature' => 'design'
-                    ],
-                    [
-                        'icon' => 'fa-code',
-                        'gradient' => 'success',
-                        'title' => 'Clean Code',
-                        'description' => 'Well-organized and documented code for easy customization and maintenance.',
-                        'feature' => 'code'
-                    ],
-                    [
-                        'icon' => 'fa-headset',
-                        'gradient' => 'info',
-                        'title' => '24/7 Support',
-                        'description' => 'Dedicated support team ready to help you with any questions or issues.',
-                        'feature' => 'support'
-                    ],
-                ];
-            @endphp
+<div class="row g-4">
+    @php
+        $features = [
+            [
+                'icon' => 'fa-paint-brush',
+                'gradient' => 'primary',
+                'title' => 'Modern Design',
+                'description' => 'Beautiful and intuitive interface with smooth animations and interactions.',
+                'feature' => 'design'
+            ],
+            [
+                'icon' => 'fa-code',
+                'gradient' => 'success',
+                'title' => 'Clean Code',
+                'description' => 'Well-organized and documented code for easy customization and maintenance.',
+                'feature' => 'code'
+            ],
+            [
+                'icon' => 'fa-headset',
+                'gradient' => 'info',
+                'title' => '24/7 Support',
+                'description' => 'Dedicated support team ready to help you with any questions or issues.',
+                'feature' => 'support'
+            ],
+        ];
+    @endphp
 
-            @foreach($features as $index => $feature)
-                <div class="col-md-4 fade-in-up" style="animation-delay: {{ $index * 0.1 }}s">
-                    <div class="card feature-card h-100 p-4 hover-lift border-0 shadow-sm" 
-                         onclick="showFeature('{{ $feature['feature'] }}')"
-                         style="border-radius: 1.5rem; cursor: pointer; background: linear-gradient(135deg, #fff, #f8f9fa);">
-                        <div class="icon-circle bg-gradient-{{ $feature['gradient'] }} mx-auto mb-4"
-                             style="width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-top: -50px;">
-                            <i class="fas {{ $feature['icon'] }} text-white" style="font-size: 2.2rem;"></i>
-                        </div>
-                        <h4 class="fw-bold mb-3">{{ $feature['title'] }}</h4>
-                        <p class="text-secondary mb-4">{{ $feature['description'] }}</p>
-                        <span class="text-{{ $feature['gradient'] }} fw-bold mt-auto">
-                            Learn more <i class="fas fa-arrow-right ms-2"></i>
-                        </span>
-                    </div>
+    @foreach($features as $index => $feature)
+        <div class="col-md-4 fade-in-up" style="animation-delay: {{ $index * 0.1 }}s">
+            <div class="card feature-card h-100 p-4 hover-lift border-0 shadow-sm" 
+                 onclick="showFeature('{{ $feature['feature'] }}')"
+                 style="border-radius: 1.5rem; cursor: pointer; background: linear-gradient(135deg, #fff, #f8f9fa); transition: all 0.3s ease; overflow: visible;">
+                
+                <!-- Icon di dalam card, tanpa margin-top negatif -->
+                <div class="icon-circle bg-gradient-{{ $feature['gradient'] }} mx-auto mb-4"
+                     style="width: 70px; height: 70px; border-radius: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                    <i class="fas {{ $feature['icon'] }} text-white" style="font-size: 2rem;"></i>
                 </div>
-            @endforeach
+                
+                <h4 class="fw-bold mb-3 text-center" style="color: #333;">{{ $feature['title'] }}</h4>
+                <p class="text-secondary mb-4 text-center" style="line-height: 1.6;">{{ $feature['description'] }}</p>
+                
+                <span class="text-{{ $feature['gradient'] }} fw-bold mt-auto d-flex justify-content-center align-items-center" style="gap: 0.5rem; transition: gap 0.3s ease;">
+                    Learn more <i class="fas fa-arrow-right"></i>
+                </span>
+            </div>
         </div>
+    @endforeach
+</div>
+
+<style>
+/* Feature Cards */
+.feature-card {
+    transition: all 0.3s ease !important;
+    overflow: visible !important;
+    position: relative;
+    padding-top: 1.5rem !important;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px) !important;
+    box-shadow: 0 20px 30px -10px rgba(102, 126, 234, 0.3) !important;
+}
+
+.feature-card .icon-circle {
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .icon-circle {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.feature-card:hover span {
+    gap: 1rem !important;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(45deg, #4caf50, #8bc34a);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(45deg, #00bcd4, #2196f3);
+}
+
+.text-primary { color: #667eea !important; }
+.text-success { color: #4caf50 !important; }
+.text-info { color: #00bcd4 !important; }
+
+/* Dark mode support */
+body.dark-mode .feature-card {
+    background: linear-gradient(135deg, #2d2d2d, #353535) !important;
+}
+
+body.dark-mode .feature-card h4 {
+    color: #fff !important;
+}
+
+body.dark-mode .feature-card p {
+    color: #ccc !important;
+}
+
+/* Animasi fade-in-up */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+</style>
+
     </div>
 
-    <!-- Testimonial Section -->
-    <div class="text-center my-5 py-4">
+<!-- Testimonial Section -->
+<div class="container my-5 py-4">
+    <div class="text-center mb-5">
         <h2 class="display-5 fw-bold mb-3">What Our Clients Say</h2>
-        <p class="lead text-secondary mb-5">Don't just take our word for it</p>
-        
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        @php
-                            $testimonials = [
-                                [
-                                    'image' => 'https://randomuser.me/api/portraits/women/68.jpg',
-                                    'quote' => 'The support team is amazing! They helped me customize everything I needed within hours.',
-                                    'name' => 'Emily Rodriguez',
-                                    'position' => 'Marketing Director',
-                                    'rating' => 5
-                                ],
-                                [
-                                    'image' => 'https://randomuser.me/api/portraits/men/32.jpg',
-                                    'quote' => 'Incredible attention to detail and the animations are buttery smooth. Highly recommended!',
-                                    'name' => 'Michael Chen',
-                                    'position' => 'Product Designer',
-                                    'rating' => 5
-                                ],
-                                [
-                                    'image' => 'https://randomuser.me/api/portraits/women/44.jpg',
-                                    'quote' => 'This is by far the best template I\'ve ever used. The design is stunning and the code is so clean!',
-                                    'name' => 'Sarah Johnson',
-                                    'position' => 'CEO, TechStart',
-                                    'rating' => 5
-                                ],
-                            ];
-                        @endphp
+        <p class="lead text-secondary">Don't just take our word for it</p>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @php
+                        $testimonials = [
+                            [
+                                'image' => 'https://randomuser.me/api/portraits/women/68.jpg',
+                                'quote' => 'The support team is amazing! They helped me customize everything I needed within hours.',
+                                'name' => 'Emily Rodriguez',
+                                'position' => 'Marketing Director',
+                                'rating' => 5
+                            ],
+                            [
+                                'image' => 'https://randomuser.me/api/portraits/men/32.jpg',
+                                'quote' => 'Incredible attention to detail and the animations are buttery smooth. Highly recommended!',
+                                'name' => 'Michael Chen',
+                                'position' => 'Product Designer',
+                                'rating' => 5
+                            ],
+                            [
+                                'image' => 'https://randomuser.me/api/portraits/women/44.jpg',
+                                'quote' => 'This is by far the best template I\'ve ever used. The design is stunning and the code is so clean!',
+                                'name' => 'Sarah Johnson',
+                                'position' => 'CEO, TechStart',
+                                'rating' => 5
+                            ],
+                        ];
+                    @endphp
 
-                        @foreach($testimonials as $index => $testimonial)
-                            <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                <div class="card border-0 shadow-lg p-5" style="border-radius: 2rem; background: white;">
-                                    <i class="fas fa-quote-right text-primary opacity-2" style="font-size: 5rem; position: absolute; top: 20px; right: 30px;"></i>
+                    @foreach($testimonials as $index => $testimonial)
+                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                            <div class="card border-0 shadow-sm mx-auto" style="max-width: 700px; border-radius: 20px;">
+                                <div class="card-body p-5 text-center">
+                                    <!-- Avatar -->
+                                    <img src="{{ $testimonial['image'] }}" 
+                                         class="rounded-circle mb-4" 
+                                         width="80" height="80" 
+                                         alt="{{ $testimonial['name'] }}"
+                                         style="object-fit: cover;">
                                     
-                                    <div class="text-center">
-                                        <img src="{{ $testimonial['image'] }}" 
-                                             class="rounded-circle mb-4 border border-4 border-primary" 
-                                             width="100" height="100" 
-                                             alt="{{ $testimonial['name'] }}"
-                                             style="object-fit: cover;">
-                                        
-                                        <p class="text-secondary fst-italic fs-5 mb-4">"{{ $testimonial['quote'] }}"</p>
-                                        
-                                        <h5 class="fw-bold mb-1">{{ $testimonial['name'] }}</h5>
-                                        <p class="text-primary mb-3">{{ $testimonial['position'] }}</p>
-                                        
-                                        <div class="rating">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                @if($i <= $testimonial['rating'])
-                                                    <i class="fas fa-star text-warning"></i>
-                                                @else
-                                                    <i class="far fa-star text-warning"></i>
-                                                @endif
-                                            @endfor
-                                        </div>
+                                    <!-- Rating -->
+                                    <div class="mb-3">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="fas fa-star text-warning"></i>
+                                        @endfor
                                     </div>
+                                    
+                                    <!-- Quote -->
+                                    <p class="text-secondary mb-4" style="font-size: 1.1rem; line-height: 1.6;">"{{ $testimonial['quote'] }}"</p>
+                                    
+                                    <!-- Name -->
+                                    <h6 class="fw-bold mb-0">{{ $testimonial['name'] }}</h6>
+                                    <small class="text-muted">{{ $testimonial['position'] }}</small>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-                    
-                    <!-- Carousel Controls -->
-                    <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon bg-primary rounded-circle p-3" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon bg-primary rounded-circle p-3" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
+                        </div>
+                    @endforeach
                 </div>
+                
+                <!-- Carousel Controls -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon bg-primary rounded-circle p-3" aria-hidden="true" style="background-size: 60%;"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon bg-primary rounded-circle p-3" aria-hidden="true" style="background-size: 60%;"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+<style>
+/* Testimonial Carousel */
+#testimonialCarousel {
+    position: relative;
+}
+
+#testimonialCarousel .carousel-control-prev,
+#testimonialCarousel .carousel-control-next {
+    width: 40px;
+    height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.7;
+    transition: all 0.3s;
+}
+
+#testimonialCarousel .carousel-control-prev:hover,
+#testimonialCarousel .carousel-control-next:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+#testimonialCarousel .carousel-control-prev {
+    left: -20px;
+}
+
+#testimonialCarousel .carousel-control-next {
+    right: -20px;
+}
+
+#testimonialCarousel .carousel-control-prev-icon,
+#testimonialCarousel .carousel-control-next-icon {
+    background-color: #667eea;
+    border-radius: 50%;
+    padding: 12px;
+}
+
+/* Dark mode */
+body.dark-mode .card {
+    background: #2d2d2d;
+}
+
+body.dark-mode .text-secondary {
+    color: #ccc !important;
+}
+
+body.dark-mode .text-muted {
+    color: #aaa !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #testimonialCarousel .carousel-control-prev {
+        left: -10px;
+    }
+    
+    #testimonialCarousel .carousel-control-next {
+        right: -10px;
+    }
+    
+    .card-body.p-5 {
+        padding: 1.5rem !important;
+    }
+}
+</style>
 
     <!-- CTA Section -->
-    <div class="cta-section text-white text-center my-5 p-5" style="border-radius: 2rem;">
-        <h2 class="display-5 fw-bold mb-3">Ready to Get Started?</h2>
-        <p class="lead mb-4 opacity-75">Join thousands of satisfied customers building amazing products</p>
-        <a href="#" class="btn btn-light btn-lg px-5 py-3 hover-lift" 
-           onclick="event.preventDefault(); window.showNotification();"
+<div class="cta-section text-white text-center my-5 p-5" style="border-radius: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <h2 class="display-5 fw-bold mb-3">Ready to Visit Caldera?</h2>
+    <p class="lead mb-4 opacity-75">Experience the perfect blend of culinary delight and refreshing pool</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="{{ route('reservation.table') }}" class="btn btn-light btn-lg px-5 py-3 hover-lift" 
            style="border-radius: 50px; font-weight: 600;">
-            <i class="fas fa-download me-2"></i>Start Free Trial
+            <i class="fas fa-calendar-alt me-2"></i>Book a Table
+        </a>
+        <a href="{{ route('reservation.ticket') }}" class="btn btn-outline-light btn-lg px-5 py-3 hover-lift" 
+           style="border-radius: 50px; font-weight: 600; border-width: 2px;">
+            <i class="fas fa-ticket-alt me-2"></i>Buy Pool Ticket
         </a>
     </div>
+</div>
 </div>
 @endsection
 

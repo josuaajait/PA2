@@ -10,18 +10,19 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 
-        'slug', 
-        'description', 
-        'start_date', 
+        'title',
+        'slug',
+        'description',
+        'banner_image',
+        'start_date',
         'end_date',
-        'location', 
-        'max_participants', 
-        'ticket_price', 
+        'location',
+        'max_participants',
+        'ticket_price',
         'event_schedule',
-        'contact_info', 
-        'is_featured', 
-        'is_active', 
+        'contact_info',
+        'is_featured',
+        'is_active',
         'promo_id'
     ];
 
@@ -36,28 +37,16 @@ class Event extends Model
     ];
 
     /**
-     * Get all galleries for this event
+     * Relasi ke promo (jika event punya promo)
      */
-    public function galleries()
-    {
-        return $this->morphMany(Gallery::class, 'galleryable');
-    }
-
-    /**
-     * Get featured gallery for this event
-     */
-    public function featuredGallery()
-    {
-        return $this->morphOne(Gallery::class, 'galleryable')
-                    ->where('is_featured', true);
-    }
-
     public function promo()
     {
         return $this->belongsTo(Promo::class);
     }
 
-    // Scopes
+    /**
+     * Scope event mendatang
+     */
     public function scopeUpcoming($query)
     {
         return $query->where('start_date', '>=', now())
@@ -65,6 +54,9 @@ class Event extends Model
                      ->orderBy('start_date');
     }
 
+    /**
+     * Scope event featured
+     */
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);

@@ -3,31 +3,32 @@
 </div>
 
 <script>
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        const toggle = document.getElementById('darkModeToggle');
-        const icon = toggle.querySelector('i');
-        
-        if (document.body.classList.contains('dark-mode')) {
-            icon.className = 'fas fa-sun';
-            toggle.style.background = '#ffc107';
-            toggle.style.color = '#333';
-            localStorage.setItem('darkMode', 'enabled');
+// Dark mode toggle function
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode);
+    
+    // Update icon
+    const toggleIcon = document.querySelector('#darkModeToggle i');
+    if (toggleIcon) {
+        if (isDarkMode) {
+            toggleIcon.className = 'fas fa-sun';
         } else {
-            icon.className = 'fas fa-moon';
-            toggle.style.background = '#333';
-            toggle.style.color = 'white';
-            localStorage.setItem('darkMode', 'disabled');
+            toggleIcon.className = 'fas fa-moon';
         }
     }
+}
 
-    // Check for saved dark mode preference
-    if (localStorage.getItem('darkMode') === 'enabled') {
+// Load dark mode preference on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode === 'true') {
         document.body.classList.add('dark-mode');
-        const toggle = document.getElementById('darkModeToggle');
-        const icon = toggle.querySelector('i');
-        icon.className = 'fas fa-sun';
-        toggle.style.background = '#ffc107';
-        toggle.style.color = '#333';
+        const toggleIcon = document.querySelector('#darkModeToggle i');
+        if (toggleIcon) {
+            toggleIcon.className = 'fas fa-sun';
+        }
     }
+});
 </script>

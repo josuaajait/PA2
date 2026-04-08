@@ -41,8 +41,38 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>
-    
+        <script>
+        // Dark mode toggle function
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            
+            const toggleIcon = document.querySelector('#darkModeToggle i');
+            if (toggleIcon) {
+                if (isDarkMode) {
+                    toggleIcon.className = 'fas fa-sun';
+                } else {
+                    toggleIcon.className = 'fas fa-moon';
+                }
+            }
+        }
+        
+        // Load dark mode preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            if (savedDarkMode === 'true') {
+                document.body.classList.add('dark-mode');
+                const toggleIcon = document.querySelector('#darkModeToggle i');
+                if (toggleIcon) {
+                    toggleIcon.className = 'fas fa-sun';
+                }
+            }
+        });
+    </script>
+
     @stack('scripts')
+
 </body>
 
 </html>
