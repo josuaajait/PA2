@@ -85,4 +85,6 @@ class HomeController extends Controller
         return view('pages.home', compact('stats', 'features', 'testimonialsData', 
             'activePromos', 'recommendedMenus', 'upcomingEvents', 'featuredGallery'));
     }
+
+    
 }

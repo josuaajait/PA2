@@ -22,19 +22,24 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ], [
-            'email.required' => 'Email wajib diisi',
-            'email.email' => 'Format email tidak valid',
-            'password.required' => 'Password wajib diisi',
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
+
+        // Cek apakah email sudah diverifikasi
+        $user = \App\Models\User::where('email', $request->email)->first();
+        
+        if ($user && !$user->hasVerifiedEmail()) {
+            return back()->withErrors([
+                'email' => 'Email belum diverifikasi. Silakan cek email Anda untuk verifikasi.',
+            ])->onlyInput('email');
+        }
 
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
             
-            // Redirect berdasarkan role
             $user = Auth::user();
+            
             if ($user->role === 'admin' || $user->role === 'staff') {
                 return redirect()->intended(route('admin.dashboard'));
             }

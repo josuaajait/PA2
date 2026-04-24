@@ -117,4 +117,6 @@ class TableReservationController extends Controller
         
         return redirect()->route('branding.home')->with('success', 'Reservasi berhasil dibatalkan.');
     }
+
+    
 }

@@ -23,12 +23,17 @@ use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Report\ReportController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Customer\ProfileController;
+use App\Http\Controllers\Customer\ReservationController as CustomerReservationController;
+use App\Http\Controllers\Customer\TicketController as CustomerTicketController;
 use App\Http\Middleware\AdminMiddleware;
-
+use App\Http\Controllers\Auth\GmailAuthController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
-| Authentication Routes (Public)
+| Authentication Routes (Public - Guest only)
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
@@ -42,7 +47,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| Branding Module - Public Routes
+| Branding Module - Public Routes (Semua orang bisa akses)
 |--------------------------------------------------------------------------
 */
 Route::name('branding.')->group(function () {
@@ -60,8 +65,15 @@ Route::name('branding.')->group(function () {
     Route::get('/promos/{slug}', [PromoController::class, 'detail'])->name('promos.detail');
     Route::get('/events', [PromoController::class, 'events'])->name('events');
     Route::get('/events/{slug}', [PromoController::class, 'eventDetail'])->name('events.detail');
+    
+    // Testimonials
     Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials');
-    Route::post('/testimonials/store', [TestimonialController::class, 'store'])->name('testimonials.store');
+    Route::get('/testimonials/create', [TestimonialController::class, 'create'])->name('testimonials.create');
+    Route::post('/testimonials/store', [TestimonialController::class, 'store'])
+    ->name('testimonials.store')
+    ->middleware('throttle:3,1440'); // Maksimal 3 testimoni per IP per hari
+    Route::get('/testimonials/{testimonial}', [TestimonialController::class, 'show'])->name('testimonials.show');
+    
     Route::get('/gallery', [PublicGalleryController::class, 'index'])->name('gallery');
     Route::get('/gallery/category/{category}', [PublicGalleryController::class, 'category'])->name('gallery.category');
     Route::get('/gallery/{gallery}', [PublicGalleryController::class, 'show'])->name('gallery.show');
@@ -69,10 +81,10 @@ Route::name('branding.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Reservation Module - Public Routes
+| Reservation Module - Hanya User yang Login
 |--------------------------------------------------------------------------
 */
-Route::prefix('reservation')->name('reservation.')->group(function () {
+Route::prefix('reservation')->name('reservation.')->middleware(['auth'])->group(function () {
     Route::get('/table', [TableReservationController::class, 'create'])->name('table');
     Route::post('/table/check-availability', [TableReservationController::class, 'checkAvailability'])->name('table.check');
     Route::post('/table/store', [TableReservationController::class, 'store'])->name('table.store');
@@ -92,11 +104,29 @@ Route::prefix('reservation')->name('reservation.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Module - Protected Routes
+| Customer Module - Hanya User yang Login
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('password.change');
+    
+    Route::get('/reservations', [CustomerReservationController::class, 'index'])->name('reservations');
+    Route::get('/reservations/{bookingCode}', [CustomerReservationController::class, 'show'])->name('reservation.show');
+    Route::post('/reservations/{bookingCode}/cancel', [CustomerReservationController::class, 'cancel'])->name('reservation.cancel');
+    
+    Route::get('/tickets', [CustomerTicketController::class, 'index'])->name('tickets');
+    Route::get('/tickets/{ticketCode}', [CustomerTicketController::class, 'show'])->name('ticket.show');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin Module - Hanya Admin/Staff
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Login routes (tanpa middleware)
+    // Login routes (tanpa middleware auth)
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -111,7 +141,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/reservations/{reservation}', [ReservationManagementController::class, 'show'])->name('reservations.show');
         Route::post('/reservations/{reservation}/confirm', [ReservationManagementController::class, 'confirm'])->name('reservations.confirm');
         Route::post('/reservations/{reservation}/cancel', [ReservationManagementController::class, 'cancel'])->name('reservations.cancel');
-        Route::get('/reservations/export', [ReservationManagementController::class, 'export'])->name('reservations.export'); // Tambahkan ini
+        Route::get('/reservations/export', [ReservationManagementController::class, 'export'])->name('reservations.export');
         Route::get('/tickets', [TicketManagementController::class, 'index'])->name('tickets.index');
         Route::get('/tickets/{ticket}', [TicketManagementController::class, 'show'])->name('tickets.show');
         Route::post('/tickets/{ticket}/verify', [TicketManagementController::class, 'verify'])->name('tickets.verify');
@@ -129,10 +159,55 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/galleries/{gallery}/toggle-featured', [AdminGalleryController::class, 'toggleFeatured'])->name('galleries.toggle-featured');
         Route::post('/galleries/bulk-upload', [AdminGalleryController::class, 'bulkUpload'])->name('galleries.bulk-upload');
         Route::post('/galleries/update-sort-order', [AdminGalleryController::class, 'updateSortOrder'])->name('galleries.update-sort-order');
+        
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/reservations', [ReportController::class, 'reservations'])->name('reports.reservations');
         Route::get('/reports/tickets', [ReportController::class, 'tickets'])->name('reports.tickets');
         Route::get('/reports/income', [ReportController::class, 'income'])->name('reports.income');
-        Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+        Route::get('/reports/export-reservations', [ReportController::class, 'exportReservations'])->name('reports.export-reservations');
+        Route::get('/reports/export-tickets', [ReportController::class, 'exportTickets'])->name('reports.export-tickets');
+        Route::get('/reports/export-income', [ReportController::class, 'exportIncome'])->name('reports.export-income');
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Email Verification Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect()->route('branding.home');
+    })->middleware(['signed'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return back()->with('success', 'Link verifikasi baru telah dikirim!');
+    })->middleware(['throttle:6,1'])->name('verification.send');
+});
+
+// Google OAuth Routes
+Route::prefix('google')->name('google.')->group(function () {
+    Route::get('/auth', [GmailAuthController::class, 'redirectToGoogle'])->name('auth');
+    Route::get('/callback', [GmailAuthController::class, 'handleGoogleCallback'])->name('callback');
+});
+
+Route::get('/test-email', function () {
+    $user = App\Models\User::where('email', 'your-email@gmail.com')->first();
+    
+    if (!$user) {
+        return 'User tidak ditemukan';
+    }
+    
+    try {
+        $user->sendEmailVerificationNotification();
+        return 'Email verifikasi telah dikirim ke ' . $user->email;
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
 });

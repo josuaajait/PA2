@@ -39,4 +39,5 @@ class ContactController extends Controller
         
         return redirect()->back()->with('success', 'Pesan berhasil dikirim. Kami akan segera menghubungi Anda.');
     }
+    
 }

@@ -44,4 +44,6 @@ class GalleryController extends Controller
             
         return view('pages.gallery-detail', compact('gallery', 'related'));
     }
+
+    
 }

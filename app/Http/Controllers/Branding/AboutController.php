@@ -34,4 +34,6 @@ class AboutController extends Controller
         
         return view('pages.about', compact('companyInfo'));
     }
+
+    
 }

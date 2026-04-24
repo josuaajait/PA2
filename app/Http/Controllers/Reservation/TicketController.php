@@ -114,4 +114,6 @@ class TicketController extends Controller
         $ticket = PoolTicket::where('ticket_code', $ticketCode)->firstOrFail();
         return view('reservation.ticket.view', compact('ticket'));
     }
+
+    
 }

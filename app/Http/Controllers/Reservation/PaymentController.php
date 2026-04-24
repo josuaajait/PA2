@@ -84,4 +84,6 @@ class PaymentController extends Controller
             'amount' => $data->down_payment ?? $data->total_amount
         ]);
     }
+
+    
 }

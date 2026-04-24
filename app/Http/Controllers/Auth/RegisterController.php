@@ -27,13 +27,16 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
 
-        event(new Registered($user = $this->create($request->all())));
+        $user = $this->create($request->all());
 
-        // Auto login setelah register
-        Auth::login($user);
+        // 🔥 PENTING: Event Registered akan mengirim email verifikasi
+        event(new Registered($user));
 
-        return redirect()->route('branding.home')
-            ->with('success', 'Selamat datang di Caldera Resto & Pool! Akun Anda berhasil dibuat.');
+        // Jangan login otomatis, biarkan user verifikasi dulu
+        // auth()->login($user);
+
+        return redirect()->route('login')
+            ->with('success', 'Registrasi berhasil! Silakan cek email Anda untuk verifikasi.');
     }
 
     /**

@@ -1,85 +1,118 @@
 <nav class="navbar navbar-expand-lg w-100" id="mainNav" 
-     style="position: absolute; top: 0; left: 0; right: 0; z-index: 1030; background: transparent; padding: 1rem 0; transition: all 0.3s ease;">
+     style="position: fixed; top: 0; left: 0; right: 0; z-index: 1030; padding: 1rem 0; transition: all 0.3s ease;">
     <div class="container">
-        <a class="navbar-brand text-white fw-bold" href="{{ route('branding.home') }}" style="font-size: 1.5rem; transition: color 0.3s ease;">
+        <a class="navbar-brand fw-bold" href="{{ route('branding.home') }}" style="font-size: 1.5rem; transition: color 0.3s ease;">
             <i class="fas fa-fire me-2"></i>
             Caldera Resto & Pool
         </a>
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                style="background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.2);">
             <span class="navbar-toggler-icon"></span>
         </button>
         
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
-                <!-- Menu Links -->
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('branding.home') }}" style="font-weight: 500; padding: 0.5rem 1rem; transition: color 0.3s ease;">Home</a>
+                    <a class="nav-link" href="{{ route('branding.home') }}" style="font-weight: 500; padding: 0.5rem 1rem;">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('branding.about') }}" style="font-weight: 500; padding: 0.5rem 1rem; transition: color 0.3s ease;">About</a>
+                    <a class="nav-link" href="{{ route('branding.about') }}" style="font-weight: 500; padding: 0.5rem 1rem;">About</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('branding.menu') }}" style="font-weight: 500; padding: 0.5rem 1rem; transition: color 0.3s ease;">Menu</a>
+                    <a class="nav-link" href="{{ route('branding.menu') }}" style="font-weight: 500; padding: 0.5rem 1rem;">Menu</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('branding.pool') }}" style="font-weight: 500; padding: 0.5rem 1rem; transition: color 0.3s ease;">Pool</a>
+                    <a class="nav-link" href="{{ route('branding.pool') }}" style="font-weight: 500; padding: 0.5rem 1rem;">Pool</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('branding.promos') }}" style="font-weight: 500; padding: 0.5rem 1rem; transition: color 0.3s ease;">Promos</a>
+                    <a class="nav-link" href="{{ route('branding.promos') }}" style="font-weight: 500; padding: 0.5rem 1rem;">Promos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('branding.gallery') }}" style="font-weight: 500; padding: 0.5rem 1rem; transition: color 0.3s ease;">Gallery</a>
+                    <a class="nav-link" href="{{ route('branding.gallery') }}" style="font-weight: 500; padding: 0.5rem 1rem;">Gallery</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('branding.testimonials') }}" style="font-weight: 500; padding: 0.5rem 1rem; transition: color 0.3s ease;">Testimonials</a>
+                    <a class="nav-link" href="{{ route('branding.testimonials') }}" style="font-weight: 500; padding: 0.5rem 1rem;">Testimonials</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('branding.contact') }}" style="font-weight: 500; padding: 0.5rem 1rem; transition: color 0.3s ease;">Contact</a>
-                </li>
-                
-                <!-- Separator -->
-                <li class="nav-item">
-                    <span class="text-white-50 mx-2">|</span>
+                    <a class="nav-link" href="{{ route('branding.contact') }}" style="font-weight: 500; padding: 0.5rem 1rem;">Contact</a>
                 </li>
                 
-                <!-- Book Table Button -->
                 <li class="nav-item">
-                    <a href="{{ route('reservation.table') }}" class="btn btn-primary ms-2" style="background: #667eea; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; transition: all 0.3s ease;">
-                        <i class="fas fa-calendar-alt me-2"></i>Book Table
-                    </a>
+                    <span class="mx-2 text-muted">|</span>
                 </li>
+                
+                <!-- Book Table Button - Hanya untuk customer yang login -->
+                @auth
+                    @if(Auth::user()->role == 'customer')
+                        <li class="nav-item">
+                            <a href="{{ route('reservation.table') }}" class="btn btn-primary ms-2" style="background: #667eea; border: none; padding: 0.5rem 1.2rem; border-radius: 8px;">
+                                <i class="fas fa-calendar-alt me-2"></i>Book Table
+                            </a>
+                        </li>
+                    @endif
+                @endauth
                 
                 <!-- Authentication Links -->
                 @auth
-                    <li class="nav-item dropdown ms-2">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" style="font-weight: 500; padding: 0.5rem 1rem;">
-                            <i class="fas fa-user-circle me-1"></i>{{ Auth::user()->name }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>My Profile</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-calendar-alt me-2"></i>My Reservations</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-ticket-alt me-2"></i>My Tickets</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
+                    @if(Auth::user()->role == 'admin' || Auth::user()->role == 'staff')
+                        <!-- Admin/Staff Dropdown -->
+                        <li class="nav-item dropdown ms-2">
+                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" style="font-weight: 500; padding: 0.5rem 1rem;">
+                                <i class="fas fa-user-shield me-1"></i>{{ Auth::user()->name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @else
+                        <!-- Customer Dropdown -->
+                        <li class="nav-item dropdown ms-2">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" style="font-weight: 500; padding: 0.5rem 1rem;">
+                                <i class="fas fa-user-circle me-1"></i>{{ Auth::user()->name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ route('customer.profile') }}">
+                                    <i class="fas fa-user me-2"></i>My Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ route('customer.reservations') }}">
+                                    <i class="fas fa-calendar-alt me-2"></i>My Reservations
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ route('customer.tickets') }}">
+                                    <i class="fas fa-ticket-alt me-2"></i>My Tickets
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
                 @else
+                    <!-- Guest (Belum Login) -->
                     <li class="nav-item ms-2">
-                        <a href="{{ route('login') }}" class="btn btn-outline-light" style="border-radius: 8px; padding: 0.5rem 1.2rem; transition: all 0.3s ease;">
+                        <a href="{{ route('login') }}" class="btn btn-outline-primary" style="border-radius: 8px; padding: 0.5rem 1.2rem;">
                             <i class="fas fa-sign-in-alt me-2"></i>Login
                         </a>
                     </li>
                     <li class="nav-item ms-2">
-                        <a href="{{ route('register') }}" class="btn btn-primary" style="background: #667eea; border: none; border-radius: 8px; padding: 0.5rem 1.2rem; transition: all 0.3s ease;">
+                        <a href="{{ route('register') }}" class="btn btn-primary" style="background: #667eea; border: none; border-radius: 8px; padding: 0.5rem 1.2rem;">
                             <i class="fas fa-user-plus me-2"></i>Register
                         </a>
                     </li>
@@ -89,108 +122,71 @@
     </div>
 </nav>
 
-<style>
-/* Style untuk navbar saat di-scroll */
-.navbar-fixed {
-    position: fixed !important;
-    background: white !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-    animation: slideDown 0.3s ease;
+<!-- Style dan script sama seperti sebelumnya -->
+ <style>
+/* Navbar default - transparan */
+#mainNav {
+    background: transparent;
+    transition: all 0.3s ease;
 }
 
-.navbar-fixed .nav-link,
-.navbar-fixed .navbar-brand {
+#mainNav .navbar-brand,
+#mainNav .nav-link {
     color: #333 !important;
 }
 
-.navbar-fixed .btn-primary {
-    background: #667eea !important;
-    color: white !important;
+#mainNav .btn-outline-primary {
+    border-color: #667eea;
+    color: #667eea;
 }
 
-.navbar-fixed .btn-outline-light {
-    border-color: #667eea !important;
-    color: #667eea !important;
+/* Navbar saat di-scroll - putih */
+#mainNav.navbar-scrolled {
+    background: white !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.navbar-fixed .btn-outline-light:hover {
-    background: #667eea !important;
-    color: white !important;
-}
-
-.navbar-fixed .dropdown-toggle {
+#mainNav.navbar-scrolled .navbar-brand,
+#mainNav.navbar-scrolled .nav-link {
     color: #333 !important;
 }
 
-.navbar-fixed .text-white-50 {
-    color: #6c757d !important;
+/* Navbar untuk halaman dengan hero (home) */
+body.has-hero #mainNav {
+    background: transparent;
 }
 
-/* Style untuk navbar transparan (default) */
-.navbar-transparent {
-    position: absolute !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
-.navbar-transparent .nav-link,
-.navbar-transparent .navbar-brand {
+body.has-hero #mainNav .navbar-brand,
+body.has-hero #mainNav .nav-link {
     color: white !important;
 }
 
-.navbar-transparent .btn-primary {
-    background: #667eea !important;
-    color: white !important;
+body.has-hero #mainNav .btn-outline-primary {
+    border-color: white;
+    color: white;
 }
 
-.navbar-transparent .btn-outline-light {
-    border-color: white !important;
-    color: white !important;
-}
-
-.navbar-transparent .btn-outline-light:hover {
+body.has-hero #mainNav.navbar-scrolled {
     background: white !important;
-    color: #667eea !important;
 }
 
-.navbar-transparent .dropdown-toggle {
-    color: white !important;
+body.has-hero #mainNav.navbar-scrolled .navbar-brand,
+body.has-hero #mainNav.navbar-scrolled .nav-link {
+    color: #333 !important;
 }
 
-.navbar-transparent .text-white-50 {
-    color: rgba(255,255,255,0.5) !important;
-}
-
-/* Animasi */
-@keyframes slideDown {
-    from {
-        transform: translateY(-100%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-
-/* Dark mode styles */
-body.dark-mode .navbar-fixed {
+/* Dark mode */
+body.dark-mode #mainNav.navbar-scrolled {
     background: #1a1a1a !important;
     border-bottom: 1px solid #404040;
 }
 
-body.dark-mode .navbar-fixed .nav-link,
-body.dark-mode .navbar-fixed .navbar-brand {
+body.dark-mode #mainNav.navbar-scrolled .navbar-brand,
+body.dark-mode #mainNav.navbar-scrolled .nav-link {
     color: #fff !important;
 }
 
-body.dark-mode .navbar-fixed .dropdown-toggle {
-    color: #fff !important;
-}
-
-body.dark-mode .navbar-fixed .text-white-50 {
-    color: #6c757d !important;
-}
-
-/* Dropdown menu styling */
+/* Dropdown */
 .dropdown-menu {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -210,10 +206,6 @@ body.dark-mode .navbar-fixed .text-white-50 {
     color: white;
 }
 
-.dropdown-item i {
-    width: 20px;
-}
-
 body.dark-mode .dropdown-menu {
     background: #2d2d2d;
 }
@@ -222,118 +214,35 @@ body.dark-mode .dropdown-item {
     color: #fff;
 }
 
-body.dark-mode .dropdown-item:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-/* Navbar item spacing - konsisten */
-.navbar-nav .nav-item {
-    margin: 0 2px;
-}
-
-/* Button hover effects */
-.btn-primary:hover,
-.btn-outline-light:hover {
-    transform: translateY(-2px);
-}
-
 /* Responsive */
 @media (max-width: 991px) {
     .navbar-nav {
         padding: 1rem 0;
     }
-    
     .navbar-nav .nav-item {
         margin: 0.25rem 0 !important;
-    }
-    
-    .navbar-nav .nav-link {
-        padding: 0.5rem 0 !important;
-    }
-    
-    .btn-outline-light,
-    .btn-primary {
-        display: inline-block;
-        width: auto;
-        margin: 0.25rem 0 !important;
-    }
-    
-    .navbar-nav .ms-2 {
-        margin-left: 0 !important;
-    }
-    
-    .text-white-50 {
-        display: none;
-    }
-}
-
-@media (min-width: 992px) {
-    .navbar-nav {
-        gap: 0.25rem;
     }
 }
 </style>
 
 <script>
-    // Navbar scroll effect yang lebih baik
     document.addEventListener('DOMContentLoaded', function() {
         const nav = document.getElementById('mainNav');
-        const heroSection = document.querySelector('.page-header');
-        const heroHeight = heroSection ? heroSection.offsetHeight : 400;
+        const hasHero = document.querySelector('.page-header') !== null;
         
-        // Fungsi untuk update navbar berdasarkan scroll
+        if (hasHero) {
+            document.body.classList.add('has-hero');
+        }
+        
         function updateNavbar() {
-            const scrolled = window.scrollY;
-            const scrollThreshold = heroHeight * 0.3;
-            
-            if (scrolled > scrollThreshold) {
-                nav.classList.remove('navbar-transparent');
-                nav.classList.add('navbar-fixed');
-                nav.style.position = '';
-                nav.style.background = '';
-                nav.style.boxShadow = '';
+            if (window.scrollY > 50) {
+                nav.classList.add('navbar-scrolled');
             } else {
-                nav.classList.remove('navbar-fixed');
-                nav.classList.add('navbar-transparent');
-                nav.style.position = '';
-                nav.style.background = '';
-                nav.style.boxShadow = '';
+                nav.classList.remove('navbar-scrolled');
             }
         }
         
         updateNavbar();
-        
-        let ticking = false;
-        window.addEventListener('scroll', function() {
-            if (!ticking) {
-                window.requestAnimationFrame(function() {
-                    updateNavbar();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        });
-        
-        window.addEventListener('resize', function() {
-            const newHeroHeight = document.querySelector('.page-header');
-            if (newHeroHeight) {
-                heroHeight = newHeroHeight.offsetHeight;
-            }
-            updateNavbar();
-        });
+        window.addEventListener('scroll', updateNavbar);
     });
-    
-    // Global notification function
-    window.showNotification = function() {
-        const notification = document.createElement('div');
-        notification.className = 'alert alert-success position-fixed top-0 end-0 m-3';
-        notification.style.zIndex = '9999';
-        notification.innerHTML = `
-            <i class="fas fa-check-circle me-2"></i>
-            <strong>Success!</strong> Welcome to Caldera Resto & Pool!
-            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-        `;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 3000);
-    };
 </script>

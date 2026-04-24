@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Branding;
 use App\Http\Controllers\Controller;
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TestimonialController extends Controller
 {
@@ -53,12 +54,28 @@ class TestimonialController extends Controller
     /**
      * Store a newly created testimonial in storage.
      */
-    public function store(Request $request)
+public function store(Request $request)
     {
+        // CEK RATE LIMITING MANUAL (double protection)
+        $ip = $request->ip();
+        $today = now()->toDateString();
+        $cacheKey = "testimonial_limit_{$ip}_{$today}";
+        
+        $submissionCount = Cache::get($cacheKey, 0);
+        
+        if ($submissionCount >= 3) {
+            return redirect()->back()
+                ->with('error', 'Anda sudah mencapai batas maksimal 3 testimoni per hari. Silakan coba lagi besok.');
+        }
+        
+        // Validasi dengan CAPTCHA (opsional)
+        // if ($request->has('g-recaptcha-response')) {
+        //     $this->validateCaptcha($request);
+        // }
+        
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
-            'customer_email' => 'nullable|email|max:255',
-            'customer_photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'customer_email' => 'required|email|max:255',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string|min:10|max:1000',
             'service_type' => 'nullable|string|in:restaurant,pool,event',
@@ -71,14 +88,31 @@ class TestimonialController extends Controller
             $validated['customer_photo'] = $path;
         }
         
-        // Set default values
-        $validated['is_approved'] = false; // Need admin approval
+        // Simpan data
+        $validated['is_approved'] = false;
         $validated['is_featured'] = false;
+        $validated['ip_address'] = $ip; // Tambahkan kolom ini di migration
+        $validated['user_agent'] = $request->userAgent();
         
         Testimonial::create($validated);
         
+        // Increment cache counter
+        Cache::put($cacheKey, $submissionCount + 1, now()->endOfDay());
+        
         return redirect()->route('branding.testimonials')
             ->with('success', 'Terima kasih atas testimoni Anda! Testimoni akan ditampilkan setelah diverifikasi oleh admin.');
+    }
+    
+    // Optional: Validasi Google reCAPTCHA
+    private function validateCaptcha(Request $request)
+    {
+        $recaptchaSecret = env('RECAPTCHA_SECRET_KEY');
+        $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$recaptchaSecret}&response={$request->input('g-recaptcha-response')}");
+        $response = json_decode($response);
+        
+        if (!$response->success) {
+            throw new \Exception('Verifikasi CAPTCHA gagal. Silakan coba lagi.');
+        }
     }
     
     /**
@@ -93,4 +127,6 @@ class TestimonialController extends Controller
         
         return view('pages.testimonials-show', compact('testimonial'));
     }
+
+    
 }

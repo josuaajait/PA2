@@ -58,4 +58,6 @@ class PromoController extends Controller
             
         return view('pages.event-detail', compact('event'));
     }
+
+    
 }

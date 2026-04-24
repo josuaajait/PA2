@@ -1,0 +1,66 @@
+@extends('layouts.app')
+
+@section('title', 'Menu Caldera')
+
+@section('content')
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">Our Menu</h1>
+        <p class="lead text-secondary">Discover our delicious selection of food and beverages</p>
+    </div>
+    
+    <!-- Category Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="{{ route('branding.menu') }}" class="btn {{ !request('category') ? 'btn-primary' : 'btn-outline-primary' }}">All</a>
+                <a href="{{ route('branding.menu.category', 'makanan') }}" class="btn {{ request('category') == 'makanan' ? 'btn-primary' : 'btn-outline-primary' }}">Makanan</a>
+                <a href="{{ route('branding.menu.category', 'minuman') }}" class="btn {{ request('category') == 'minuman' ? 'btn-primary' : 'btn-outline-primary' }}">Minuman</a>
+                <a href="{{ route('branding.menu.category', 'dessert') }}" class="btn {{ request('category') == 'dessert' ? 'btn-primary' : 'btn-outline-primary' }}">Dessert</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menu Grid -->
+    <div class="row g-4">
+        @forelse($menus as $menu)
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                @if($menu->image)
+                    <img src="{{ asset('storage/' . $menu->image) }}" class="card-img-top" alt="{{ $menu->name }}" style="height: 200px; object-fit: cover;">
+                @else
+                    <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-utensils fa-4x text-white"></i>
+                    </div>
+                @endif
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="fw-bold mb-0">{{ $menu->name }}</h5>
+                        <span class="text-primary fw-bold">Rp {{ number_format($menu->price, 0, ',', '.') }}</span>
+                    </div>
+                    <p class="text-muted small">{{ Str::limit($menu->description, 100) }}</p>
+                    @if($menu->is_recommended)
+                        <span class="badge bg-success">Recommended</span>
+                    @endif
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-3">
+                    <a href="{{ route('branding.menu.show', $menu) }}" class="btn btn-outline-primary btn-sm w-100">
+                        View Details <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        @empty
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-utensils fa-4x text-muted mb-3"></i>
+            <p class="text-muted">Menu sedang kosong</p>
+        </div>
+        @endforelse
+    </div>
+    
+    <!-- Pagination -->
+    <div class="mt-5">
+        {{ $menus->links() }}
+    </div>
+</div>
+@endsection
