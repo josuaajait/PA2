@@ -3,117 +3,87 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Storage;
 
 class Gallery extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'title',
         'type',
         'file_path',
-        'menu_id',
-        'event_id',
-        'promo_id',
-        'testimonial_id',
         'category',
         'description',
         'is_featured',
-        'sort_order'
+        'sort_order',
     ];
 
     protected $casts = [
         'is_featured' => 'boolean',
-        'sort_order' => 'integer'
+        'sort_order'  => 'integer',
     ];
 
+    // -------------------------------------------------------------------------
+    // Accessors
+    // -------------------------------------------------------------------------
+
     /**
-     * Get the parent galleryable model (polymorphic)
+     * Full public URL of the media file.
      */
-    public function parent()
+    public function getFileUrlAttribute(): string
     {
-        if ($this->menu_id) {
-            return $this->belongsTo(Menu::class, 'menu_id');
-        } elseif ($this->event_id) {
-            return $this->belongsTo(Event::class, 'event_id');
-        } elseif ($this->promo_id) {
-            return $this->belongsTo(Promo::class, 'promo_id');
-        } elseif ($this->testimonial_id) {
-            return $this->belongsTo(Testimonial::class, 'testimonial_id');
+        if (!$this->file_path) {
+            return '';
         }
-        return null;
-    }
-
-    /**
-     * Get image URL
-     */
-    public function getUrlAttribute()
-    {
-        return Storage::url($this->file_path);
-    }
-
-    /**
-     * Get full image URL
-     */
-    public function getImageUrlAttribute()
-    {
         return asset('storage/' . $this->file_path);
     }
 
     /**
-     * Delete file from storage
+     * Get full URL using asset helper if path exists.
      */
-    public function deleteFile()
+    public function getFileUrlDisplayAttribute(): string
     {
-        if ($this->file_path && Storage::disk('public')->exists($this->file_path)) {
-            Storage::disk('public')->delete($this->file_path);
+        if (!$this->file_path) {
+            return '';
         }
+        return asset('storage/' . $this->file_path);
     }
 
     /**
-     * Scope for images only
+     * Human-readable type label.
      */
-    public function scopeImages($query)
+    public function getTypeLabelAttribute(): string
     {
-        return $query->where('type', 'image');
+        return match ($this->type) {
+            'video' => 'Video',
+            default => 'Gambar',
+        };
     }
 
-    /**
-     * Scope for videos only
-     */
-    public function scopeVideos($query)
-    {
-        return $query->where('type', 'video');
-    }
+    // -------------------------------------------------------------------------
+    // Scopes
+    // -------------------------------------------------------------------------
 
-    /**
-     * Scope for featured items
-     */
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
     }
 
-    /**
-     * Scope by category
-     */
-    public function scopeCategory($query, $category)
+    public function scopeImages($query)
+    {
+        return $query->where('type', 'image');
+    }
+
+    public function scopeVideos($query)
+    {
+        return $query->where('type', 'video');
+    }
+
+    public function scopeByCategory($query, string $category)
     {
         return $query->where('category', $category);
     }
 
-    /**
-     * Boot the model
-     */
-    protected static function boot()
+    public function scopeOrdered($query)
     {
-        parent::boot();
-        
-        // Delete file when gallery is deleted
-        static::deleting(function ($gallery) {
-            $gallery->deleteFile();
-        });
+        return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
     }
 }

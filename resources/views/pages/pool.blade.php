@@ -12,7 +12,10 @@
 
     <div class="row align-items-center mb-5">
         <div class="col-lg-6 mb-4 mb-lg-0">
-            <img src="https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=600" class="img-fluid rounded-4 shadow-lg pool-img" alt="Caldera Pool">
+        <img src="{{ asset('storage/galleries/pool1.jpeg') }}" 
+        class="img-fluid rounded-4 shadow-lg pool-img" 
+        alt="Caldera Pool"
+        style="max-width: 500px; width: 100%;">
         </div>
         <div class="col-lg-6">
             <h3 class="fw-bold mb-3" style="color: #1c3451; font-family: 'Playfair Display', serif;">Tiket Masuk Kolam Renang</h3>

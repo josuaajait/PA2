@@ -4,288 +4,231 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gallery;
-use App\Models\Menu;
-use App\Models\Event;
-use App\Models\Promo;
-use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class GalleryController extends Controller
 {
+    /**
+     * Display a listing of galleries.
+     */
     public function index(Request $request)
     {
-        $query = Gallery::with(['parent']);
-        
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
+        $query = Gallery::query();
+
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
         }
-        
+
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
-        
-        $galleries = $query->orderBy('sort_order')->paginate(20);
-        
-        return view('admin.galleries.index', compact('galleries'));
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('is_featured')) {
+            $query->where('is_featured', $request->is_featured === '1');
+        }
+
+        $galleries = $query
+            ->orderBy('sort_order')
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
+
+        $categories = Gallery::select('category')
+            ->whereNotNull('category')
+            ->distinct()
+            ->pluck('category');
+
+        return view('admin.galleries.index', compact('galleries', 'categories'));
     }
-    
+
+    /**
+     * Show the form for creating a new gallery item.
+     */
     public function create()
     {
-        $menus = Menu::select('id', 'name')->get();
-        $events = Event::select('id', 'title')->get();
-        $promos = Promo::select('id', 'title')->get();
-        $testimonials = Testimonial::select('id', 'customer_name')->get();
-        
-        return view('admin.galleries.create', compact('menus', 'events', 'promos', 'testimonials'));
+        return view('admin.galleries.create');
     }
-    
+
+    /**
+     * Store a newly created gallery item.
+     */
     public function store(Request $request)
     {
+        // ✅ FIX 1: Ambil type lebih awal sebelum validasi
+        $type = $request->input('type', 'image');
+
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|in:image,video',
-            'file' => 'required|file|mimes:jpg,jpeg,png,mp4,mov,avi|max:10240',
-            'parent_type' => 'required|in:menu,event,promo,testimonial',
-            'parent_id' => 'required|integer',
-            'is_featured' => 'boolean',
-            'sort_order' => 'nullable|integer',
-            'category' => 'nullable|string',
-            'description' => 'nullable|string'
+            'title'       => 'required|string|max:255',
+            'type'        => ['required', Rule::in(['image', 'video'])],
+            // ✅ FIX 2: Gunakan $type yang sudah diambil, bukan inline input()
+            'file'        => $this->fileValidationRules($type),
+            'category'    => 'nullable|string|max:100',
+            'description' => 'nullable|string',
+            'is_featured' => 'nullable|boolean',
+            'sort_order'  => 'nullable|integer|min:0',
+            // ✅ FIX 3: Hapus galleryable_id & galleryable_type — tidak ada di migration
         ]);
-        
-        // Upload file ke storage
-        $path = $request->file('file')->store('galleries/' . $validated['parent_type'], 'public');
-        
-        $data = [
-            'title' => $validated['title'],
-            'type' => $validated['type'],
-            'file_path' => $path,
-            'category' => $validated['category'] ?? $validated['parent_type'],
-            'description' => $validated['description'],
-            'is_featured' => $validated['is_featured'] ?? false,
-            'sort_order' => $validated['sort_order'] ?? 0,
-        ];
-        
-        // Set foreign key berdasarkan parent type
-        switch ($validated['parent_type']) {
-            case 'menu':
-                $data['menu_id'] = $validated['parent_id'];
-                break;
-            case 'event':
-                $data['event_id'] = $validated['parent_id'];
-                break;
-            case 'promo':
-                $data['promo_id'] = $validated['parent_id'];
-                break;
-            case 'testimonial':
-                $data['testimonial_id'] = $validated['parent_id'];
-                break;
-        }
-        
-        $gallery = Gallery::create($data);
-        
-        // Jika featured, unfeature lainnya untuk parent yang sama
-        if ($data['is_featured']) {
-            $this->unfeatureOthers($validated['parent_type'], $validated['parent_id'], $gallery->id);
-        }
-        
-        return redirect()->route('admin.galleries.index')
-            ->with('success', 'Gallery berhasil ditambahkan');
+
+        $filePath = $this->handleFileUpload($request);
+
+        Gallery::create([
+            'title'       => $validated['title'],
+            'type'        => $validated['type'],
+            'file_path'   => $filePath,
+            'category'    => $validated['category'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'is_featured' => $request->boolean('is_featured'),
+            'sort_order'  => $validated['sort_order'] ?? 0,
+        ]);
+
+        return redirect()
+            ->route('admin.galleries.index')
+            ->with('success', 'Gallery berhasil ditambahkan.');
     }
-    
+
+    /**
+     * Display the specified gallery item.
+     */
+    public function show(Gallery $gallery)
+    {
+        return view('admin.galleries.show', compact('gallery'));
+    }
+
+    /**
+     * Show the form for editing the specified gallery item.
+     */
     public function edit(Gallery $gallery)
     {
-        $menus = Menu::select('id', 'name')->get();
-        $events = Event::select('id', 'title')->get();
-        $promos = Promo::select('id', 'title')->get();
-        $testimonials = Testimonial::select('id', 'customer_name')->get();
-        
-        return view('admin.galleries.edit', compact('gallery', 'menus', 'events', 'promos', 'testimonials'));
+        return view('admin.galleries.edit', compact('gallery'));
     }
-    
+
+    /**
+     * Update the specified gallery item.
+     */
     public function update(Request $request, Gallery $gallery)
     {
+        // ✅ FIX: Ambil type lebih awal sebelum validasi
+        $type = $request->input('type', 'image');
+
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|in:image,video',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,mp4,mov,avi|max:10240',
-            'parent_type' => 'required|in:menu,event,promo,testimonial',
-            'parent_id' => 'required|integer',
-            'is_featured' => 'boolean',
-            'sort_order' => 'nullable|integer',
-            'category' => 'nullable|string',
-            'description' => 'nullable|string'
+            'title'       => 'required|string|max:255',
+            'type'        => ['required', Rule::in(['image', 'video'])],
+            'file'        => $this->fileValidationRules($type, optional: true),
+            'category'    => 'nullable|string|max:100',
+            'description' => 'nullable|string',
+            'is_featured' => 'nullable|boolean',
+            'sort_order'  => 'nullable|integer|min:0',
         ]);
-        
+
         $data = [
-            'title' => $validated['title'],
-            'type' => $validated['type'],
-            'category' => $validated['category'] ?? $validated['parent_type'],
-            'description' => $validated['description'],
-            'is_featured' => $validated['is_featured'] ?? false,
-            'sort_order' => $validated['sort_order'] ?? 0,
+            'title'       => $validated['title'],
+            'type'        => $validated['type'],
+            'category'    => $validated['category'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'is_featured' => $request->boolean('is_featured'),
+            'sort_order'  => $validated['sort_order'] ?? 0,
         ];
-        
-        // Upload file baru jika ada
+
         if ($request->hasFile('file')) {
-            // Hapus file lama
-            $gallery->deleteFile();
-            
-            // Upload file baru
-            $path = $request->file('file')->store('galleries/' . $validated['parent_type'], 'public');
-            $data['file_path'] = $path;
+            $this->deleteFile($gallery->file_path);
+            $data['file_path'] = $this->handleFileUpload($request);
         }
-        
-        // Reset foreign keys
-        $gallery->update([
-            'menu_id' => null,
-            'event_id' => null,
-            'promo_id' => null,
-            'testimonial_id' => null,
-        ]);
-        
-        // Set foreign key berdasarkan parent type
-        switch ($validated['parent_type']) {
-            case 'menu':
-                $data['menu_id'] = $validated['parent_id'];
-                break;
-            case 'event':
-                $data['event_id'] = $validated['parent_id'];
-                break;
-            case 'promo':
-                $data['promo_id'] = $validated['parent_id'];
-                break;
-            case 'testimonial':
-                $data['testimonial_id'] = $validated['parent_id'];
-                break;
-        }
-        
+
         $gallery->update($data);
-        
-        // Jika featured, unfeature lainnya untuk parent yang sama
-        if ($data['is_featured']) {
-            $this->unfeatureOthers($validated['parent_type'], $validated['parent_id'], $gallery->id);
-        }
-        
-        return redirect()->route('admin.galleries.index')
-            ->with('success', 'Gallery berhasil diupdate');
+
+        return redirect()
+            ->route('admin.galleries.index')
+            ->with('success', 'Gallery berhasil diperbarui.');
     }
-    
+
+    /**
+     * Remove the specified gallery item.
+     */
     public function destroy(Gallery $gallery)
     {
-        // Hapus file dari storage
-        $gallery->deleteFile();
-        
-        // Hapus record dari database
+        $this->deleteFile($gallery->file_path);
         $gallery->delete();
-        
-        return redirect()->route('admin.galleries.index')
-            ->with('success', 'Gallery berhasil dihapus');
+
+        return redirect()
+            ->route('admin.galleries.index')
+            ->with('success', 'Gallery berhasil dihapus.');
     }
-    
+
+    /**
+     * Toggle featured status via AJAX.
+     */
     public function toggleFeatured(Gallery $gallery)
     {
         $gallery->update(['is_featured' => !$gallery->is_featured]);
-        
-        return response()->json(['success' => true, 'is_featured' => $gallery->is_featured]);
-    }
-    
-    public function bulkUpload(Request $request)
-    {
-        $validated = $request->validate([
-            'files.*' => 'required|file|mimes:jpg,jpeg,png|max:5120',
-            'parent_type' => 'required|in:menu,event,promo,testimonial',
-            'parent_id' => 'required|integer',
+
+        return response()->json([
+            'success'     => true,
+            'is_featured' => $gallery->is_featured,
+            'message'     => $gallery->is_featured
+                ? 'Gallery ditandai sebagai featured.'
+                : 'Gallery dihapus dari featured.',
         ]);
-        
-        $uploaded = [];
-        
-        foreach ($request->file('files') as $file) {
-            $path = $file->store('galleries/' . $validated['parent_type'], 'public');
-            
-            $data = [
-                'title' => $file->getClientOriginalName(),
-                'type' => 'image',
-                'file_path' => $path,
-                'category' => $validated['parent_type'],
-            ];
-            
-            switch ($validated['parent_type']) {
-                case 'menu':
-                    $data['menu_id'] = $validated['parent_id'];
-                    break;
-                case 'event':
-                    $data['event_id'] = $validated['parent_id'];
-                    break;
-                case 'promo':
-                    $data['promo_id'] = $validated['parent_id'];
-                    break;
-                case 'testimonial':
-                    $data['testimonial_id'] = $validated['parent_id'];
-                    break;
-            }
-            
-            Gallery::create($data);
-            $uploaded[] = $file->getClientOriginalName();
-        }
-        
-        return redirect()->back()->with('success', count($uploaded) . ' file berhasil diupload');
     }
-    
-    public function updateSortOrder(Request $request)
+
+    /**
+     * Update sort order via AJAX (drag & drop).
+     */
+    public function updateOrder(Request $request)
     {
-        $orders = $request->input('orders', []);
-        
-        foreach ($orders as $order) {
-            Gallery::where('id', $order['id'])->update(['sort_order' => $order['sort_order']]);
+        $request->validate([
+            'items'         => 'required|array',
+            'items.*.id'    => 'required|exists:galleries,id',
+            'items.*.order' => 'required|integer|min:0',
+        ]);
+
+        foreach ($request->items as $item) {
+            Gallery::where('id', $item['id'])->update(['sort_order' => $item['order']]);
         }
-        
-        return response()->json(['success' => true]);
+
+        return response()->json(['success' => true, 'message' => 'Urutan berhasil disimpan.']);
     }
-    
-    public function getParents(Request $request)
+
+    // -------------------------------------------------------------------------
+    // Private Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Return validation rules for the uploaded file.
+     */
+    private function fileValidationRules(string $type = 'image', bool $optional = false): array
     {
-        $type = $request->get('type');
-        $parents = [];
-        
-        switch ($type) {
-            case 'menu':
-                $parents = Menu::select('id', 'name as name')->get();
-                break;
-            case 'event':
-                $parents = Event::select('id', 'title as name')->get();
-                break;
-            case 'promo':
-                $parents = Promo::select('id', 'title as name')->get();
-                break;
-            case 'testimonial':
-                $parents = Testimonial::select('id', 'customer_name as name')->get();
-                break;
+        $required = $optional ? 'nullable' : 'required';
+
+        if ($type === 'video') {
+            return [$required, 'file', 'mimes:mp4,mov,avi', 'max:10240']; // 10 MB
         }
-        
-        return response()->json($parents);
+
+        return [$required, 'file', 'image', 'mimes:jpg,jpeg,png', 'max:2048']; // 2 MB
     }
-    
-    private function unfeatureOthers($parentType, $parentId, $currentId)
+
+    /**
+     * Upload file and return its stored path.
+     */
+    private function handleFileUpload(Request $request): string
     {
-        $query = Gallery::where('is_featured', true)->where('id', '!=', $currentId);
-        
-        switch ($parentType) {
-            case 'menu':
-                $query->where('menu_id', $parentId);
-                break;
-            case 'event':
-                $query->where('event_id', $parentId);
-                break;
-            case 'promo':
-                $query->where('promo_id', $parentId);
-                break;
-            case 'testimonial':
-                $query->where('testimonial_id', $parentId);
-                break;
+        $type      = $request->input('type', 'image');
+        $directory = $type === 'video' ? 'galleries/videos' : 'galleries/images';
+
+        return $request->file('file')->store($directory, 'public');
+    }
+
+    /**
+     * Delete a file from storage.
+     */
+    private function deleteFile(?string $filePath): void
+    {
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            Storage::disk('public')->delete($filePath);
         }
-        
-        $query->update(['is_featured' => false]);
     }
 }

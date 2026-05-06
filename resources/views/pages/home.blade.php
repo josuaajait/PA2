@@ -9,9 +9,9 @@
     <div class="row align-items-center">
         <div class="col-md-5 mb-4 mb-md-0">
             <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=800"
-                     class="img-fluid rounded-4 shadow-lg" alt="Pool View"
-                     style="border: 4px solid #e8e0d0;">
+            <img src="{{ asset('storage/galleries/home.jpeg') }}"
+                class="img-fluid rounded-4 shadow-lg" alt="Pool View"
+                style="border: 4px solid #e8e0d0;">
                 <div class="carousel-dots-overlay">
                     <span></span><span class="active"></span><span></span>
                 </div>

@@ -159,7 +159,7 @@
                 </a>
                 <a class="nav-custom-link {{ request()->routeIs('branding.pool*') ? 'active' : '' }}"
                    href="{{ route('branding.pool') }}">
-                    <i class="fas fa-building me-1"></i>Facilities
+                    <i class="fas fa-building me-1"></i>Pool
                 </a>
                 <a class="nav-custom-link {{ request()->routeIs('branding.events*') ? 'active' : '' }}"
                    href="{{ route('branding.events') }}">

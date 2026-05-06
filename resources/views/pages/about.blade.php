@@ -12,7 +12,7 @@
             <p>Kami berkomitmen untuk memberikan pelayanan terbaik, makanan berkualitas, dan pengalaman yang tak terlupakan bagi setiap pengunjung.</p>
         </div>
         <div class="col-lg-6">
-            <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600" class="img-fluid rounded-4 shadow-lg" alt="About Caldera">
+            <img src="{{ asset('storage/galleries/about.jpeg') }}" class="img-fluid rounded-4 shadow-lg" alt="About Caldera">
         </div>
     </div>
 

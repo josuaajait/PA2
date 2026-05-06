@@ -195,9 +195,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Gallery
         Route::resource('galleries', AdminGalleryController::class);
-        Route::post('/galleries/{gallery}/toggle-featured', [AdminGalleryController::class, 'toggleFeatured'])->name('galleries.toggle-featured');
-        Route::post('/galleries/bulk-upload', [AdminGalleryController::class, 'bulkUpload'])->name('galleries.bulk-upload');
-        Route::post('/galleries/update-sort-order', [AdminGalleryController::class, 'updateSortOrder'])->name('galleries.update-sort-order');
+            // Extra routes
+    Route::patch('galleries/{gallery}/toggle-featured', [AdminGalleryController::class, 'toggleFeatured'])
+         ->name('galleries.toggle-featured');
+ 
+    Route::post('galleries/update-order', [AdminGalleryController::class, 'updateOrder'])
+         ->name('galleries.update-order');
 
         // Reports
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
