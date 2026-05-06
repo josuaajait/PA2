@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\TableReservation;
+use App\Models\User;
+use App\Notifications\ReservationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -47,6 +49,12 @@ class ReservationManagementController extends Controller
                 'confirmed_at' => now()
             ]);
             
+            // 🔥 Kirim notifikasi konfirmasi ke customer
+            $customer = User::where('email', $reservation->customer_email)->first();
+            if ($customer) {
+                $customer->notify(new ReservationNotification($reservation, 'confirmed'));
+            }
+            
             DB::commit();
             
             return redirect()->back()->with('success', 'Reservasi berhasil dikonfirmasi');
@@ -69,6 +77,12 @@ class ReservationManagementController extends Controller
                 'cancelled_at' => now(),
                 'cancellation_reason' => $validated['cancellation_reason']
             ]);
+            
+            // 🔥 Kirim notifikasi pembatalan ke customer
+            $customer = User::where('email', $reservation->customer_email)->first();
+            if ($customer) {
+                $customer->notify(new ReservationNotification($reservation, 'cancelled'));
+            }
             
             return redirect()->back()->with('success', 'Reservasi berhasil dibatalkan');
             

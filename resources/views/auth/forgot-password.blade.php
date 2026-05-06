@@ -17,7 +17,7 @@
                     
                     <p class="text-muted">Masukkan email Anda, kami akan mengirimkan link reset password</p>
                     
-                    <form method="POST" action="{{ route('password.email') }}">
+                    <form method="POST" action="{{ route('password.otp.send') }}">
                         @csrf
                         <div class="mb-3">
                             <label class="form-label">Email</label>

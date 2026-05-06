@@ -1,97 +1,96 @@
-<footer class="footer pt-5 mt-5" style="background: #1a1a2e; color: #fff;">
+<footer class="footer pt-5 mt-5">
     <div class="container">
         <div class="row">
             <!-- Brand Section -->
             <div class="col-md-4 mb-4">
                 <div class="mb-3">
-                    <i class="fas fa-fire fa-2x text-primary mb-2"></i>
-                    <h5 class="fw-bold text-white mb-2">Caldera Resto & Pool</h5>
-                    <p class="text-secondary small">Experience the perfect blend of culinary delight and refreshing pool experience.</p>
+                    <div style="font-family: 'Playfair Display', serif; color: #c1a067; font-size: 1.4rem; font-weight: 700; line-height: 1.2; margin-bottom: 10px;">
+                        Caldera Resto<br>& Pool
+                    </div>
+                    <p class="footer-text small">Experience the perfect blend of culinary delight and refreshing pool experience.</p>
                 </div>
-                <div>
-                    <ul class="d-flex list-unstyled gap-3">
-                        <li><a href="#" class="text-secondary"><i class="fab fa-facebook-f fa-lg"></i></a></li>
-                        <li><a href="#" class="text-secondary"><i class="fab fa-instagram fa-lg"></i></a></li>
-                        <li><a href="#" class="text-secondary"><i class="fab fa-twitter fa-lg"></i></a></li>
-                        <li><a href="#" class="text-secondary"><i class="fab fa-youtube fa-lg"></i></a></li>
-                        <li><a href="#" class="text-secondary"><i class="fab fa-tiktok fa-lg"></i></a></li>
-                    </ul>
-                </div>
+                <ul class="d-flex list-unstyled gap-3">
+                    <li><a href="#" class="footer-social"><i class="fab fa-facebook-f"></i></a></li>
+                    <li><a href="#" class="footer-social"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="#" class="footer-social"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="#" class="footer-social"><i class="fab fa-youtube"></i></a></li>
+                    <li><a href="#" class="footer-social"><i class="fab fa-tiktok"></i></a></li>
+                </ul>
             </div>
-            
+
             <!-- Quick Links -->
             <div class="col-md-2 col-sm-6 mb-4">
-                <h6 class="text-white fw-bold mb-3">Quick Links</h6>
+            <h6 class="footer-heading mb-3" style="color: #c1a067 !important;">Quick Links</h6> 
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="<?php echo e(route('branding.home')); ?>" class="text-secondary text-decoration-none">Home</a></li>
-                    <li class="mb-2"><a href="<?php echo e(route('branding.about')); ?>" class="text-secondary text-decoration-none">About Us</a></li>
-                    <li class="mb-2"><a href="<?php echo e(route('branding.menu')); ?>" class="text-secondary text-decoration-none">Menu</a></li>
-                    <li class="mb-2"><a href="<?php echo e(route('branding.pool')); ?>" class="text-secondary text-decoration-none">Pool</a></li>
-                    <li class="mb-2"><a href="<?php echo e(route('branding.gallery')); ?>" class="text-secondary text-decoration-none">Gallery</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('branding.home')); ?>" class="footer-link">Home</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('branding.about')); ?>" class="footer-link">About Us</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('branding.menu')); ?>" class="footer-link">Menu</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('branding.pool')); ?>" class="footer-link">Pool</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('branding.gallery')); ?>" class="footer-link">Gallery</a></li>
                 </ul>
             </div>
-            
+
             <!-- Information -->
             <div class="col-md-3 col-sm-6 mb-4">
-                <h6 class="text-white fw-bold mb-3">Information</h6>
+                <h6 class="footer-heading mb-3" style="color: #c1a067 !important;">Information</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="<?php echo e(route('branding.promos')); ?>" class="text-secondary text-decoration-none">Promos & Events</a></li>
-                    <li class="mb-2"><a href="<?php echo e(route('branding.testimonials')); ?>" class="text-secondary text-decoration-none">Testimonials</a></li>
-                    <li class="mb-2"><a href="<?php echo e(route('branding.contact')); ?>" class="text-secondary text-decoration-none">Contact Us</a></li>
-                    <li class="mb-2"><a href="<?php echo e(route('reservation.table')); ?>" class="text-secondary text-decoration-none">Book a Table</a></li>
-                    <li class="mb-2"><a href="<?php echo e(route('reservation.ticket')); ?>" class="text-secondary text-decoration-none">Buy Pool Ticket</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('branding.promos')); ?>" class="footer-link">Promos & Events</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('branding.testimonials')); ?>" class="footer-link">Testimonials</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('branding.contact')); ?>" class="footer-link">Contact Us</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('reservation.table')); ?>" class="footer-link">Book a Table</a></li>
+                    <li class="mb-2"><a href="<?php echo e(route('reservation.ticket')); ?>" class="footer-link">Buy Pool Ticket</a></li>
                 </ul>
             </div>
-            
+
             <!-- Contact Info -->
             <div class="col-md-3 mb-4">
-                <h6 class="text-white fw-bold mb-3">Contact Info</h6>
+                <h6 class="footer-heading mb-3" style="color: #c1a067 !important;">Contact Info</h6>
                 <ul class="list-unstyled">
                     <li class="mb-3 d-flex">
-                        <i class="fas fa-map-marker-alt text-primary mt-1 me-3"></i>
-                        <span class="text-secondary">Jl. Raya Caldera No. 123, Kota Bandung, Jawa Barat</span>
+                        <i class="fas fa-map-marker-alt footer-icon mt-1 me-3"></i>
+                        <span class="footer-text">Jl. Raya Caldera No. 123, Kota Bandung, Jawa Barat</span>
                     </li>
                     <li class="mb-3 d-flex">
-                        <i class="fas fa-phone text-primary mt-1 me-3"></i>
-                        <span class="text-secondary">(022) 1234567</span>
+                        <i class="fas fa-phone footer-icon mt-1 me-3"></i>
+                        <span class="footer-text">(022) 1234567</span>
                     </li>
                     <li class="mb-3 d-flex">
-                        <i class="fas fa-mobile-alt text-primary mt-1 me-3"></i>
-                        <span class="text-secondary">0812-3456-7890</span>
+                        <i class="fas fa-mobile-alt footer-icon mt-1 me-3"></i>
+                        <span class="footer-text">0812-3456-7890</span>
                     </li>
                     <li class="mb-3 d-flex">
-                        <i class="fas fa-envelope text-primary mt-1 me-3"></i>
-                        <span class="text-secondary">info@caldera.com</span>
+                        <i class="fas fa-envelope footer-icon mt-1 me-3"></i>
+                        <span class="footer-text">info@caldera.com</span>
                     </li>
                 </ul>
             </div>
-            
+
             <!-- Opening Hours -->
-            <div class="col-md-12">
-                <hr class="bg-secondary opacity-25">
+            <div class="col-12">
+                <hr class="footer-divider">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start">
-                        <p class="text-secondary small mb-2">
-                            <i class="fas fa-clock text-primary me-2"></i>
-                            <strong>Resto Hours:</strong> Monday - Friday: 10:00 - 22:00 | Saturday - Sunday: 09:00 - 23:00
+                        <p class="footer-text small mb-2">
+                            <i class="fas fa-clock footer-icon me-2"></i>
+                            <strong class="footer-strong">Resto Hours:</strong> Monday - Friday: 10:00 - 22:00 | Saturday - Sunday: 09:00 - 23:00
                         </p>
                     </div>
                     <div class="col-md-6 text-center text-md-end">
-                        <p class="text-secondary small mb-2">
-                            <i class="fas fa-swimmer text-primary me-2"></i>
-                            <strong>Pool Hours:</strong> Daily: 08:00 - 18:00
+                        <p class="footer-text small mb-2">
+                            <i class="fas fa-swimmer footer-icon me-2"></i>
+                            <strong class="footer-strong">Pool Hours:</strong> Daily: 08:00 - 18:00
                         </p>
                     </div>
                 </div>
-                <hr class="bg-secondary opacity-25">
+                <hr class="footer-divider">
             </div>
-            
+
             <!-- Copyright -->
-            <div class="col-12 text-center mt-3">
-                <p class="text-secondary small mb-0">
-                    &copy; <?php echo e(date('Y')); ?> Caldera Resto & Pool. All rights reserved. 
-                    <span class="mx-2">|</span> 
-                    Designed with <i class="fas fa-heart text-danger"></i> for great experience
+            <div class="col-12 text-center mt-3 pb-4">
+                <p class="footer-text small mb-0">
+                    &copy; <?php echo e(date('Y')); ?> Caldera Resto & Pool. All rights reserved.
+                    <span class="mx-2">|</span>
+                    Designed with <i class="fas fa-heart" style="color: #c1a067;"></i> for great experience
                 </p>
             </div>
         </div>
@@ -99,45 +98,81 @@
 </footer>
 
 <style>
-/* Footer Styles */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
 .footer {
-    background: #1a1a2e;
+    background: #1c3451;
     color: #fff;
 }
 
-.footer a.text-secondary {
-    transition: all 0.3s ease;
+.footer-heading {
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-size: 14px;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #c1a067;
+    display: inline-block;
+    margin-bottom: 16px !important;
 }
 
-.footer a.text-secondary:hover {
-    color: #667eea !important;
-    transform: translateX(3px);
+/* Teks umum — putih terang agar terbaca di navy */
+.footer-text {
+    color: #dce8f0;
+}
+
+/* Strong di jam operasional */
+.footer-strong {
+    color: #ffffff;
+}
+
+/* Link navigasi */
+.footer-link {
+    color: #dce8f0;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
     display: inline-block;
 }
 
-.footer .list-unstyled li {
-    transition: all 0.3s ease;
+.footer-link:hover {
+    color: #c1a067;
+    transform: translateX(4px);
 }
 
-.footer .list-unstyled li:hover {
-    transform: translateX(3px);
+.footer-icon {
+    color: #c1a067;
 }
 
-.footer hr {
-    opacity: 0.2;
+.footer-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(193,160,103,0.15);
+    color: #c1a067;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-size: 14px;
 }
 
-/* Dark mode support */
+.footer-social:hover {
+    background: #c1a067;
+    color: #1c3451;
+    transform: translateY(-3px);
+}
+
+.footer-divider {
+    border-color: rgba(255,255,255,0.15);
+    opacity: 1;
+}
+
+/* Dark mode */
 body.dark-mode .footer {
-    background: #0d0d1a !important;
-}
-
-body.dark-mode .footer .text-secondary {
-    color: #aaa !important;
-}
-
-body.dark-mode .footer hr {
-    background-color: #fff;
+    background: #0d1e30 !important;
 }
 
 /* Responsive */
@@ -145,15 +180,9 @@ body.dark-mode .footer hr {
     .footer {
         text-align: center;
     }
-    
     .footer .d-flex {
         justify-content: center;
     }
-    
-    .footer .col-md-3 .d-flex {
-        justify-content: center;
-    }
-    
     .footer .text-md-start,
     .footer .text-md-end {
         text-align: center !important;

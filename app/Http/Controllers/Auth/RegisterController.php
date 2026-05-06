@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Models\EmailOtpVerification;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
@@ -25,18 +27,40 @@ class RegisterController extends Controller
      */
     public function register(Request $request)
     {
-        $this->validator($request->all())->validate();
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+        ]);
 
-        $user = $this->create($request->all());
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => bcrypt($request->password),
+        ]);
 
-        // 🔥 PENTING: Event Registered akan mengirim email verifikasi
-        event(new Registered($user));
+        // Login user
+        Auth::login($user);
 
-        // Jangan login otomatis, biarkan user verifikasi dulu
-        // auth()->login($user);
+        // Generate OTP dan kirim manual — JANGAN pakai event Registered
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        return redirect()->route('login')
-            ->with('success', 'Registrasi berhasil! Silakan cek email Anda untuk verifikasi.');
+        EmailOtpVerification::create([
+            'user_id'    => $user->id,
+            'otp'        => $otp,
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        Mail::raw(
+            "Halo {$user->name},\n\nKode OTP verifikasi email Anda: {$otp}\n\nBerlaku 10 menit.",
+            function ($message) use ($user) {
+                $message->to((string) $user->email)
+                        ->subject('Kode OTP Verifikasi - Caldera Resto & Pool');
+            }
+        );
+
+        return redirect()->route('verification.notice')
+                         ->with('success', 'Kode OTP dikirim ke ' . $user->email);
     }
 
     /**

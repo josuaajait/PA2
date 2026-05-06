@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Reservation;
 use App\Http\Controllers\Controller;
 use App\Models\TableReservation;
 use App\Models\Promo;
+use App\Models\User;
+use App\Notifications\ReservationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Notifications\AdminNewReservationNotification; 
 
 class TableReservationController extends Controller
 {
@@ -78,6 +81,18 @@ class TableReservationController extends Controller
                 'status' => 'pending'
             ]);
             
+            // 🔥 Kirim notifikasi ke customer
+            $customer = User::where('email', $validated['customer_email'])->first();
+            if ($customer) {
+                $customer->notify(new ReservationNotification($reservation, 'created'));
+            }
+            
+            // 🔥 Kirim notifikasi ke semua admin
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new AdminNewReservationNotification($reservation));
+            }
+            
             DB::commit();
             
             return redirect()->route('reservation.table.success', $reservation->booking_code)
@@ -115,8 +130,12 @@ class TableReservationController extends Controller
             'cancellation_reason' => $request->reason
         ]);
         
+        // 🔥 Kirim notifikasi pembatalan ke customer
+        $customer = User::where('email', $reservation->customer_email)->first();
+        if ($customer) {
+            $customer->notify(new ReservationNotification($reservation, 'cancelled'));
+        }
+        
         return redirect()->route('branding.home')->with('success', 'Reservasi berhasil dibatalkan.');
     }
-
-    
 }

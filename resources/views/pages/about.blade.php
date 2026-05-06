@@ -66,3 +66,79 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    /* Page header banner */
+    .about-hero {
+        background: linear-gradient(135deg, #1c3451 0%, #01516e 100%);
+        padding: 50px 0 40px;
+        margin-bottom: 0;
+        color: white;
+    }
+
+    /* Section title underline gold */
+    h1, h2 {
+        font-family: 'Playfair Display', serif;
+        color: #1c3451;
+    }
+
+    h1.display-4 {
+        color: #1c3451;
+        font-size: 2.4rem;
+    }
+
+    /* Cards */
+    .card {
+        border-radius: 16px !important;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(28,52,81,0.12) !important;
+    }
+
+    /* Icon color override to navy/gold */
+    .fa-utensils, .fa-swimmer, .fa-music,
+    .fa-eye, .fa-bullseye {
+        color: #c1a067 !important;
+    }
+
+    /* Section divider */
+    .section-divider {
+        width: 50px;
+        height: 3px;
+        background: #c1a067;
+        margin: 12px auto 24px;
+        border-radius: 2px;
+    }
+
+    /* Vision Mission heading */
+    .row .col-12.text-center h2::after {
+        content: '';
+        display: block;
+        width: 50px;
+        height: 3px;
+        background: #c1a067;
+        margin: 12px auto 0;
+        border-radius: 2px;
+    }
+
+    /* Feature card icon wrapper */
+    .card .fas {
+        display: block;
+    }
+
+    /* Image */
+    .img-fluid.rounded-4 {
+        border: 4px solid #e8e0d0;
+    }
+
+    /* Lead text */
+    .lead {
+        color: #5a7a99 !important;
+        font-weight: 500;
+    }
+</style>
+@endpush

@@ -10,9 +10,16 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --bg-left: #01516e;
+            --bg-right: #1c3451;
+            --accent-gold: #c1a067;
+            --input-bg: #d9d9d9;
+        }
+
         * {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -20,288 +27,238 @@
             box-sizing: border-box;
         }
         
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .main-wrapper {
+            display: flex;
             min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Sisi Kiri - Logo */
+        .left-side {
+            flex: 1;
+            background-color: var(--bg-left);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--accent-gold);
+            text-align: center;
+        }
+
+        .logo-container {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        .logo-container svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .brand-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            letter-spacing: 4px;
+            margin-bottom: 0;
+            line-height: 1;
+        }
+
+        .brand-subtitle {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+
+        /* Sisi Kanan - Form */
+        .right-side {
+            flex: 1;
+            background-color: var(--bg-right);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-        }
-        
-        .register-container {
-            max-width: 500px;
-            width: 100%;
-            margin: 0 auto;
-        }
-        
-        .register-card {
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-            overflow: hidden;
-            transition: transform 0.3s;
-        }
-        
-        .register-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .register-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 35px 30px;
-            text-align: center;
+            padding: 40px;
             color: white;
-            position: relative;
         }
-        
-        .register-header h2 {
-            margin: 0;
-            font-weight: 700;
-            font-size: 28px;
-            letter-spacing: 1px;
+
+        .form-container {
+            width: 100%;
+            max-width: 450px;
         }
-        
-        .register-header p {
-            margin: 8px 0 0;
-            opacity: 0.9;
-            font-size: 14px;
+
+        .register-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 40px;
         }
-        
-        .brand-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-top: 10px;
+
+        .register-header i.header-icon {
+            font-size: 60px;
+        }
+
+        .register-header h1 {
+            font-size: 32px;
+            font-weight: 500;
             letter-spacing: 2px;
+            margin: 0;
         }
-        
-        .register-body {
-            padding: 35px 30px;
-        }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
-        .form-group label {
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #333;
-            display: block;
-            font-size: 14px;
-        }
-        
+
         .form-control {
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
+            background-color: var(--input-bg) !important;
+            border: none !important;
+            border-radius: 4px !important;
             padding: 12px 15px;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-        
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-            outline: none;
-        }
-        
-        .form-control::placeholder {
-            color: #bbb;
-            font-size: 13px;
-        }
-        
-        .btn-register {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            width: 100%;
-            padding: 14px;
-            font-weight: 600;
             font-size: 16px;
-            border-radius: 12px;
-            transition: all 0.3s;
-            color: white;
-            cursor: pointer;
-            margin-top: 10px;
+            color: #333 !important;
         }
-        
-        .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102,126,234,0.4);
-        }
-        
-        .login-link {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 14px;
+
+        .form-control::placeholder {
             color: #666;
         }
-        
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
+
+        .login-link {
+            font-size: 14px;
+            margin-top: 15px;
+            color: rgba(255,255,255,0.8);
         }
-        
-        .login-link a:hover {
+
+        .login-link a {
+            color: #4da3ff;
             text-decoration: underline;
         }
-        
-        .brand-icon {
-            width: 70px;
-            height: 70px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
+
+        .btn-register {
+            background-color: var(--accent-gold);
+            color: #333;
+            border: none;
+            padding: 10px 40px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 18px;
+            float: right;
+            margin-top: 20px;
+            transition: 0.3s;
         }
-        
-        .brand-icon i {
-            font-size: 35px;
-            color: white;
+
+        .btn-register:hover {
+            background-color: #d4b47a;
+            transform: scale(1.05);
         }
-        
-        .form-check-label {
-            font-size: 13px;
-            color: #666;
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-wrapper {
+                flex-direction: column;
+            }
+            .left-side, .right-side {
+                flex: none;
+                width: 100%;
+                padding: 60px 20px;
+            }
+            .brand-title { font-size: 2.5rem; }
         }
-        
-        .form-check-input:checked {
-            background-color: #667eea;
-            border-color: #667eea;
-        }
-        
+
+        /* Custom Alert Style */
         .alert {
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .input-icon {
-            position: relative;
-        }
-        
-        .input-icon i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #aaa;
-        }
-        
-        .input-icon .form-control {
-            padding-left: 40px;
-        }
-        
-        hr {
-            margin: 20px 0;
-            border-color: #eee;
-        }
-        
-        @media (max-width: 576px) {
-            .register-body {
-                padding: 25px 20px;
-            }
-            .register-header {
-                padding: 25px 20px;
-            }
-            .register-header h2 {
-                font-size: 24px;
-            }
+            font-size: 13px;
+            padding: 10px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
-        <div class="register-card">
-            <div class="register-header">
-                <div class="brand-icon">
-                    <i class="fas fa-fire"></i>
-                </div>
-                <h2>REGISTER</h2>
-                <p>Create your account</p>
-                <div class="brand-name">CALDERA RESTO & POOL</div>
+    <div class="main-wrapper">
+        <!-- SISI KIRI: Logo dan Branding -->
+        <div class="left-side">
+            <div class="logo-container">
+                <!-- SVG Logo yang menyerupai gambar -->
+                <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Lingkaran Matahari & Gunung -->
+                    <circle cx="200" cy="100" r="80" stroke="#c1a067" stroke-width="4"/>
+                    <path d="M140 130 Q170 80 200 110 T260 90" stroke="#c1a067" stroke-width="3"/>
+                    <path d="M140 145 Q180 110 220 140 T260 120" stroke="#c1a067" stroke-width="3"/>
+                    <circle cx="185" cy="75" r="15" stroke="#c1a067" stroke-width="2"/>
+                    <!-- Kolam Renang -->
+                    <path d="M50 200 C50 180 350 180 350 200 L350 230 C350 250 50 250 50 230 Z" fill="#1fa9d6" stroke="#fffceb" stroke-width="8"/>
+                    <!-- Tangga Kolam -->
+                    <path d="M85 160 L85 200 M110 160 L110 200" stroke="#fffceb" stroke-width="4" stroke-linecap="round"/>
+                    <!-- Meja & Payung -->
+                    <path d="M260 180 L360 180" stroke="#fffceb" stroke-width="5"/> <!-- Meja -->
+                    <path d="M310 180 L310 110" stroke="#fffceb" stroke-width="3"/> <!-- Tiang Payung -->
+                    <path d="M260 130 A50 50 0 0 1 360 130 Z" fill="#1fa9d6" stroke="#fffceb" stroke-width="2"/> <!-- Payung -->
+                </svg>
             </div>
-            
-            <div class="register-body">
+            <h1 class="brand-title">CALDERA</h1>
+            <p class="brand-subtitle">RESTO & POOL</p>
+        </div>
+
+        <!-- SISI KANAN: Form Registrasi -->
+        <div class="right-side">
+            <div class="form-container">
+                <div class="register-header">
+                    <i class="fas fa-users-cog header-icon"></i>
+                    <h1>REGISTER</h1>
+                </div>
+
                 @if($errors->any())
                     <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <strong>Error!</strong> Please check your input.
-                        <ul class="mb-0 mt-2">
+                        <ul class="mb-0">
                             @foreach($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
                     </div>
                 @endif
-                
+
                 @if(session('success'))
                     <div class="alert alert-success">
-                        <i class="fas fa-check-circle me-2"></i>
                         {{ session('success') }}
                     </div>
                 @endif
-                
+
                 <form method="POST" action="{{ route('register') }}">
                     @csrf
                     
                     <div class="form-group">
-                        <label>Nama</label>
-                        <div class="input-icon">
-                            <i class="fas fa-user"></i>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
-                                   value="{{ old('name') }}" placeholder="Masukkan nama lengkap" required>
-                        </div>
+                        <input type="text" name="name" class="form-control" 
+                               value="{{ old('name') }}" placeholder="Nama" required>
                     </div>
                     
                     <div class="form-group">
-                        <label>Email</label>
-                        <div class="input-icon">
-                            <i class="fas fa-envelope"></i>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
-                                   value="{{ old('email') }}" placeholder="Masukkan email" required>
-                        </div>
+                        <input type="email" name="email" class="form-control" 
+                               value="{{ old('email') }}" placeholder="Email" required>
                     </div>
                     
                     <div class="form-group">
-                        <label>Password</label>
-                        <div class="input-icon">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" 
-                                   placeholder="Masukkan password" required>
-                        </div>
+                        <input type="password" name="password" class="form-control" 
+                               placeholder="Password" required>
                     </div>
                     
                     <div class="form-group">
-                        <label>Konfirmasi password</label>
-                        <div class="input-icon">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" name="password_confirmation" class="form-control" 
-                                   placeholder="Konfirmasi password" required>
-                        </div>
+                        <input type="password" name="password_confirmation" class="form-control" 
+                               placeholder="Konfirmasi password" required>
                     </div>
-                    
-                    <div class="form-group">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="terms" id="terms" value="1" required>
-                            <label class="form-check-label" for="terms">
-                                Saya menyetujui <a href="#" class="text-primary">Syarat & Ketentuan</a> yang berlaku
-                            </label>
-                        </div>
+
+                    <div class="login-link">
+                        Sudah punya akun? <a href="{{ route('login') }}">Login.</a>
                     </div>
                     
                     <button type="submit" class="btn-register">
-                        <i class="fas fa-user-plus me-2"></i>Register
+                        Register
                     </button>
                 </form>
-                
-                <hr>
-                
-                <div class="login-link">
-                    Sudah punya akun? <a href="{{ route('login') }}">Login disini</a>
-                </div>
             </div>
         </div>
     </div>

@@ -4,6 +4,10 @@
 <head>
     <title>@yield('title', 'Caldera Resto & Pool')</title>
     
+    @if(session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,25 +25,17 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     
     <style>
-        /* Reset margin pada body */
         body {
             margin: 0;
             padding: 0;
             overflow-x: hidden;
         }
-        
-        /* Main content - beri padding top untuk navbar fixed */
+
+        /* Hapus padding-top karena navbar bukan fixed/sticky */
         main {
-            padding-top: 80px;
             min-height: 100vh;
         }
-        
-        /* Halaman dengan hero section (home) - hero sudah punya padding sendiri */
-        .page-header {
-            margin-top: -80px;
-            padding-top: 80px;
-        }
-        
+
         /* Dark mode toggle button */
         .dark-mode-toggle {
             position: fixed;
@@ -96,12 +92,12 @@
     <!-- Navbar -->
     @include('components.navbar')
 
-        <!-- ALERT VERIFIKASI EMAIL - DILETAKKAN DI SINI -->
+    <!-- ALERT VERIFIKASI EMAIL -->
     @auth
         @if(!Auth::user()->hasVerifiedEmail())
-            <div class="alert alert-warning text-center mb-0 rounded-0" style="margin-top: 70px;">
+            <div class="alert alert-warning text-center mb-0 rounded-0">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                Email Anda belum diverifikasi. 
+                Email Anda belum diverifikasi.
                 <a href="{{ route('verification.notice') }}" class="alert-link">Klik di sini</a> untuk verifikasi.
             </div>
         @endif
@@ -119,7 +115,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>
     <script>
-        // Dark mode toggle function
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDarkMode = document.body.classList.contains('dark-mode');
@@ -135,7 +130,6 @@
             }
         }
         
-        // Load dark mode preference
         document.addEventListener('DOMContentLoaded', function() {
             const savedDarkMode = localStorage.getItem('darkMode');
             if (savedDarkMode === 'true') {

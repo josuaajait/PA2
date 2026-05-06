@@ -5,118 +5,211 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Caldera Resto & Pool</title>
     
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --bg-left: #01516e;
+            --bg-right: #1c3451;
+            --accent-gold: #c1a067;
+            --btn-gold: #f0c67e;
+            --input-bg: #d9d9d9;
+        }
+
         * {
             font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .main-wrapper {
+            display: flex;
             min-height: 100vh;
+            width: 100%;
+        }
+
+        /* SISI KIRI - BRANDING */
+        .left-side {
+            flex: 1;
+            background-color: var(--bg-left);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--accent-gold);
+            text-align: center;
+        }
+
+        .logo-container {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        .brand-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5rem;
+            letter-spacing: 4px;
+            margin-bottom: 0;
+            line-height: 1;
+        }
+
+        .brand-subtitle {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+
+        /* SISI KANAN - FORM */
+        .right-side {
+            flex: 1;
+            background-color: var(--bg-right);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-        }
-        
-        .login-container {
-            max-width: 450px;
-            width: 100%;
-        }
-        
-        .login-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 30px;
-            text-align: center;
+            padding: 40px;
             color: white;
         }
-        
-        .login-header h2 {
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .login-header i {
+            font-size: 60px;
+        }
+
+        .login-header h1 {
+            font-size: 32px;
+            font-weight: 500;
+            letter-spacing: 2px;
             margin: 0;
-            font-weight: 600;
         }
-        
-        .login-header p {
-            margin: 5px 0 0;
-            opacity: 0.9;
+
+        .form-group {
+            margin-bottom: 20px;
         }
-        
-        .login-body {
-            padding: 30px;
+
+        .form-control {
+            background-color: var(--input-bg) !important;
+            border: none !important;
+            border-radius: 4px !important;
+            padding: 12px 15px;
+            font-size: 16px;
+            color: #333 !important;
         }
-        
+
         .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: var(--btn-gold);
+            color: #333;
             border: none;
             width: 100%;
             padding: 12px;
+            border-radius: 8px;
             font-weight: 600;
-            border-radius: 10px;
+            font-size: 18px;
+            margin-top: 10px;
+            transition: 0.3s;
         }
-        
+
         .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+            background-color: #e5b96d;
         }
-        
-        .brand-icon {
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
+
+        .form-footer {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
+            margin-top: 15px;
+            font-size: 14px;
         }
-        
-        .brand-icon i {
-            font-size: 30px;
-        }
-        
-        .form-control {
-            border-radius: 10px;
-            padding: 12px 15px;
-        }
-        
-        .register-link {
+
+        .register-link-container {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
+            font-size: 14px;
         }
-        
-        .register-link a {
-            color: #667eea;
+
+        .right-side a {
+            color: white;
             text-decoration: none;
-            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .right-side a:hover {
+            text-decoration: underline;
+        }
+
+        /* Custom Checkbox */
+        .form-check-input {
+            background-color: transparent;
+            border: 2px solid white;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-wrapper { flex-direction: column; }
+            .left-side, .right-side { flex: none; width: 100%; padding: 60px 20px; }
+            .brand-title { font-size: 3rem; }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <div class="brand-icon">
-                    <i class="fas fa-fire"></i>
-                </div>
-                <h2>Welcome Back</h2>
-                <p>Login to your account</p>
+    <div class="main-wrapper">
+        <!-- SISI KIRI -->
+        <div class="left-side">
+            <div class="logo-container">
+                <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Circle with landscape -->
+                    <circle cx="200" cy="100" r="80" stroke="#c1a067" stroke-width="4"/>
+                    <path d="M140 130 Q170 80 200 110 T260 90" stroke="#c1a067" stroke-width="3"/>
+                    <path d="M140 145 Q180 110 220 140 T260 120" stroke="#c1a067" stroke-width="3"/>
+                    <circle cx="185" cy="75" r="15" stroke="#c1a067" stroke-width="2"/>
+                    <!-- Pool Area -->
+                    <path d="M50 200 C50 180 350 180 350 200 L350 230 C350 250 50 250 50 230 Z" fill="#1fa9d6" stroke="#fffceb" stroke-width="8"/>
+                    <!-- Ladders -->
+                    <path d="M85 160 L85 200 M110 160 L110 200" stroke="#fffceb" stroke-width="4" stroke-linecap="round"/>
+                    <!-- Umbrella & Table -->
+                    <path d="M260 180 L360 180" stroke="#fffceb" stroke-width="5"/> 
+                    <path d="M310 180 L310 110" stroke="#fffceb" stroke-width="3"/> 
+                    <path d="M260 130 A50 50 0 0 1 360 130 Z" fill="#1fa9d6" stroke="#fffceb" stroke-width="2"/>
+                </svg>
             </div>
-            
-            <div class="login-body">
+            <h1 class="brand-title">CALDERA</h1>
+            <p class="brand-subtitle">RESTO & POOL</p>
+        </div>
+
+        <!-- SISI KANAN -->
+        <div class="right-side">
+            <div class="form-container">
+                <div class="login-header">
+                    <i class="fas fa-user-group"></i>
+                    <h1>LOGIN</h1>
+                </div>
+
                 @if($errors->any())
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i>
+                    <div class="alert alert-danger py-2" style="font-size: 13px;">
                         {{ $errors->first() }}
                     </div>
                 @endif
@@ -124,30 +217,35 @@
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
                     
-                    <div class="form-group mb-3">
-                        <label>Email Address</label>
-                        <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
+                    <div class="form-group">
+                        <input type="text" name="email" class="form-control" 
+                               value="{{ old('email') }}" placeholder="Nama" required>
                     </div>
                     
-                    <div class="form-group mb-3">
-                        <label>Password</label>
-                        <input type="password" name="password" class="form-control" required>
+                    <div class="form-group">
+                        <input type="password" name="password" class="form-control" 
+                               placeholder="Masukkan password" required>
                     </div>
                     
-                    <div class="form-group mb-3">
+                    <button type="submit" class="btn-login">
+                        Login
+                    </button>
+
+                    <div class="form-footer">
                         <div class="form-check">
                             <input type="checkbox" name="remember" class="form-check-input" id="remember">
-                            <label class="form-check-label" for="remember">Remember me</label>
+                            <label class="form-check-label ms-1" for="remember">Ingatkan saya</label>
                         </div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-login text-white">
-                        <i class="fas fa-sign-in-alt me-2"></i>Login
-                    </button>
+                        @if(Route::has('password.request'))
+                            <a href="{{ route('password.request') }}">Lupa Password?</a>
+                        @elseif(Route::has('password.otp.form'))
+                            <a href="{{ route('password.otp.form') }}">Lupa Password?</a>
+                        @endif                    
+                        </div>
                 </form>
                 
-                <div class="register-link">
-                    Don't have an account? <a href="{{ route('register') }}">Register here</a>
+                <div class="register-link-container">
+                    Tidak mempunyai akun? <a href="{{ route('register') }}" style="text-decoration: underline;">Daftar.</a>
                 </div>
             </div>
         </div>

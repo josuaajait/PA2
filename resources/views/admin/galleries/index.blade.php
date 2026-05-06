@@ -2,61 +2,245 @@
 
 @section('title', 'Gallery')
 
+@push('styles')
+<style>
+    .report-page-header {
+        background: linear-gradient(135deg, #1c3451 0%, #2a4a6b 100%);
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .report-page-header h6 {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .report-page-header .header-icon {
+        width: 44px;
+        height: 44px;
+        background: rgba(193,160,103,0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 14px;
+    }
+
+    .report-page-header .header-icon i {
+        color: #c1a067;
+        font-size: 18px;
+    }
+
+    .btn-add {
+        background: #c1a067;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 18px;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-add:hover {
+        background: #a98750;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .report-main-card {
+        border: none;
+        border-radius: 16px;
+        border-top: 3px solid #c1a067 !important;
+        box-shadow: 0 4px 20px rgba(28,52,81,0.08);
+    }
+
+    .report-main-card .card-body {
+        padding: 24px;
+    }
+
+    /* Gallery Cards */
+    .gallery-card {
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(28,52,81,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-top: 3px solid transparent;
+    }
+
+    .gallery-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(28,52,81,0.14);
+        border-top-color: #c1a067;
+    }
+
+    .gallery-card .card-body {
+        padding: 14px 16px 10px;
+    }
+
+    .gallery-card .card-body h6 {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1c3451;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .gallery-card .card-body p {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-bottom: 6px;
+    }
+
+    .gallery-card .card-footer {
+        background: #f8fafc;
+        border-top: 1px solid #f0f0f0;
+        padding: 10px 16px;
+        display: flex;
+        gap: 6px;
+    }
+
+    .btn-edit {
+        background: #1c3451;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+
+    .btn-edit:hover { background: #c1a067; color: #fff; }
+
+    .btn-delete {
+        background: #dc2626;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+
+    .btn-delete:hover { background: #b91c1c; color: #fff; }
+
+    .btn-star-on {
+        background: #d97706;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 12px;
+        transition: all 0.2s;
+        margin-left: auto;
+    }
+
+    .btn-star-off {
+        background: #15803d;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 12px;
+        transition: all 0.2s;
+        margin-left: auto;
+    }
+
+    .btn-star-on:hover, .btn-star-off:hover { opacity: 0.85; }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+    }
+
+    .empty-state i { color: #dde2e8; margin-bottom: 16px; display: block; }
+    .empty-state p { font-size: 14px; margin-bottom: 16px; }
+</style>
+@endpush
+
 @section('content')
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">Daftar Gallery</h6>
-        <div>
-            <a href="{{ route('admin.galleries.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus me-1"></i> Tambah Gallery
-            </a>
+
+<div class="report-page-header">
+    <div class="d-flex align-items-center">
+        <div class="header-icon">
+            <i class="fas fa-images"></i>
         </div>
+        <h6>Daftar Gallery</h6>
     </div>
+    <a href="{{ route('admin.galleries.create') }}" class="btn-add">
+        <i class="fas fa-plus"></i> Tambah Gallery
+    </a>
+</div>
+
+<div class="card report-main-card">
     <div class="card-body">
         <div class="row g-4">
             @forelse($galleries as $gallery)
             <div class="col-md-3">
-                <div class="card h-100 shadow-sm">
+                <div class="card gallery-card h-100">
                     @if($gallery->type == 'image')
-                        <img src="{{ $gallery->image_url }}" class="card-img-top" style="height: 200px; object-fit: cover;" onerror="this.src='https://placehold.co/400x300?text=No+Image'">
+                        <img src="{{ $gallery->image_url }}" class="card-img-top" style="height: 180px; object-fit: cover;" onerror="this.src='https://placehold.co/400x300?text=No+Image'">
                     @else
-                        <video class="card-img-top" style="height: 200px; object-fit: cover;" controls>
+                        <video class="card-img-top" style="height: 180px; object-fit: cover;" controls>
                             <source src="{{ $gallery->image_url }}" type="video/mp4">
                         </video>
                     @endif
                     <div class="card-body">
-                        <h6 class="fw-bold">{{ $gallery->title }}</h6>
-                        <p class="small text-muted">Kategori: {{ $gallery->category }}</p>
+                        <h6>{{ $gallery->title }}</h6>
+                        <p>Kategori: {{ $gallery->category }}</p>
                         @if($gallery->is_featured)
-                            <span class="badge bg-primary">Featured</span>
+                            <span class="badge" style="background:#c1a067; font-size:11px;">
+                                <i class="fas fa-star me-1"></i> Featured
+                            </span>
                         @endif
                     </div>
-                    <div class="card-footer bg-transparent">
-                        <a href="{{ route('admin.galleries.edit', $gallery) }}" class="btn btn-sm btn-info">
+                    <div class="card-footer">
+                        <a href="{{ route('admin.galleries.edit', $gallery) }}" class="btn btn-edit">
                             <i class="fas fa-edit"></i>
                         </a>
                         <form action="{{ route('admin.galleries.destroy', $gallery) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus gallery ini?')">
+                            <button type="submit" class="btn btn-delete" onclick="return confirm('Yakin hapus gallery ini?')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
-                        <button onclick="toggleFeatured({{ $gallery->id }})" class="btn btn-sm {{ $gallery->is_featured ? 'btn-warning' : 'btn-success' }}">
+                        <button onclick="toggleFeatured({{ $gallery->id }})" class="btn {{ $gallery->is_featured ? 'btn-star-on' : 'btn-star-off' }}">
                             <i class="fas fa-star"></i>
                         </button>
                     </div>
                 </div>
             </div>
             @empty
-            <div class="col-12 text-center py-5">
-                <i class="fas fa-images fa-4x text-muted mb-3"></i>
-                <p>Belum ada data gallery</p>
-                <a href="{{ route('admin.galleries.create') }}" class="btn btn-primary">Tambah Gallery</a>
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="fas fa-images fa-4x"></i>
+                    <p>Belum ada data gallery</p>
+                    <a href="{{ route('admin.galleries.create') }}" class="btn-add">
+                        <i class="fas fa-plus"></i> Tambah Gallery
+                    </a>
+                </div>
             </div>
             @endforelse
         </div>
-        {{ $galleries->links() }}
+
+        <div class="mt-4">
+            {{ $galleries->links() }}
+        </div>
     </div>
 </div>
 
@@ -75,4 +259,5 @@
     }
 </script>
 @endpush
+
 @endsection
