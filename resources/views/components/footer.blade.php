@@ -10,17 +10,14 @@
                     <p class="footer-text small">Experience the perfect blend of culinary delight and refreshing pool experience.</p>
                 </div>
                 <ul class="d-flex list-unstyled gap-3">
-                    <li><a href="#" class="footer-social"><i class="fab fa-facebook-f"></i></a></li>
-                    <li><a href="#" class="footer-social"><i class="fab fa-instagram"></i></a></li>
-                    <li><a href="#" class="footer-social"><i class="fab fa-twitter"></i></a></li>
-                    <li><a href="#" class="footer-social"><i class="fab fa-youtube"></i></a></li>
-                    <li><a href="#" class="footer-social"><i class="fab fa-tiktok"></i></a></li>
+                    <li><a href="https://www.instagram.com/calderarestoandpool/" class="footer-social"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="https://www.tiktok.com/@caldera.resto.cof7" class="footer-social"><i class="fab fa-tiktok"></i></a></li>
                 </ul>
             </div>
 
             <!-- Quick Links -->
             <div class="col-md-2 col-sm-6 mb-4">
-            <h6 class="footer-heading mb-3" style="color: #c1a067 !important;">Quick Links</h6> 
+                <h6 class="footer-heading mb-3" style="color: #c1a067 !important;">Quick Links</h6>
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="{{ route('branding.home') }}" class="footer-link">Home</a></li>
                     <li class="mb-2"><a href="{{ route('branding.about') }}" class="footer-link">About Us</a></li>
@@ -42,27 +39,44 @@
                 </ul>
             </div>
 
-            <!-- Contact Info -->
+            <!-- Contact Info + Mini Map (ALAMAT ASLI) -->
             <div class="col-md-3 mb-4">
-                <h6 class="footer-heading mb-3" style="color: #c1a067 !important;">Contact Info</h6>
+                <h6 class="footer-heading mb-3" style="color: #c1a067 !important;">Find Us</h6>
+                
+                <!-- Contact details sesuai Google Maps -->
                 <ul class="list-unstyled">
                     <li class="mb-3 d-flex">
                         <i class="fas fa-map-marker-alt footer-icon mt-1 me-3"></i>
-                        <span class="footer-text">Jl. Raya Caldera No. 123, Kota Bandung, Jawa Barat</span>
+                        <span class="footer-text small">Jl. Patuan Nagari, Sangkar Nihuta, Kec. Balige, Toba, Sumatera Utara 22312</span>
                     </li>
                     <li class="mb-3 d-flex">
                         <i class="fas fa-phone footer-icon mt-1 me-3"></i>
-                        <span class="footer-text">(022) 1234567</span>
-                    </li>
-                    <li class="mb-3 d-flex">
-                        <i class="fas fa-mobile-alt footer-icon mt-1 me-3"></i>
-                        <span class="footer-text">0812-3456-7890</span>
+                        <span class="footer-text small">(022) 1234567 / 0812-3456-7890</span>
                     </li>
                     <li class="mb-3 d-flex">
                         <i class="fas fa-envelope footer-icon mt-1 me-3"></i>
-                        <span class="footer-text">info@caldera.com</span>
+                        <span class="footer-text small">info@caldera.com</span>
                     </li>
                 </ul>
+
+                <!-- MINI MAPS (embed dari lokasi asli Caldera Resto and Coffee) -->
+                <div class="mini-map mt-2" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15933.37470040786!2d99.131767!3d2.367627!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x302d1f97ddace8ed%3A0xbdf47207860cc8f5!2sCaldera%20Resto%20and%20Coffee!5e0!3m2!1sen!2sid!4v1744100000000!5m2!1sen!2sid" 
+                        width="100%" 
+                        height="130" 
+                        style="border:0; pointer-events: none;" 
+                        allowfullscreen="" 
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Caldera Resto and Coffee - Balige, Toba">
+                    </iframe>
+                </div>
+                <p class="footer-text small mt-2 mb-0 text-center">
+                    <a href="https://maps.app.goo.gl/dahhwPLVRKnpftdB8" target="_blank" class="footer-link" style="font-size: 11px;">
+                        <i class="fas fa-external-link-alt me-1"></i>Open in Google Maps &rarr;
+                    </a>
+                </p>
             </div>
 
             <!-- Opening Hours -->
@@ -89,8 +103,6 @@
             <div class="col-12 text-center mt-3 pb-4">
                 <p class="footer-text small mb-0">
                     &copy; {{ date('Y') }} Caldera Resto & Pool. All rights reserved.
-                    <span class="mx-2">|</span>
-                    Designed with <i class="fas fa-heart" style="color: #c1a067;"></i> for great experience
                 </p>
             </div>
         </div>
@@ -117,17 +129,14 @@
     margin-bottom: 16px !important;
 }
 
-/* Teks umum — putih terang agar terbaca di navy */
 .footer-text {
     color: #dce8f0;
 }
 
-/* Strong di jam operasional */
 .footer-strong {
     color: #ffffff;
 }
 
-/* Link navigasi */
 .footer-link {
     color: #dce8f0;
     text-decoration: none;
@@ -170,12 +179,18 @@
     opacity: 1;
 }
 
-/* Dark mode */
+.mini-map iframe {
+    transition: opacity 0.2s;
+}
+
+.mini-map:hover iframe {
+    opacity: 0.95;
+}
+
 body.dark-mode .footer {
     background: #0d1e30 !important;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .footer {
         text-align: center;
@@ -186,6 +201,11 @@ body.dark-mode .footer {
     .footer .text-md-start,
     .footer .text-md-end {
         text-align: center !important;
+    }
+    .mini-map {
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
     }
 }
 </style>

@@ -13,17 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->api(prepend: [
-        \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        ]);
-
         $middleware->alias([
-            'admin' => AdminMiddleware::class,
-            // 'customer' => CustomerMiddleware::class, // HAPUS - tidak diperlukan
+            'admin'        => AdminMiddleware::class,
+            'jwt.auth'     => \App\Http\Middleware\JwtMiddleware::class,
+            'otp.verified' => \App\Http\Middleware\OtpVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
-
-    

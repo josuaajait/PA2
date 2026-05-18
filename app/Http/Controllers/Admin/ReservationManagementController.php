@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Notifications\ReservationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use App\Notifications\PaymentVerifiedNotification;
 
 class ReservationManagementController extends Controller
 {
@@ -142,5 +145,65 @@ class ReservationManagementController extends Controller
         return response($csv, 200)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+        /**
+     * Verifikasi pembayaran reservasi (dipanggil oleh admin)
+     */
+    public function verifyPayment($id)
+    {
+        $reservation = TableReservation::findOrFail($id);
+        
+        // Cek apakah statusnya payment_verified
+        if ($reservation->payment_status !== 'payment_verified') {
+            return redirect()->back()->with('error', 'Status pembayaran tidak valid untuk diverifikasi.');
+        }
+        
+        // Update status pembayaran dan reservasi
+        $reservation->payment_status = 'paid';
+        $reservation->status = 'confirmed';
+        $reservation->confirmed_at = now();
+        $reservation->save();
+
+        // 🔔 KIRIM NOTIFIKASI KE CUSTOMER (HANYA SETELAH ADMIN VERIFIKASI) 🔔
+        $this->sendPaymentVerifiedNotification($reservation);
+
+        Log::info('Admin verifikasi pembayaran', [
+            'admin_id' => Auth::id(),
+            'booking_code' => $reservation->booking_code,
+            'customer_email' => $reservation->customer_email
+        ]);
+
+        return redirect()->back()->with('success', 'Pembayaran berhasil diverifikasi dan reservasi dikonfirmasi.');
+    }
+
+    /**
+     * Kirim notifikasi ke customer bahwa pembayaran sudah diverifikasi
+     */
+    private function sendPaymentVerifiedNotification(TableReservation $reservation)
+    {
+        // Cari customer berdasarkan email atau user_id
+        $customer = null;
+        
+        if ($reservation->user_id) {
+            $customer = \App\Models\User::find($reservation->user_id);
+        } elseif ($reservation->customer_email) {
+            $customer = \App\Models\User::where('email', $reservation->customer_email)->first();
+        }
+
+        if ($customer) {
+            $customer->notify(new PaymentVerifiedNotification($reservation));
+            
+            Log::info('Notifikasi pembayaran diverifikasi dikirim ke customer', [
+                'customer_id' => $customer->id,
+                'customer_email' => $customer->email,
+                'booking_code' => $reservation->booking_code
+            ]);
+        } else {
+            Log::warning('Customer tidak ditemukan untuk notifikasi', [
+                'booking_code' => $reservation->booking_code,
+                'customer_email' => $reservation->customer_email
+            ]);
+        }
     }
 }

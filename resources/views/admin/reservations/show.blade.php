@@ -126,6 +126,23 @@
         border: none;
     }
 
+    /* Payment Status Badges */
+    .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        gap: 4px;
+    }
+
+    .payment-waiting { background: #fff3e0; color: #e65100; }
+    .payment-verified { background: #e3f2fd; color: #1565c0; }
+    .payment-paid { background: #e8f5e9; color: #2e7d32; }
+    .payment-unpaid { background: #ffebee; color: #c62828; }
+
+    /* Buttons */
     .btn-confirm-main {
         background: linear-gradient(135deg, #15803d, #16a34a);
         color: #fff;
@@ -140,6 +157,24 @@
 
     .btn-confirm-main:hover {
         background: linear-gradient(135deg, #166534, #15803d);
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .btn-verify-main {
+        background: linear-gradient(135deg, #c1a067, #a8894f);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 24px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(193,160,103,0.3);
+    }
+
+    .btn-verify-main:hover {
+        background: linear-gradient(135deg, #a8894f, #8b6d3f);
         color: #fff;
         transform: translateY(-1px);
     }
@@ -160,6 +195,20 @@
         background: linear-gradient(135deg, #b45309, #92400e);
         color: #fff;
         transform: translateY(-1px);
+    }
+
+    /* Proof Image */
+    .proof-image {
+        max-width: 200px;
+        border-radius: 8px;
+        border: 1px solid #e8e0d0;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .proof-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     /* Modal */
@@ -229,6 +278,26 @@
     }
 
     .btn-modal-danger:hover { background: linear-gradient(135deg, #b91c1c, #991b1b); color: #fff; }
+
+    .btn-modal-success {
+        background: linear-gradient(135deg, #15803d, #16a34a);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 18px;
+        transition: all 0.2s;
+    }
+
+    .btn-modal-success:hover { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; }
+
+    .proof-preview {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
 </style>
 @endpush
 
@@ -264,10 +333,6 @@
                         <td>{{ $reservation->customer_name }}</td>
                     </tr>
                     <tr>
-                        <td>Email</td>
-                        <td>{{ $reservation->customer_email }}</td>
-                    </tr>
-                    <tr>
                         <td>Telepon</td>
                         <td>{{ $reservation->customer_phone }}</td>
                     </tr>
@@ -286,7 +351,7 @@
                     </tr>
                     <tr>
                         <td>Tanggal</td>
-                        <td>{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d F Y') }}</td>
                     </tr>
                     <tr>
                         <td>Jam</td>
@@ -298,11 +363,40 @@
                     </tr>
                     <tr>
                         <td>Down Payment</td>
-                        <td><span class="fw-bold" style="color:#c1a067; font-size:15px;">Rp {{ number_format($reservation->down_payment ?? 0, 0, ',', '.') }}</span></td>
+                        <td><span class="fw-bold" style="color:#c1a067; font-size:15px;">Rp {{ number_format($reservation->down_payment ?? 50000, 0, ',', '.') }}</span></td>
                     </tr>
                     <tr>
-                        <td>Status</td>
+                        <td>Status Reservasi</td>
                         <td>{!! $reservation->status_label !!}</td>
+                    </tr>
+                    <tr>
+                        <td>Status Pembayaran</td>
+                        <td>
+                            @php
+                                $paymentClass = match($reservation->payment_status) {
+                                    'waiting_payment' => 'payment-waiting',
+                                    'payment_verified' => 'payment-verified',
+                                    'paid' => 'payment-paid',
+                                    default => 'payment-unpaid'
+                                };
+                                $paymentText = match($reservation->payment_status) {
+                                    'waiting_payment' => 'Menunggu Pembayaran',
+                                    'payment_verified' => 'Menunggu Verifikasi',
+                                    'paid' => 'Lunas',
+                                    default => 'Belum Bayar'
+                                };
+                                $paymentIcon = match($reservation->payment_status) {
+                                    'waiting_payment' => 'fa-clock',
+                                    'payment_verified' => 'fa-upload',
+                                    'paid' => 'fa-check-circle',
+                                    default => 'fa-times-circle'
+                                };
+                            @endphp
+                            <span class="payment-badge {{ $paymentClass }}">
+                                <i class="fas {{ $paymentIcon }} me-1"></i>
+                                {{ $paymentText }}
+                            </span>
+                        </td>
                     </tr>
                     @if($reservation->special_requests)
                     <tr>
@@ -320,19 +414,49 @@
             </div>
         </div>
 
-        @if($reservation->status == 'pending')
+        {{-- Bukti Pembayaran (jika ada) --}}
+        @if($reservation->payment_proof)
         <hr class="section-divider">
-        <div class="text-end d-flex justify-content-end gap-2">
-            <form action="{{ route('admin.reservations.confirm', $reservation) }}" method="POST" class="d-inline">
-                @csrf
-                <button type="submit" class="btn-confirm-main" onclick="return confirm('Konfirmasi reservasi ini?')">
-                    <i class="fas fa-check me-1"></i> Konfirmasi Reservasi
-                </button>
-            </form>
-            <button onclick="showCancelModal({{ $reservation->id }})" class="btn-cancel-main">
-                <i class="fas fa-times me-1"></i> Batalkan Reservasi
-            </button>
+        <div class="detail-section-title">
+            <i class="fas fa-receipt"></i> Bukti Pembayaran
         </div>
+        <div class="text-center">
+            <img src="{{ asset('storage/' . $reservation->payment_proof) }}" 
+                 alt="Bukti Pembayaran" 
+                 class="proof-image" 
+                 style="max-width: 300px; cursor: pointer;"
+                 onclick="openProofModal('{{ asset('storage/' . $reservation->payment_proof) }}')">
+            <div class="mt-2">
+                <small class="text-muted">Klik gambar untuk memperbesar</small>
+            </div>
+        </div>
+        @endif
+
+        {{-- Action Buttons --}}
+        <hr class="section-divider">
+        
+        @if($reservation->payment_status == 'payment_verified' && $reservation->status == 'pending')
+            <div class="text-end d-flex justify-content-end gap-2">
+                <button onclick="showVerifyPaymentModal({{ $reservation->id }}, '{{ $reservation->booking_code }}', '{{ $reservation->payment_proof }}')" 
+                        class="btn-verify-main">
+                    <i class="fas fa-credit-card me-1"></i> Verifikasi Pembayaran
+                </button>
+                <button onclick="showCancelModal({{ $reservation->id }})" class="btn-cancel-main">
+                    <i class="fas fa-times me-1"></i> Batalkan Reservasi
+                </button>
+            </div>
+        @elseif($reservation->status == 'pending')
+            <div class="text-end d-flex justify-content-end gap-2">
+                <form action="{{ route('admin.reservations.confirm', $reservation) }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn-confirm-main" onclick="return confirm('Konfirmasi reservasi ini?')">
+                        <i class="fas fa-check me-1"></i> Konfirmasi Reservasi
+                    </button>
+                </form>
+                <button onclick="showCancelModal({{ $reservation->id }})" class="btn-cancel-main">
+                    <i class="fas fa-times me-1"></i> Batalkan Reservasi
+                </button>
+            </div>
         @endif
 
     </div>
@@ -363,13 +487,104 @@
     </div>
 </div>
 
+<!-- Verify Payment Modal -->
+<div class="modal fade" id="verifyPaymentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Verifikasi Pembayaran</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="verifyPaymentForm" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Kode Booking</label>
+                        <input type="text" id="verifyBookingCode" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bukti Pembayaran</label>
+                        <div id="proofPreview" class="text-center">
+                            <img id="proofImage" src="" alt="Bukti Pembayaran" class="proof-preview" style="display: none;">
+                            <p id="noProofText" class="text-muted">Tidak ada bukti pembayaran</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <small>Dengan memverifikasi pembayaran, reservasi akan otomatis dikonfirmasi dan customer akan menerima notifikasi.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-modal-close" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-modal-success">
+                        <i class="fas fa-check-circle me-2"></i> Verifikasi Pembayaran
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Proof Image Modal (Zoom) -->
+<div class="modal fade" id="proofImageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bukti Pembayaran</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <img id="proofFullImage" src="" alt="Bukti Pembayaran" style="max-width: 100%; max-height: 80vh;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-modal-close" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
+    let currentReservationId = null;
+    
     function showCancelModal(id) {
         const form = document.getElementById('cancelForm');
         form.action = `/admin/reservations/${id}/cancel`;
         new bootstrap.Modal(document.getElementById('cancelModal')).show();
     }
+    
+    function showVerifyPaymentModal(id, bookingCode, proofPath) {
+        currentReservationId = id;
+        const form = document.getElementById('verifyPaymentForm');
+        form.action = `/admin/reservations/${id}/verify-payment`;
+        
+        document.getElementById('verifyBookingCode').value = bookingCode;
+        
+        const proofImage = document.getElementById('proofImage');
+        const noProofText = document.getElementById('noProofText');
+        
+        if (proofPath) {
+            proofImage.src = `/storage/${proofPath}`;
+            proofImage.style.display = 'block';
+            noProofText.style.display = 'none';
+        } else {
+            proofImage.style.display = 'none';
+            noProofText.style.display = 'block';
+        }
+        
+        new bootstrap.Modal(document.getElementById('verifyPaymentModal')).show();
+    }
+    
+    function openProofModal(imageUrl) {
+        document.getElementById('proofFullImage').src = imageUrl;
+        new bootstrap.Modal(document.getElementById('proofImageModal')).show();
+    }
+    
+    document.getElementById('verifyPaymentModal').addEventListener('hidden.bs.modal', function() {
+        if (currentReservationId) {
+            location.reload();
+        }
+    });
 </script>
 @endpush
 

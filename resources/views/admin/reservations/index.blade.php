@@ -103,7 +103,7 @@
     }
 
     .report-table thead th:first-child { border-radius: 10px 0 0 0; }
-    .report-table thead th:last-child  { border-radius: 0 10px 0 0; }
+    .report-table thead th:last-child { border-radius: 0 10px 0 0; }
 
     .report-table tbody tr { transition: background 0.15s; }
     .report-table tbody tr:hover { background: #f8fafc; }
@@ -142,6 +142,18 @@
 
     .btn-confirm:hover { background: #16a34a; color: #fff; }
 
+    .btn-verify {
+        background: #c1a067;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+
+    .btn-verify:hover { background: #a8894f; color: #fff; }
+
     .btn-cancel-row {
         background: #d97706;
         color: #fff;
@@ -154,7 +166,21 @@
 
     .btn-cancel-row:hover { background: #b45309; color: #fff; }
 
-    /* Modal */
+    .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        gap: 4px;
+    }
+
+    .payment-waiting { background: #fff3e0; color: #e65100; }
+    .payment-verified { background: #e3f2fd; color: #1565c0; }
+    .payment-paid { background: #e8f5e9; color: #2e7d32; }
+    .payment-unpaid { background: #ffebee; color: #c62828; }
+
     .modal-content {
         border: none;
         border-radius: 16px;
@@ -221,6 +247,29 @@
     }
 
     .btn-modal-danger:hover { background: linear-gradient(135deg, #b91c1c, #991b1b); color: #fff; }
+
+    .btn-modal-success {
+        background: linear-gradient(135deg, #15803d, #16a34a);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 18px;
+        transition: all 0.2s;
+    }
+
+    .btn-modal-success:hover { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; }
+
+    .proof-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .proof-preview:hover { transform: scale(1.02); }
 </style>
 @endpush
 
@@ -253,9 +302,18 @@
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <select class="form-select" id="paymentFilter" onchange="filterReservations()">
+                        <option value="">Semua Pembayaran</option>
+                        <option value="waiting_payment">Menunggu Pembayaran</option>
+                        <option value="payment_verified">Menunggu Verifikasi</option>
+                        <option value="paid">Lunas</option>
+                        <option value="unpaid">Belum Bayar</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <input type="date" class="form-control" id="dateFilter" onchange="filterReservations()">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <input type="text" class="form-control" id="searchFilter" placeholder="Cari nama atau kode booking..." onkeyup="filterReservations()">
                 </div>
             </div>
@@ -271,13 +329,16 @@
                         <th>Jam</th>
                         <th>Tamu</th>
                         <th>DP</th>
-                        <th>Status</th>
+                        <th>Status Reservasi</th>
+                        <th>Status Bayar</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($reservations as $reservation)
-                    <tr>
+                    <tr data-status="{{ $reservation->status }}" 
+                        data-payment="{{ $reservation->payment_status }}"
+                        data-date="{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('Y-m-d') }}">
                         <td class="fw-bold">{{ $reservation->booking_code }}</td>
                         <td>
                             {{ $reservation->customer_name }}<br>
@@ -286,28 +347,57 @@
                         <td>{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i') }}</td>
                         <td>{{ $reservation->number_of_guests }} orang</td>
-                        <td>Rp {{ number_format($reservation->down_payment ?? 0, 0, ',', '.') }}</td>
+                        <td>Rp {{ number_format($reservation->down_payment ?? 50000, 0, ',', '.') }}</td>
                         <td>{!! $reservation->status_label !!}</td>
                         <td>
-                            <a href="{{ route('admin.reservations.show', $reservation) }}" class="btn btn-view">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            @if($reservation->status == 'pending')
-                                <form action="{{ route('admin.reservations.confirm', $reservation) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-confirm ms-1" onclick="return confirm('Konfirmasi reservasi ini?')">
-                                        <i class="fas fa-check"></i>
+                            @php
+                                $paymentClass = match($reservation->payment_status) {
+                                    'waiting_payment' => 'payment-waiting',
+                                    'payment_verified' => 'payment-verified',
+                                    'paid' => 'payment-paid',
+                                    default => 'payment-unpaid'
+                                };
+                                $paymentText = match($reservation->payment_status) {
+                                    'waiting_payment' => 'Menunggu Pembayaran',
+                                    'payment_verified' => 'Menunggu Verifikasi',
+                                    'paid' => 'Lunas',
+                                    default => 'Belum Bayar'
+                                };
+                            @endphp
+                            <span class="payment-badge {{ $paymentClass }}">
+                                <i class="fas 
+                                    @if($reservation->payment_status == 'waiting_payment') fa-clock
+                                    @elseif($reservation->payment_status == 'payment_verified') fa-upload
+                                    @elseif($reservation->payment_status == 'paid') fa-check-circle
+                                    @else fa-times-circle
+                                    @endif me-1"></i>
+                                {{ $paymentText }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="{{ route('admin.reservations.show', $reservation) }}" class="btn btn-view" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                
+                                @if($reservation->payment_status == 'payment_verified' && $reservation->status == 'pending')
+                                    <button onclick="showVerifyPaymentModal({{ $reservation->id }}, '{{ $reservation->booking_code }}', '{{ $reservation->payment_proof }}')" 
+                                            class="btn btn-verify" title="Verifikasi Pembayaran">
+                                        <i class="fas fa-credit-card"></i>
                                     </button>
-                                </form>
-                                <button onclick="showCancelModal({{ $reservation->id }})" class="btn btn-cancel-row ms-1">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            @endif
+                                @endif
+                                
+                                @if($reservation->status == 'pending')
+                                    <button onclick="showCancelModal({{ $reservation->id }})" class="btn btn-cancel-row" title="Batalkan Reservasi">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">Belum ada data reservasi</td>
+                        <td colspan="9" class="text-center text-muted py-4">Belum ada data reservasi</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -346,30 +436,94 @@
     </div>
 </div>
 
+<!-- Verify Payment Modal -->
+<div class="modal fade" id="verifyPaymentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Verifikasi Pembayaran</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="verifyPaymentForm" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Kode Booking</label>
+                        <input type="text" id="verifyBookingCode" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bukti Pembayaran</label>
+                        <div id="proofPreview" class="text-center">
+                            <img id="proofImage" src="" alt="Bukti Pembayaran" class="proof-preview" style="display: none;">
+                            <p id="noProofText" class="text-muted">Tidak ada bukti pembayaran</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <small>Dengan memverifikasi pembayaran, reservasi akan otomatis dikonfirmasi dan customer akan menerima notifikasi.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-modal-close" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-modal-success">
+                        <i class="fas fa-check-circle me-2"></i> Verifikasi Pembayaran
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
+    let currentReservationId = null;
+    
     function showCancelModal(id) {
         const form = document.getElementById('cancelForm');
         form.action = `/admin/reservations/${id}/cancel`;
         new bootstrap.Modal(document.getElementById('cancelModal')).show();
     }
-
+    
+    function showVerifyPaymentModal(id, bookingCode, proofPath) {
+        currentReservationId = id;
+        const form = document.getElementById('verifyPaymentForm');
+        form.action = `/admin/reservations/${id}/verify-payment`;
+        
+        document.getElementById('verifyBookingCode').value = bookingCode;
+        
+        const proofImage = document.getElementById('proofImage');
+        const noProofText = document.getElementById('noProofText');
+        
+        if (proofPath) {
+            proofImage.src = `/storage/${proofPath}`;
+            proofImage.style.display = 'block';
+            noProofText.style.display = 'none';
+        } else {
+            proofImage.style.display = 'none';
+            noProofText.style.display = 'block';
+        }
+        
+        new bootstrap.Modal(document.getElementById('verifyPaymentModal')).show();
+    }
+    
     function filterReservations() {
-        const status = document.getElementById('statusFilter').value;
-        const date   = document.getElementById('dateFilter').value;
+        const status = document.getElementById('statusFilter').value.toLowerCase();
+        const payment = document.getElementById('paymentFilter').value.toLowerCase();
+        const date = document.getElementById('dateFilter').value;
         const search = document.getElementById('searchFilter').value.toLowerCase();
-        const rows   = document.querySelectorAll('#reservationsTable tbody tr');
-
+        const rows = document.querySelectorAll('#reservationsTable tbody tr');
+        
         rows.forEach(row => {
+            if (row.cells.length < 9) return;
+            
             let show = true;
-            if (status) {
-                const statusCell = row.cells[6]?.innerText.toLowerCase();
-                if (!statusCell || !statusCell.includes(status)) show = false;
-            }
-            if (date && show) {
-                const dateCell = row.cells[2]?.innerText;
-                if (dateCell && !dateCell.includes(date)) show = false;
-            }
+            const rowStatus = row.getAttribute('data-status') || '';
+            const rowPayment = row.getAttribute('data-payment') || '';
+            const rowDate = row.getAttribute('data-date') || '';
+            
+            if (status && rowStatus !== status) show = false;
+            if (payment && rowPayment !== payment) show = false;
+            if (date && rowDate !== date) show = false;
             if (search && show) {
                 const text = row.innerText.toLowerCase();
                 if (!text.includes(search)) show = false;
@@ -377,6 +531,12 @@
             row.style.display = show ? '' : 'none';
         });
     }
+    
+    document.getElementById('verifyPaymentModal').addEventListener('hidden.bs.modal', function() {
+        if (currentReservationId) {
+            location.reload();
+        }
+    });
 </script>
 @endpush
 

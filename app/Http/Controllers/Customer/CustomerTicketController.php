@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Customer; // ← UBAH dari Reservation ke Customer
+namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\PoolTicket;
@@ -11,28 +11,38 @@ use App\Notifications\AdminNewTicketNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CustomerTicketController extends Controller
 {
-    // ← TAMBAHKAN method index yang belum ada
+    /**
+     * Display a listing of tickets for authenticated user.
+     */
     public function index()
     {
-        $tickets = PoolTicket::where('customer_email', Auth::user()->email)
+        // Ambil tiket berdasarkan user_id yang login
+        $tickets = PoolTicket::where('user_id', Auth::id())
             ->latest()
             ->paginate(10);
 
         return view('customer.tickets', compact('tickets'));
     }
 
+    /**
+     * Show ticket details.
+     */
     public function show($ticketCode)
     {
         $ticket = PoolTicket::where('ticket_code', $ticketCode)
-            ->where('customer_email', Auth::user()->email)
+            ->where('user_id', Auth::id())
             ->firstOrFail();
 
         return view('customer.ticket-show', compact('ticket'));
     }
 
+    /**
+     * Show ticket purchase form.
+     */
     public function create()
     {
         $promos = Promo::active()
@@ -48,6 +58,9 @@ class CustomerTicketController extends Controller
         return view('reservation.ticket.create', compact('promos', 'ticketPrices'));
     }
 
+    /**
+     * Calculate ticket price.
+     */
     public function calculate(Request $request)
     {
         $validated = $request->validate([
@@ -73,6 +86,9 @@ class CustomerTicketController extends Controller
         ]);
     }
 
+    /**
+     * Store a newly created ticket.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -108,29 +124,37 @@ class CustomerTicketController extends Controller
                 'customer_email'    => $validated['customer_email'],
                 'customer_phone'    => $validated['customer_phone'],
                 'visit_date'        => $validated['visit_date'],
-                'visit_time'        => $validated['visit_time'],
+                'visit_time'        => $validated['visit_time'] ?? null,
                 'ticket_type'       => $validated['ticket_type'],
                 'number_of_tickets' => $validated['number_of_tickets'],
                 'price_per_ticket'  => $pricePerTicket,
                 'total_amount'      => $pricePerTicket * $validated['number_of_tickets'],
                 'payment_status'    => 'unpaid',
-                'status'            => 'active'
+                'status'            => 'active',
+                'user_id'           => Auth::id(),  // Hubungkan dengan user yang login
             ]);
 
-            // Notifikasi ke customer
-            $customer = User::where('email', $validated['customer_email'])->first();
-            if ($customer) {
-                $customer->notify(new TicketNotification($ticket, 'purchased'));
+            // Notifikasi ke customer yang login (guard method_exists)
+            $user = Auth::user();
+            if ($user && is_object($user) && method_exists($user, 'notify')) {
+                $user->notify(new TicketNotification($ticket, 'purchased'));
+            } else {
+                Log::warning('CustomerTicketController: user not notifiable', ['user' => $user?->id ?? null]);
             }
 
-            // Notifikasi ke admin
+            // Notifikasi ke semua admin
             $admins = User::where('role', 'admin')->get();
             foreach ($admins as $admin) {
-                $admin->notify(new AdminNewTicketNotification($ticket));
+                if (is_object($admin) && method_exists($admin, 'notify')) {
+                    $admin->notify(new AdminNewTicketNotification($ticket));
+                } else {
+                    Log::warning('CustomerTicketController: admin not notifiable', ['admin' => $admin?->id ?? null]);
+                }
             }
 
             DB::commit();
 
+            // Redirect ke halaman success dengan route yang benar
             return redirect()->route('reservation.ticket.success', $ticket->ticket_code)
                 ->with('success', 'Tiket berhasil dipesan! Silakan lakukan pembayaran.');
 
@@ -140,15 +164,27 @@ class CustomerTicketController extends Controller
         }
     }
 
+    /**
+     * Show success page.
+     */
     public function success($ticketCode)
     {
-        $ticket = PoolTicket::where('ticket_code', $ticketCode)->firstOrFail();
+        $ticket = PoolTicket::where('ticket_code', $ticketCode)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+            
         return view('reservation.ticket.success', compact('ticket'));
     }
 
+    /**
+     * Show ticket view.
+     */
     public function view($ticketCode)
     {
-        $ticket = PoolTicket::where('ticket_code', $ticketCode)->firstOrFail();
+        $ticket = PoolTicket::where('ticket_code', $ticketCode)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+            
         return view('reservation.ticket.view', compact('ticket'));
     }
 }

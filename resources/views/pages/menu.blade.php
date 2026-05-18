@@ -10,8 +10,25 @@
         <p class="lead text-secondary">Discover our delicious selection of food and beverages</p>
     </div>
 
-    <!-- Category Filter -->
+    <!-- Search Bar -->
     <div class="row mb-4">
+        <div class="col-12">
+            <div class="search-wrapper mx-auto" style="max-width: 400px;">
+                <div class="input-group" style="background: #fff; border-radius: 50px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <span class="input-group-text border-0 bg-white text-muted ps-4">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control border-0 py-2" placeholder="Search menu..." style="font-size: 14px; box-shadow: none;" id="searchInput">
+                    <button class="btn border-0 bg-white text-muted pe-4" type="button" id="searchClearBtn" style="display: none;">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="row mb-5">
         <div class="col-12">
             <div class="d-flex justify-content-center gap-2 flex-wrap">
                 <a href="{{ route('branding.menu') }}" class="btn btn-filter {{ !request('category') ? 'active' : '' }}">All</a>
@@ -46,11 +63,7 @@
                         <span class="badge recommended-badge">⭐ Recommended</span>
                     @endif
                 </div>
-                <div class="card-footer bg-transparent border-0 pb-3 px-3">
-                    <a href="{{ route('branding.menu.show', $menu) }}" class="btn btn-menu-detail w-100">
-                        View Details <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
+                
             </div>
         </div>
         @empty
@@ -150,19 +163,92 @@
         border-radius: 20px;
     }
 
-    .btn-menu-detail {
-        border: 1.5px solid #1c3451;
-        color: #1c3451;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: 600;
-        padding: 8px;
+    
+
+    .search-wrapper {
+    position: relative;
+    }
+
+    .search-wrapper .input-group {
+        transition: all 0.3s ease;
+    }
+
+    .search-wrapper .input-group:focus-within {
+        box-shadow: 0 4px 12px rgba(28,52,81,0.15) !important;
+        transform: translateY(-1px);
+    }
+
+    #searchInput:focus {
+        outline: none;
+    }
+
+    #searchClearBtn {
         transition: all 0.2s;
     }
 
-    .btn-menu-detail:hover {
-        background: #1c3451;
-        color: white;
+    #searchClearBtn:hover {
+        color: #c1a067 !important;
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('searchClearBtn');
+    const menuCards = document.querySelectorAll('.menu-card');
+    const noResultMsg = document.createElement('div');
+    noResultMsg.className = 'col-12 text-center py-5';
+    noResultMsg.innerHTML = `
+        <i class="fas fa-search fa-4x mb-3" style="color: #c1a067; opacity: 0.5;"></i>
+        <p class="text-muted">No menu found matching your search</p>
+    `;
+    noResultMsg.style.display = 'none';
+    
+    const menuGrid = document.querySelector('.row.g-4');
+    menuGrid.parentNode.appendChild(noResultMsg);
+    
+    function filterMenu() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        if (searchTerm === '') {
+            clearBtn.style.display = 'none';
+        } else {
+            clearBtn.style.display = 'block';
+        }
+        
+        menuCards.forEach(card => {
+            const title = card.querySelector('.fw-bold')?.textContent.toLowerCase() || '';
+            const description = card.querySelector('.text-muted')?.textContent.toLowerCase() || '';
+            const price = card.querySelector('.menu-price')?.textContent.toLowerCase() || '';
+            
+            if (title.includes(searchTerm) || description.includes(searchTerm) || price.includes(searchTerm)) {
+                card.closest('.col-md-6')?.classList.remove('d-none');
+                visibleCount++;
+            } else {
+                card.closest('.col-md-6')?.classList.add('d-none');
+            }
+        });
+        
+        // Show/hide no result message
+        if (visibleCount === 0 && searchTerm !== '') {
+            noResultMsg.style.display = 'block';
+            menuGrid.style.display = 'none';
+        } else {
+            noResultMsg.style.display = 'none';
+            menuGrid.style.display = 'flex';
+        }
+    }
+    
+    searchInput.addEventListener('input', filterMenu);
+    
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        filterMenu();
+        searchInput.focus();
+    });
+});
+</script>
 @endpush

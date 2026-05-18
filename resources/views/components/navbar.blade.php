@@ -15,13 +15,6 @@
                 
                 <!-- Search + Auth + Notifikasi -->
                 <div class="col-6 col-md-7 d-flex align-items-center justify-content-end gap-2">
-                    <!-- Search Bar -->
-                    <div class="input-group d-none d-md-flex" style="max-width: 250px; background: #fff; border-radius: 8px; overflow: hidden; height: 40px;">
-                        <span class="input-group-text border-0 bg-white text-muted px-3">
-                            <i class="fas fa-search" style="font-size:13px;"></i>
-                        </span>
-                        <input type="text" class="form-control border-0" placeholder="Search menu" style="font-size: 13px; box-shadow: none;" id="searchInput">
-                    </div>
 
                     @auth
                         <!-- 🔥 NOTIFIKASI BELL ICON 🔥 -->
@@ -148,35 +141,42 @@
     <div style="background: #ffffff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
         <div class="container">
             <!-- Desktop Nav -->
-            <div class="d-none d-lg-flex align-items-center">
-                <a class="nav-custom-link {{ request()->routeIs('branding.home') ? 'active' : '' }}"
-                   href="{{ route('branding.home') }}">
-                    <i class="fas fa-home me-1"></i>Home
-                </a>
-                <a class="nav-custom-link {{ request()->routeIs('branding.about') ? 'active' : '' }}"
-                   href="{{ route('branding.about') }}">
-                    <i class="fas fa-mug-hot me-1"></i>About Us
-                </a>
-                <a class="nav-custom-link {{ request()->routeIs('branding.pool*') ? 'active' : '' }}"
-                   href="{{ route('branding.pool') }}">
-                    <i class="fas fa-building me-1"></i>Pool
-                </a>
-                <a class="nav-custom-link {{ request()->routeIs('branding.events*') ? 'active' : '' }}"
-                   href="{{ route('branding.events') }}">
-                    <i class="fas fa-calendar-check me-1"></i>Promo
-                </a>
-                <a class="nav-custom-link {{ request()->routeIs('branding.gallery*') ? 'active' : '' }}"
-                   href="{{ route('branding.gallery') }}">
-                    <i class="fas fa-image me-1"></i>Gallery
-                </a>
-                <a class="nav-custom-link {{ request()->routeIs('branding.menu*') ? 'active' : '' }}"
-                   href="{{ route('branding.menu') }}">
-                    <i class="fas fa-user-tie me-1"></i>Menu
-                </a>
-                <a class="nav-custom-link {{ request()->routeIs('branding.testimonials*') ? 'active' : '' }}"
-                   href="{{ route('branding.testimonials') }}">
-                    <i class="fas fa-comments me-1"></i>Testimoni
-                </a>
+        <div class="d-none d-lg-flex align-items-center">
+            <a class="nav-custom-link {{ request()->routeIs('branding.home') ? 'active' : '' }}"
+            href="{{ route('branding.home') }}">
+                <i class="fas fa-home me-1"></i>Home
+            </a>
+            <a class="nav-custom-link {{ request()->routeIs('branding.about') ? 'active' : '' }}"
+            href="{{ route('branding.about') }}">
+                <i class="fas fa-mug-hot me-1"></i>About Us
+            </a>
+            <a class="nav-custom-link {{ request()->routeIs('branding.pool*') ? 'active' : '' }}"
+            href="{{ route('branding.pool') }}">
+                <i class="fas fa-swimmer me-1"></i>Pool
+            </a>
+            <!-- Reserving Meja - Menu Baru -->
+            <a class="nav-custom-link {{ request()->routeIs('reservation.table*') ? 'active' : '' }}"
+            href="{{ route('reservation.table') }}">
+                <i class="fas fa-chair me-1"></i>Reservasi Meja
+            </a>
+            <a class="nav-custom-link {{ request()->routeIs('branding.events*') ? 'active' : '' }}"
+            href="{{ route('branding.promos') }}">
+                <i class="fas fa-bullhorn me-1"></i>Promo
+            </a>
+            <a class="nav-custom-link {{ request()->routeIs('branding.gallery*') ? 'active' : '' }}"
+            href="{{ route('branding.gallery') }}">
+                <i class="fas fa-image me-1"></i>Gallery
+            </a>
+            <a class="nav-custom-link {{ request()->routeIs('branding.menu*') ? 'active' : '' }}"
+            href="{{ route('branding.menu') }}">
+                <i class="fas fa-utensils me-1"></i>Menu
+            </a>
+            <a class="nav-custom-link {{ request()->routeIs('branding.testimonials*') ? 'active' : '' }}"
+            href="{{ route('branding.testimonials') }}">
+                <i class="fas fa-comments me-1"></i>Testimoni
+            </a>
+
+        </div>
             </div>
 
             <!-- Mobile Nav Toggle -->
@@ -194,13 +194,15 @@
                     <a class="nav-custom-link-mobile {{ request()->routeIs('branding.about') ? 'active' : '' }}"
                        href="{{ route('branding.about') }}"><i class="fas fa-mug-hot me-2"></i>About Us</a>
                     <a class="nav-custom-link-mobile {{ request()->routeIs('branding.pool*') ? 'active' : '' }}"
-                       href="{{ route('branding.pool') }}"><i class="fas fa-building me-2"></i>Facilities</a>
+                       href="{{ route('branding.pool') }}"><i class="fas fa-swimmer me-2"></i>Pool</a>
                     <a class="nav-custom-link-mobile {{ request()->routeIs('branding.events*') ? 'active' : '' }}"
-                       href="{{ route('branding.events') }}"><i class="fas fa-calendar-check me-2"></i>Promo</a>
+                       href="{{ route('branding.events') }}"><i class="fas fa-bullhorn me-2"></i>Promo</a>
                     <a class="nav-custom-link-mobile {{ request()->routeIs('branding.gallery*') ? 'active' : '' }}"
                        href="{{ route('branding.gallery') }}"><i class="fas fa-image me-2"></i>Gallery</a>
                     <a class="nav-custom-link-mobile {{ request()->routeIs('branding.menu*') ? 'active' : '' }}"
-                       href="{{ route('branding.menu') }}"><i class="fas fa-user-tie me-2"></i>Menu</a>
+                       href="{{ route('branding.menu') }}"><i class="fas fa-utensils me-2"></i>Menu</a>
+                    <a class="nav-custom-link-mobile {{ request()->routeIs('reservation.table*') ? 'active' : '' }}"
+                       href="{{ route('reservation.table') }}"><i class="fas fa-chair me-2"></i>Reservasi Meja</a>
                 </div>
             </div>
         </div>

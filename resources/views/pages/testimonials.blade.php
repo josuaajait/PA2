@@ -34,12 +34,20 @@
 
         <div class="col-md-8">
             <div class="card border-0 shadow-sm p-4 h-100 caldera-card">
-                <div class="row">
-                    <div class="col-6">
-                        @foreach([5,4,3] as $star)
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="me-2" style="width: 50px;">
-                                <span class="fw-bold" style="font-size: 13px;">{{ $star }} Star</span>
+                <div class="row h-100">
+                    <!-- Rating bars section -->
+                    <div class="col-12 col-md-7 d-flex flex-column justify-content-center">
+                        @foreach([5,4,3,2,1] as $star)
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-2" style="min-width: 65px;">
+                                <span class="fw-bold" style="font-size: 13px;">
+                                    @if($star == 5) 5 Star
+                                    @elseif($star == 4) 4 Star
+                                    @elseif($star == 3) 3 Star
+                                    @elseif($star == 2) 2 Star
+                                    @else 1 Star
+                                    @endif
+                                </span>
                             </div>
                             <div class="progress flex-grow-1" style="height: 8px; border-radius: 4px; background: #f0ebe0;">
                                 @php
@@ -47,15 +55,17 @@
                                 @endphp
                                 <div class="progress-bar" style="width: {{ $percent }}%; background: #c1a067; border-radius: 4px;"></div>
                             </div>
-                            <div class="ms-2" style="width: 40px;">
-                                <span class="text-muted small">{{ $ratingStats[$star . '_star'] }}</span>
+                            <div class="ms-2" style="min-width: 35px; text-align: right;">
+                                <span class="text-muted small fw-bold">{{ $ratingStats[$star . '_star'] }}</span>
                             </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="col-6">
-                        <div class="d-flex flex-column justify-content-between h-100">
-                            <a href="{{ route('branding.testimonials.create') }}" class="btn btn-caldera w-100 mb-3">
+                    
+                    <!-- Buttons section - lebih rapat -->
+                    <div class="col-12 col-md-5 d-flex flex-column justify-content-center">
+                        <div class="d-flex flex-column gap-2">
+                            <a href="{{ route('branding.testimonials.create') }}" class="btn btn-caldera w-100">
                                 <i class="fas fa-star me-2"></i>Write a Review
                             </a>
                             <div class="dropdown w-100">
@@ -65,13 +75,15 @@
                                 <ul class="dropdown-menu w-100">
                                     <li><a class="dropdown-item" href="{{ route('branding.testimonials') }}">All Reviews</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['rating' => 5]) }}">5 Star Only</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['rating' => 4]) }}">4 Star & Up</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['rating' => 3]) }}">3 Star & Up</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['rating' => 5]) }}">5 Star <i class="fas fa-star ms-1" style="color: #c1a067; font-size: 11px;"></i></a></li>
+                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['rating' => 4]) }}">4 Star <i class="fas fa-star ms-1" style="color: #c1a067; font-size: 11px;"></i></a></li>
+                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['rating' => 3]) }}">3 Star <i class="fas fa-star ms-1" style="color: #c1a067; font-size: 11px;"></i></a></li>
+                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['rating' => 2]) }}">2 Star <i class="fas fa-star ms-1" style="color: #c1a067; font-size: 11px;"></i></a></li>
+                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['rating' => 1]) }}">1 Star <i class="fas fa-star ms-1" style="color: #c1a067; font-size: 11px;"></i></a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['service' => 'restaurant']) }}">Restaurant</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['service' => 'pool']) }}">Pool</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['service' => 'event']) }}">Event</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['service' => 'restaurant']) }}"><i class="fas fa-utensils me-2"></i>Restaurant</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['service' => 'pool']) }}"><i class="fas fa-swimmer me-2"></i>Pool</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('branding.testimonials', ['service' => 'event']) }}"><i class="fas fa-calendar-alt me-2"></i>Event</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -100,7 +112,7 @@
                                  style="object-fit: cover; border: 2px solid #c1a067;"
                                  alt="{{ $testimonial->customer_name }}">
                         @else
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($testimonial->customer_name) }}&background=1c3451&color=c1a067&size=60"
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode($testimonial->customer_name) }}&background=1c3451&color=c1a067&size=60&rounded=true"
                                  class="rounded-circle me-3"
                                  width="55" height="55"
                                  style="border: 2px solid #c1a067;"
@@ -118,6 +130,7 @@
                         </div>
                     </div>
 
+                    <!-- Rating Bintang 1-5 -->
                     <div class="mb-3">
                         @for($i = 1; $i <= 5; $i++)
                             @if($i <= $testimonial->rating)
@@ -126,16 +139,21 @@
                                 <i class="far fa-star" style="color: #c1a067;"></i>
                             @endif
                         @endfor
+                        <span class="badge bg-light text-dark ms-2 small fw-semibold">
+                            {{ $testimonial->rating }}/5
+                        </span>
                     </div>
 
                     <p class="fst-italic text-muted mb-3">"{{ \Illuminate\Support\Str::limit($testimonial->comment, 150) }}"</p>
 
-                    @if($testimonial->visit_date)
-                        <small class="text-muted">
-                            <i class="fas fa-calendar-alt me-1" style="color: #c1a067;"></i>
-                            Visited: {{ \Carbon\Carbon::parse($testimonial->visit_date)->format('d M Y') }}
-                        </small>
-                    @endif
+                    <div class="mt-auto">
+                        @if($testimonial->visit_date)
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt me-1" style="color: #c1a067;"></i>
+                                Visited: {{ \Carbon\Carbon::parse($testimonial->visit_date)->format('d M Y') }}
+                            </small>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -175,6 +193,12 @@
 
     .caldera-card {
         border-radius: 16px !important;
+        transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .caldera-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(28,52,81,0.1) !important;
     }
 
     .testimonial-card {
@@ -223,6 +247,23 @@
         color: white;
     }
 
+    .progress {
+        background-color: #f0ebe0;
+    }
+
+    .progress-bar {
+        transition: width 0.5s ease;
+    }
+
+    .dropdown-item:active {
+        background-color: #1c3451;
+        color: white;
+    }
+
+    .dropdown-item i {
+        width: 20px;
+    }
+
     /* Dark mode */
     body.dark-mode .testimonial-card {
         background: #1e1e2a !important;
@@ -230,6 +271,23 @@
 
     body.dark-mode .testimonial-card .text-muted {
         color: #b0b0b0 !important;
+    }
+
+    body.dark-mode .bg-light {
+        background-color: #2d2d3a !important;
+        color: #c1a067 !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .display-1 {
+            font-size: 3rem;
+        }
     }
 </style>
 @endpush

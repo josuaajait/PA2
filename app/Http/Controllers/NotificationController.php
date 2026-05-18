@@ -20,7 +20,15 @@ class NotificationController extends Controller
             ->paginate(10);
         
         foreach ($notifications as $notif) {
-            $notif->data = json_decode($notif->data, true);
+            $data = json_decode($notif->data, true);
+            $notif->data = $data;
+            $notif->type = $data['type'] ?? 'general';
+            $notif->title = $data['title'] ?? 'Notifikasi';
+            $notif->body = $data['body'] ?? '';
+            $notif->icon = $data['icon'] ?? 'fa-bell';
+            $notif->color = $data['color'] ?? 'primary';
+            $notif->booking_code = $data['booking_code'] ?? null;
+            $notif->url = $data['url'] ?? null;
             $notif->created_at = Carbon::parse($notif->created_at);
         }
         
@@ -81,10 +89,13 @@ class NotificationController extends Controller
             $data = json_decode($notif->data, true);
             $formatted[] = [
                 'id' => $notif->id,
+                'type' => $data['type'] ?? 'general',
                 'title' => $data['title'] ?? 'Notifikasi',
                 'body' => $data['body'] ?? '',
                 'icon' => $data['icon'] ?? 'fa-bell',
                 'color' => $data['color'] ?? 'primary',
+                'booking_code' => $data['booking_code'] ?? null,
+                'url' => $data['url'] ?? null,
                 'read_at' => $notif->read_at,
                 'created_at' => $this->getTimeAgo($notif->created_at),
             ];

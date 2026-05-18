@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class TestimonialManagementController extends Controller
 {
@@ -75,7 +76,7 @@ class TestimonialManagementController extends Controller
         $testimonial = Testimonial::findOrFail($id);
         $testimonial->is_approved = true;
         $testimonial->approved_at = now();
-        $testimonial->approved_by = auth()->id;
+$testimonial->approved_by = Auth::id();
         $testimonial->save();
         
         return redirect()->back()->with('success', 'Testimoni berhasil disetujui.');
@@ -140,7 +141,7 @@ class TestimonialManagementController extends Controller
         Testimonial::whereIn('id', $ids)->update([
             'is_approved' => true,
             'approved_at' => now(),
-            'approved_by' => auth()->id
+            'approved_by' => Auth::id(),
         ]);
         
         return response()->json(['success' => true, 'message' => count($ids) . ' testimoni disetujui.']);

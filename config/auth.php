@@ -40,6 +40,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Guard baru untuk API & Mobile
+        'api' => [
+            'driver'   => 'jwt',
+            'provider' => 'users',
+        ],
     ],
 
     /*

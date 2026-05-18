@@ -80,11 +80,30 @@ class TicketController extends Controller
         ];
 
         $pricePerTicket = $prices[$validated['ticket_type']];
+        $totalAmount = $pricePerTicket * $validated['number_of_tickets'];
 
         try {
             DB::beginTransaction();
 
+            // Generate ticket code unik
+            $ticketCode = 'TKT-' . strtoupper(uniqid());
+            while (PoolTicket::where('ticket_code', $ticketCode)->exists()) {
+                $ticketCode = 'TKT-' . strtoupper(uniqid());
+            }
+
+            // 🔥 INI YANG PENTING: Simpan user_id jika user login
+            $userId = Auth::check() ? Auth::id() : null;
+            
+            // Jika user tidak login tapi email cocok dengan user yang terdaftar
+            if (!$userId) {
+                $existingUser = User::where('email', $validated['customer_email'])->first();
+                if ($existingUser) {
+                    $userId = $existingUser->id;
+                }
+            }
+
             $ticket = PoolTicket::create([
+                'ticket_code'       => $ticketCode,
                 'customer_name'     => $validated['customer_name'],
                 'customer_email'    => $validated['customer_email'],
                 'customer_phone'    => $validated['customer_phone'],
@@ -93,21 +112,21 @@ class TicketController extends Controller
                 'ticket_type'       => $validated['ticket_type'],
                 'number_of_tickets' => $validated['number_of_tickets'],
                 'price_per_ticket'  => $pricePerTicket,
-                'total_amount'      => $pricePerTicket * $validated['number_of_tickets'],
+                'total_amount'      => $totalAmount,
                 'payment_status'    => 'unpaid',
                 'status'            => 'active',
+                'user_id'           => $userId, // 🔥 INI YANG HARUS ADA!
             ]);
 
             // Notifikasi ke customer yang login
-            $customer = Auth::user();
-            if ($customer instanceof User) {
-                $customer->notify(new TicketNotification($ticket, 'purchased'));
-            } else {
-                // Customer tidak login, cari by email
-                $userByEmail = User::where('email', $validated['customer_email'])->first();
-                if ($userByEmail instanceof User) {
-                    $userByEmail->notify(new TicketNotification($ticket, 'purchased'));
+            if ($userId) {
+                $customer = User::find($userId);
+                if ($customer) {
+                    $customer->notify(new TicketNotification($ticket, 'purchased'));
                 }
+            } else {
+                // Customer tidak login, kirim notifikasi ke email? Bisa dengan cara lain
+                // Misalnya: kirim email (opsional)
             }
 
             // Notifikasi ke semua admin

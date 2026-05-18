@@ -37,4 +37,50 @@ class AdminNewReservationNotification extends Notification
             'number_of_guests' => $this->reservation->number_of_guests,
         ];
     }
+
+        public function verifyPayment($id)
+    {
+        $reservation = TableReservation::findOrFail($id);
+        
+        // Update status pembayaran
+        $reservation->payment_status = 'paid';
+        $reservation->status = 'confirmed';
+        $reservation->confirmed_at = now();
+        $reservation->save();
+
+        // 🔔 KIRIM NOTIFIKASI KE CUSTOMER 🔔
+        $this->sendPaymentVerifiedNotification($reservation);
+
+        return redirect()->back()->with('success', 'Pembayaran berhasil diverifikasi dan reservasi dikonfirmasi.');
+    }
+
+    /**
+     * Kirim notifikasi ke customer bahwa pembayaran sudah diverifikasi
+     */
+    private function sendPaymentVerifiedNotification(TableReservation $reservation)
+    {
+        // Cari customer berdasarkan email atau user_id
+        $customer = null;
+        
+        if ($reservation->user_id) {
+            $customer = \App\Models\User::find($reservation->user_id);
+        } elseif ($reservation->customer_email) {
+            $customer = \App\Models\User::where('email', $reservation->customer_email)->first();
+        }
+
+        if ($customer) {
+            $customer->notify(new PaymentVerifiedNotification($reservation));
+            
+            \Illuminate\Support\Facades\Log::info('Notifikasi pembayaran diverifikasi dikirim ke customer', [
+                'customer_id' => $customer->id,
+                'customer_email' => $customer->email,
+                'booking_code' => $reservation->booking_code
+            ]);
+        } else {
+            \Illuminate\Support\Facades\Log::warning('Customer tidak ditemukan untuk notifikasi', [
+                'booking_code' => $reservation->booking_code,
+                'customer_email' => $reservation->customer_email
+            ]);
+        }
+    }
 }

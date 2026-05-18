@@ -40,11 +40,7 @@
                     </div>
                     <p class="text-muted small">{{ Str::limit($menu->description, 100) }}</p>
                 </div>
-                <div class="card-footer bg-transparent border-0 pb-3">
-                    <a href="{{ route('branding.menu.show', $menu) }}" class="btn btn-outline-primary btn-sm w-100">
-                        View Details <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
+                
             </div>
         </div>
         @empty

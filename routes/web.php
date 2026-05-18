@@ -10,7 +10,6 @@ use App\Http\Controllers\Branding\PromoController;
 use App\Http\Controllers\Branding\TestimonialController;
 use App\Http\Controllers\Branding\GalleryController as PublicGalleryController;
 use App\Http\Controllers\Reservation\TableReservationController;
-use App\Http\Controllers\Reservation\TicketController;
 use App\Http\Controllers\Reservation\PaymentController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -101,19 +100,25 @@ Route::name('branding.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('reservation')->name('reservation.')->middleware(['auth'])->group(function () {
+    // Table Reservation Routes
     Route::get('/table', [TableReservationController::class, 'create'])->name('table');
     Route::post('/table/check-availability', [TableReservationController::class, 'checkAvailability'])->name('table.check');
     Route::post('/table/store', [TableReservationController::class, 'store'])->name('table.store');
+    Route::get('/table/payment/{booking_code}', [TableReservationController::class, 'paymentInstruction'])->name('table.payment');
+    Route::post('/table/upload-payment/{booking_code}', [TableReservationController::class, 'uploadPaymentProof'])->name('table.upload-payment');
+    Route::get('/table/whatsapp/{booking_code}', [TableReservationController::class, 'redirectToWhatsApp'])->name('table.whatsapp');
     Route::get('/table/success/{booking_code}', [TableReservationController::class, 'success'])->name('table.success');
     Route::get('/table/view/{booking_code}', [TableReservationController::class, 'view'])->name('table.view');
     Route::post('/table/cancel/{booking_code}', [TableReservationController::class, 'cancel'])->name('table.cancel');
 
-    Route::get('/ticket', [TicketController::class, 'create'])->name('ticket');
-    Route::post('/ticket/calculate', [TicketController::class, 'calculate'])->name('ticket.calculate');
-    Route::post('/ticket/store', [TicketController::class, 'store'])->name('ticket.store');
-    Route::get('/ticket/success/{ticket_code}', [TicketController::class, 'success'])->name('ticket.success');
-    Route::get('/ticket/view/{ticket_code}', [TicketController::class, 'view'])->name('ticket.view');
+    // Ticket Routes - Gunakan CustomerTicketController
+    Route::get('/ticket', [CustomerTicketController::class, 'create'])->name('ticket');
+    Route::post('/ticket/calculate', [CustomerTicketController::class, 'calculate'])->name('ticket.calculate');
+    Route::post('/ticket/store', [CustomerTicketController::class, 'store'])->name('ticket.store');
+    Route::get('/ticket/success/{ticket_code}', [CustomerTicketController::class, 'success'])->name('ticket.success');
+    Route::get('/ticket/view/{ticket_code}', [CustomerTicketController::class, 'view'])->name('ticket.view');
 
+    // Payment Routes
     Route::post('/payment/upload-proof', [PaymentController::class, 'uploadProof'])->name('payment.upload');
     Route::get('/payment/status/{booking_code}', [PaymentController::class, 'status'])->name('payment.status');
 });
@@ -133,6 +138,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::post('/reservations/{bookingCode}/cancel', [CustomerReservationController::class, 'cancel'])->name('reservation.cancel');
 
     Route::get('/tickets', [CustomerTicketController::class, 'index'])->name('tickets');
+    Route::get('/tickets/{ticketCode}', [CustomerTicketController::class, 'show'])->name('tickets.show');
 });
 
 /*
@@ -195,12 +201,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Gallery
         Route::resource('galleries', AdminGalleryController::class);
-            // Extra routes
-    Route::patch('galleries/{gallery}/toggle-featured', [AdminGalleryController::class, 'toggleFeatured'])
-         ->name('galleries.toggle-featured');
- 
-    Route::post('galleries/update-order', [AdminGalleryController::class, 'updateOrder'])
-         ->name('galleries.update-order');
+        Route::patch('galleries/{gallery}/toggle-featured', [AdminGalleryController::class, 'toggleFeatured'])->name('galleries.toggle-featured');
+        Route::post('galleries/update-order', [AdminGalleryController::class, 'updateOrder'])->name('galleries.update-order');
 
         // Reports
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
@@ -211,11 +213,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/reports/export-tickets', [ReportController::class, 'exportTickets'])->name('reports.export-tickets');
         Route::get('/reports/export-income', [ReportController::class, 'exportIncome'])->name('reports.export-income');
 
-        // Notifications (dipindah ke dalam middleware)
+        // Notifications
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/{id}/mark-read', [AdminNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
         Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
         Route::get('/notifications/latest', [AdminNotificationController::class, 'getLatest'])->name('notifications.latest');
+
+        // Reservation Confirm Route
+        Route::post('/reservation/table/confirm/{bookingCode}', [TableReservationController::class, 'confirm'])
+        ->name('reservation.table.confirm');
+        Route::post('/reservations/{id}/verify-payment', [ReservationManagementController::class, 'verifyPayment'])
+        ->name('reservations.verify-payment');  
     });
 });
 
