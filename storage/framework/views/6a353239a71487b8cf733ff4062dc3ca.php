@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Contact Us - Caldera Resto & Pool')
 
-@section('content')
+<?php $__env->startSection('title', 'Contact Us - Caldera Resto & Pool'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container py-5">
     <!-- Header -->
     <div class="text-center mb-5">
@@ -101,26 +101,27 @@
                         <i class="fas fa-paper-plane me-2" style="color: #c1a067;"></i> Send Us a Message
                     </h4>
                     
-                    @if(session('success'))
+                    <?php if(session('success')): ?>
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                            <i class="fas fa-check-circle me-2"></i> <?php echo e(session('success')); ?>
+
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                    @endif
+                    <?php endif; ?>
                     
-                    @if($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <ul class="mb-0">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
+                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li><?php echo e($error); ?></li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </ul>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                    @endif
+                    <?php endif; ?>
                     
-                    <form method="POST" action="{{ route('branding.contact.send') }}">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('branding.contact.send')); ?>">
+                        <?php echo csrf_field(); ?>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
@@ -128,7 +129,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" name="name" class="form-control caldera-input" 
-                                       value="{{ old('name') }}" required>
+                                       value="<?php echo e(old('name')); ?>" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
@@ -136,14 +137,14 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="email" name="email" class="form-control caldera-input" 
-                                       value="{{ old('email') }}" required>
+                                       value="<?php echo e(old('email')); ?>" required>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-phone me-1" style="color: #c1a067;"></i> Phone
                                 </label>
                                 <input type="text" name="phone" class="form-control caldera-input" 
-                                       value="{{ old('phone') }}" placeholder="0812-3456-7890">
+                                       value="<?php echo e(old('phone')); ?>" placeholder="0812-3456-7890">
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
@@ -151,7 +152,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" name="subject" class="form-control caldera-input" 
-                                       value="{{ old('subject') }}" required>
+                                       value="<?php echo e(old('subject')); ?>" required>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
@@ -159,7 +160,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <textarea name="message" class="form-control caldera-input" 
-                                          rows="5" required>{{ old('message') }}</textarea>
+                                          rows="5" required><?php echo e(old('message')); ?></textarea>
                             </div>
                             <div class="col-md-12">
                                 <button type="submit" class="btn btn-submit w-100">
@@ -191,9 +192,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
 
@@ -351,4 +352,5 @@
         color: #1c3451;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/pages/contact.blade.php ENDPATH**/ ?>

@@ -117,6 +117,7 @@ Route::prefix('reservation')->name('reservation.')->middleware(['auth'])->group(
     Route::post('/ticket/store', [CustomerTicketController::class, 'store'])->name('ticket.store');
     Route::get('/ticket/success/{ticket_code}', [CustomerTicketController::class, 'success'])->name('ticket.success');
     Route::get('/ticket/view/{ticket_code}', [CustomerTicketController::class, 'view'])->name('ticket.view');
+        Route::post('/ticket/payment/upload', [PaymentController::class, 'uploadTicketPayment'])->name('ticket.payment.upload');
 
     // Payment Routes
     Route::post('/payment/upload-proof', [PaymentController::class, 'uploadProof'])->name('payment.upload');
@@ -187,6 +188,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/tickets/{ticket}', [TicketManagementController::class, 'show'])->name('tickets.show');
         Route::post('/tickets/{ticket}/verify', [TicketManagementController::class, 'verify'])->name('tickets.verify');
         Route::get('/tickets/check-capacity', [TicketManagementController::class, 'checkCapacity'])->name('tickets.capacity');
+
 
         // Testimonials
         Route::get('/testimonials', [TestimonialManagementController::class, 'index'])->name('testimonials.index');

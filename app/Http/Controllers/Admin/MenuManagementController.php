@@ -10,19 +10,14 @@ use Illuminate\Support\Facades\Storage;
 
 class MenuManagementController extends Controller
 {
-    /**
-     * Display a listing of the menu.
-     */
     public function index(Request $request)
     {
         $query = Menu::query();
         
-        // Filter by category
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
         
-        // Search by name
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
@@ -33,17 +28,11 @@ class MenuManagementController extends Controller
         return view('admin.menus.index', compact('menus', 'categories'));
     }
     
-    /**
-     * Show the form for creating a new menu.
-     */
     public function create()
     {
         return view('admin.menus.create');
     }
     
-    /**
-     * Store a newly created menu in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -63,7 +52,13 @@ class MenuManagementController extends Controller
         
         // Upload image if exists
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('menus', 'public');
+            $file = $request->file('image');
+            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+            $path = $file->storeAs('menus', $filename, 'public');
+            $validated['image'] = $path;
+        } else {
+            // Jika tidak upload gambar, set default null
+            $validated['image'] = null;
         }
         
         Menu::create($validated);
@@ -72,25 +67,16 @@ class MenuManagementController extends Controller
             ->with('success', 'Menu berhasil ditambahkan');
     }
     
-    /**
-     * Display the specified menu.
-     */
     public function show(Menu $menu)
     {
         return view('admin.menus.show', compact('menu'));
     }
     
-    /**
-     * Show the form for editing the specified menu.
-     */
     public function edit(Menu $menu)
     {
         return view('admin.menus.edit', compact('menu'));
     }
     
-    /**
-     * Update the specified menu in storage.
-     */
     public function update(Request $request, Menu $menu)
     {
         $validated = $request->validate([
@@ -108,13 +94,21 @@ class MenuManagementController extends Controller
         $validated['is_available'] = $request->has('is_available');
         $validated['is_recommended'] = $request->has('is_recommended');
         
-        // Upload new image if exists
+        // Handle image upload
         if ($request->hasFile('image')) {
-            // Delete old image
-            if ($menu->image) {
+            // Delete old image if exists
+            if ($menu->image && Storage::disk('public')->exists($menu->image)) {
                 Storage::disk('public')->delete($menu->image);
             }
-            $validated['image'] = $request->file('image')->store('menus', 'public');
+            
+            $file = $request->file('image');
+            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+            $path = $file->storeAs('menus', $filename, 'public');
+            $validated['image'] = $path;
+        } else {
+            // 🔥 PENTING: Jangan hapus gambar yang sudah ada jika tidak upload gambar baru
+            // Hapus key 'image' dari array validated agar tidak mengubah gambar yang sudah ada
+            unset($validated['image']);
         }
         
         $menu->update($validated);
@@ -123,13 +117,10 @@ class MenuManagementController extends Controller
             ->with('success', 'Menu berhasil diupdate');
     }
     
-    /**
-     * Remove the specified menu from storage.
-     */
     public function destroy(Menu $menu)
     {
         // Delete image file
-        if ($menu->image) {
+        if ($menu->image && Storage::disk('public')->exists($menu->image)) {
             Storage::disk('public')->delete($menu->image);
         }
         
@@ -139,9 +130,6 @@ class MenuManagementController extends Controller
             ->with('success', 'Menu berhasil dihapus');
     }
     
-    /**
-     * Toggle menu availability status.
-     */
     public function toggleAvailability(Menu $menu)
     {
         $menu->update(['is_available' => !$menu->is_available]);

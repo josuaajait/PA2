@@ -1,12 +1,12 @@
-@extends('layouts.admin')
 
-@section('title', 'Menu Management')
 
-@section('content')
+<?php $__env->startSection('title', 'Menu Management'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="card">
     <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4">
         <h6 class="mb-0 fw-bold" style="color: #1c3451;">Daftar Menu</h6>
-        <a href="{{ route('admin.menus.create') }}" class="btn btn-sm btn-admin-primary">
+        <a href="<?php echo e(route('admin.menus.create')); ?>" class="btn btn-sm btn-admin-primary">
             <i class="fas fa-plus me-1"></i> Tambah Menu
         </a>
     </div>
@@ -17,14 +17,15 @@
                 <form method="GET" class="d-flex gap-2">
                     <select name="category" class="form-select w-auto" onchange="this.form.submit()">
                         <option value="">Semua Kategori</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>
-                                {{ ucfirst($cat) }}
+                        <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($cat); ?>" <?php echo e(request('category') == $cat ? 'selected' : ''); ?>>
+                                <?php echo e(ucfirst($cat)); ?>
+
                             </option>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                     <input type="text" name="search" class="form-control" placeholder="Cari menu..." 
-                           value="{{ request('search') }}" onchange="this.form.submit()">
+                           value="<?php echo e(request('search')); ?>" onchange="this.form.submit()">
                 </form>
             </div>
         </div>
@@ -43,79 +44,81 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($menus as $menu)
+                    <?php $__empty_1 = true; $__currentLoopData = $menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
                         <td>
-                            @if($menu->image && Storage::disk('public')->exists($menu->image))
-                                <img src="{{ asset('storage/' . $menu->image) }}" 
+                            <?php if($menu->image && Storage::disk('public')->exists($menu->image)): ?>
+                                <img src="<?php echo e(asset('storage/' . $menu->image)); ?>" 
                                      width="52" height="52"
                                      style="object-fit: cover; border-radius: 10px; border: 2px solid #e8e0d0;"
                                      onerror="this.onerror=null; this.src='https://placehold.co/52x52/e8e0d0/c1a067?text=No+Image';">
-                            @else
+                            <?php else: ?>
                                 <div class="d-flex align-items-center justify-content-center"
                                      style="width: 52px; height: 52px; border-radius: 10px; background: #f0ebe0;">
                                     <i class="fas fa-utensils" style="color: #c1a067;"></i>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </td>
-                        <td class="fw-bold" style="color: #1c3451;">{{ $menu->name }}</td>
+                        <td class="fw-bold" style="color: #1c3451;"><?php echo e($menu->name); ?></td>
                         <td>
-                            <span class="badge-category">{{ ucfirst($menu->category) }}</span>
+                            <span class="badge-category"><?php echo e(ucfirst($menu->category)); ?></span>
                         </td>
                         <td class="fw-semibold" style="color: #c1a067;">
-                            Rp {{ number_format($menu->price, 0, ',', '.') }}
+                            Rp <?php echo e(number_format($menu->price, 0, ',', '.')); ?>
+
                         </td>
-                        <td>{!! $menu->status_label !!}</td>
+                        <td><?php echo $menu->status_label; ?></td>
                         <td>
-                            @if($menu->is_recommended)
+                            <?php if($menu->is_recommended): ?>
                                 <span class="badge" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; border-radius: 20px; padding: 4px 10px; font-size: 11px;">Ya</span>
-                            @else
+                            <?php else: ?>
                                 <span class="badge" style="background: #f9fafb; color: #6b7280; border: 1px solid #e5e7eb; border-radius: 20px; padding: 4px 10px; font-size: 11px;">Tidak</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td>
                             <div class="d-flex gap-1">
-                                <a href="{{ route('admin.menus.show', $menu) }}" class="btn btn-action btn-action-view" title="View">
+                                <a href="<?php echo e(route('admin.menus.show', $menu)); ?>" class="btn btn-action btn-action-view" title="View">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{{ route('admin.menus.edit', $menu) }}" class="btn btn-action btn-action-edit" title="Edit">
+                                <a href="<?php echo e(route('admin.menus.edit', $menu)); ?>" class="btn btn-action btn-action-edit" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('admin.menus.destroy', $menu) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
+                                <form action="<?php echo e(route('admin.menus.destroy', $menu)); ?>" method="POST" class="d-inline">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                     <button type="submit" class="btn btn-action btn-action-delete" title="Hapus"
                                             onclick="return confirm('Yakin hapus menu ini?')">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
-                                <button onclick="toggleAvailability({{ $menu->id }})"
-                                        class="btn btn-action {{ $menu->is_available ? 'btn-action-warning' : 'btn-action-success' }}"
-                                        title="{{ $menu->is_available ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                    <i class="fas {{ $menu->is_available ? 'fa-times' : 'fa-check' }}"></i>
+                                <button onclick="toggleAvailability(<?php echo e($menu->id); ?>)"
+                                        class="btn btn-action <?php echo e($menu->is_available ? 'btn-action-warning' : 'btn-action-success'); ?>"
+                                        title="<?php echo e($menu->is_available ? 'Nonaktifkan' : 'Aktifkan'); ?>">
+                                    <i class="fas <?php echo e($menu->is_available ? 'fa-times' : 'fa-check'); ?>"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="7" class="text-center py-5">
                             <i class="fas fa-utensils fa-3x mb-3 d-block" style="color: #c1a067; opacity: 0.4;"></i>
                             <span class="text-muted">Belum ada data menu</span>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
         <div class="mt-3">
-            {{ $menus->links() }}
+            <?php echo e($menus->links()); ?>
+
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
     .btn-admin-primary {
         background: #1c3451;
@@ -190,15 +193,15 @@
     .btn-action-success { background: #f0fdf4; color: #15803d; }
     .btn-action-success:hover { background: #15803d; color: white; }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     function toggleAvailability(id) {
         fetch(`/admin/menus/${id}/toggle-availability`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Content-Type': 'application/json'
             }
         }).then(response => response.json()).then(data => {
@@ -209,4 +212,5 @@
         });
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/admin/menus/index.blade.php ENDPATH**/ ?>

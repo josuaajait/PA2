@@ -63,23 +63,51 @@
                         @enderror
                     </div>
 
+                    {{-- Edit bagian current image --}}
                     <div class="form-group mb-3">
                         <label class="admin-label">Current Image</label>
                         @if($menu->image)
+                            @php
+                                $imageUrl = asset('storage/' . $menu->image);
+                                // Cek apakah file benar-benar ada
+                                $imageExists = Storage::disk('public')->exists($menu->image);
+                            @endphp
+                            
+                            @if($imageExists)
+                                <div class="mb-2">
+                                    <img src="{{ $imageUrl }}" width="120" height="120"
+                                        style="object-fit: cover; border-radius: 10px; border: 2px solid #e8e0d0;">
+                                    <br>
+                                    <small class="text-muted">Gambar saat ini: {{ basename($menu->image) }}</small>
+                                </div>
+                            @else
+                                <div class="mb-2 alert alert-warning p-2">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <small>File gambar tidak ditemukan. Silakan upload gambar baru.</small>
+                                </div>
+                            @endif
+                        @else
                             <div class="mb-2">
-                                <img src="{{ asset('storage/' . $menu->image) }}" width="120" height="120"
-                                     style="object-fit: cover; border-radius: 10px; border: 2px solid #e8e0d0;">
+                                <small class="text-muted">Belum ada gambar</small>
                             </div>
                         @endif
-                        <input type="file" name="image"
-                               class="form-control admin-input @error('image') is-invalid @enderror"
-                               accept="image/*">
+                        
+                        <input type="file" name="image" id="menuImage"
+                            class="form-control admin-input @error('image') is-invalid @enderror"
+                            accept="image/*" onchange="previewImage(this)">
                         <small class="text-muted" style="font-size: 12px;">
                             Kosongkan untuk mempertahankan gambar saat ini. Ukuran rekomendasi: 500x500px
                         </small>
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        
+                        <!-- Preview Image Baru -->
+                        <div id="imagePreviewContainer" class="mt-2" style="display: none;">
+                            <img id="imagePreview" src="#" alt="Preview New" style="max-width: 150px; max-height: 150px; border-radius: 10px; border: 2px solid #c1a067;">
+                            <br>
+                            <small class="text-muted">Gambar baru yang akan diupload</small>
+                        </div>
                     </div>
 
                     <div class="row mb-3">

@@ -65,15 +65,21 @@
                         @enderror
                     </div>
 
+                    {{-- Tambahkan di bagian form-group image --}}
                     <div class="form-group mb-3">
                         <label class="admin-label">Menu Image</label>
-                        <input type="file" name="image"
-                               class="form-control admin-input @error('image') is-invalid @enderror"
-                               accept="image/*">
+                        <input type="file" name="image" id="menuImage"
+                            class="form-control admin-input @error('image') is-invalid @enderror"
+                            accept="image/*" onchange="previewImage(this)">
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <small class="text-muted" style="font-size: 12px;">Ukuran rekomendasi: 500x500px</small>
+                        
+                        <!-- Preview Image -->
+                        <div id="imagePreviewContainer" class="mt-2" style="display: none;">
+                            <img id="imagePreview" src="#" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 10px; border: 2px solid #c1a067;">
+                        </div>
                     </div>
 
                     <div class="row mb-3">
@@ -207,4 +213,24 @@
         color: #374151;
     }
 </style>
+@endpush
+{{-- Tambahkan script di akhir --}}
+@push('scripts')
+<script>
+    function previewImage(input) {
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const preview = document.getElementById('imagePreview');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            previewContainer.style.display = 'none';
+        }
+    }
+</script>
 @endpush

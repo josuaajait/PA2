@@ -1,29 +1,29 @@
-@extends('layouts.app')
 
-@section('title', 'Caldera Resto & Pool - Home')
 
-@section('content')
+<?php $__env->startSection('title', 'Caldera Resto & Pool - Home'); ?>
 
-{{-- HERO SECTION --}}
+<?php $__env->startSection('content'); ?>
+
+
 <section class="hero-section d-flex align-items-center"
-         style="background-image: linear-gradient(rgba(28,52,81,0.6), rgba(28,52,81,0.7)), url('{{ asset('storage/galleries/home.jpeg') }}');">
+         style="background-image: linear-gradient(rgba(28,52,81,0.6), rgba(28,52,81,0.7)), url('<?php echo e(asset('storage/galleries/home.jpeg')); ?>');">
     <div class="container text-center text-white">
         <h1 class="hero-title display-3 fw-bold mb-3">
             <span class="gold-text">Caldera</span> Resto & Pool
         </h1>
         <p class="hero-subtitle lead mb-4">Experience the perfect blend of culinary delight and refreshing pool experience</p>
         <div class="hero-buttons">
-            <a href="{{ route('reservation.table') }}" class="btn btn-primary btn-lg me-3">
+            <a href="<?php echo e(route('reservation.table')); ?>" class="btn btn-primary btn-lg me-3">
                 <i class="fas fa-calendar-alt me-2"></i> Book a Table
             </a>
-            <a href="{{ route('reservation.ticket') }}" class="btn btn-outline-light btn-lg">
+            <a href="<?php echo e(route('reservation.ticket')); ?>" class="btn btn-outline-light btn-lg">
                 <i class="fas fa-ticket-alt me-2"></i> Buy Pool Ticket
             </a>
         </div>
     </div>
 </section>
 
-{{-- WEEKLY OFFERS SECTION --}}
+
 <section class="offers-section py-5">
     <div class="container">
         <div class="text-center mb-5">
@@ -33,7 +33,7 @@
         </div>
 
         <div class="row g-4">
-            @php
+            <?php
                 // Optimasi query dengan caching
                 $activePromos = Cache::remember('homepage_promos', 3600, function () {
                     return \App\Models\Promo::where('is_active', true)
@@ -43,34 +43,34 @@
                                     ->take(3)
                                     ->get();
                 });
-            @endphp
+            ?>
             
-            @forelse($activePromos as $promo)
+            <?php $__empty_1 = true; $__currentLoopData = $activePromos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $promo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="col-md-4">
                 <div class="offer-card text-center p-4">
-                    <div class="offer-day">{{ $promo->promo_type == 'ticket' ? 'Ticket Promo' : 'Food Promo' }}</div>
-                    <div class="offer-title">{{ $promo->title }}</div>
-                    <div class="offer-price">{{ $promo->discount_percent ? $promo->discount_percent . '% OFF' : 'Special Price' }}</div>
-                    <div class="offer-desc">{{ Str::limit($promo->description, 80) }}</div>
-                    <div class="offer-badge">Valid until {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</div>
+                    <div class="offer-day"><?php echo e($promo->promo_type == 'ticket' ? 'Ticket Promo' : 'Food Promo'); ?></div>
+                    <div class="offer-title"><?php echo e($promo->title); ?></div>
+                    <div class="offer-price"><?php echo e($promo->discount_percent ? $promo->discount_percent . '% OFF' : 'Special Price'); ?></div>
+                    <div class="offer-desc"><?php echo e(Str::limit($promo->description, 80)); ?></div>
+                    <div class="offer-badge">Valid until <?php echo e(\Carbon\Carbon::parse($promo->end_date)->format('d M Y')); ?></div>
                 </div>
             </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="col-12 text-center">
                 <p class="text-muted">No active promos at the moment</p>
             </div>
-            @endforelse
+            <?php endif; ?>
         </div>
 
         <div class="text-center mt-4">
-            <a href="{{ route('branding.promos') }}" class="btn btn-outline-gold">
+            <a href="<?php echo e(route('branding.promos')); ?>" class="btn btn-outline-gold">
                 View All Promos <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
     </div>
 </section>
 
-{{-- LEGENDARY ATMOSPHERE SECTION --}}
+
 <section class="atmosphere-section py-5">
     <div class="container">
         <div class="row align-items-center">
@@ -80,21 +80,21 @@
                 <p class="lead">There's nothing better than spending time with family and friends in the best atmosphere.</p>
                 <p class="text-muted">Whether you're looking for a relaxing swim, a delicious meal with loved ones, or a place to celebrate special occasions, Caldera offers the perfect setting. Our pool area is well-maintained, our restaurant serves authentic Indonesian and international cuisine, and our staff is always ready to serve you with a smile.</p>
                 <div class="mt-4">
-                    <a href="{{ route('branding.about') }}" class="btn btn-gold">
+                    <a href="<?php echo e(route('branding.about')); ?>" class="btn btn-gold">
                         Learn More <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
             </div>
             <div class="col-lg-6">
                 <div class="atmosphere-gallery">
-                    <img src="{{ asset('storage/galleries/about.jpeg') }}" alt="Caldera Atmosphere" class="img-fluid rounded-4 shadow-lg">
+                    <img src="<?php echo e(asset('storage/galleries/about.jpeg')); ?>" alt="Caldera Atmosphere" class="img-fluid rounded-4 shadow-lg">
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-{{-- FEATURED MENU SECTION --}}
+
 <section class="featured-menu-section py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
@@ -104,7 +104,7 @@
         </div>
 
         <div class="row g-4">
-            @php
+            <?php
                 $featuredMenus = Cache::remember('homepage_featured_menus', 3600, function () {
                     return \App\Models\Menu::where('is_available', true)
                                     ->where('is_recommended', true)
@@ -112,41 +112,41 @@
                                     ->take(4)
                                     ->get();
                 });
-            @endphp
+            ?>
             
-            @forelse($featuredMenus as $menu)
+            <?php $__empty_1 = true; $__currentLoopData = $featuredMenus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="col-md-3 col-sm-6">
                 <div class="menu-card-featured text-center">
                     <div class="menu-img-wrapper mb-3">
-                        @if($menu->image && Storage::disk('public')->exists($menu->image))
-                            <img src="{{ asset('storage/' . $menu->image) }}" 
-                                 alt="{{ $menu->name }}"
+                        <?php if($menu->image && Storage::disk('public')->exists($menu->image)): ?>
+                            <img src="<?php echo e(asset('storage/' . $menu->image)); ?>" 
+                                 alt="<?php echo e($menu->name); ?>"
                                  style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 2px solid #c1a067;">
-                        @else
+                        <?php else: ?>
                             <i class="fas fa-utensils fa-3x" style="color: #c1a067;"></i>
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    <h5 class="fw-bold">{{ $menu->name }}</h5>
-                    <p class="text-muted small">{{ Str::limit($menu->description, 60) }}</p>
-                    <div class="price">Rp {{ number_format($menu->price, 0, ',', '.') }}</div>
+                    <h5 class="fw-bold"><?php echo e($menu->name); ?></h5>
+                    <p class="text-muted small"><?php echo e(Str::limit($menu->description, 60)); ?></p>
+                    <div class="price">Rp <?php echo e(number_format($menu->price, 0, ',', '.')); ?></div>
                 </div>
             </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="col-12 text-center">
                 <p class="text-muted">No featured menus available</p>
             </div>
-            @endforelse
+            <?php endif; ?>
         </div>
 
         <div class="text-center mt-4">
-            <a href="{{ route('branding.menu') }}" class="btn btn-gold">
+            <a href="<?php echo e(route('branding.menu')); ?>" class="btn btn-gold">
                 View Full Menu <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
     </div>
 </section>
 
-{{-- TESTIMONIALS SECTION --}}
+
 <section class="testimonials-section py-5">
     <div class="container">
         <div class="text-center mb-5">
@@ -156,7 +156,7 @@
         </div>
 
         <div class="row g-4">
-            @php
+            <?php
                 // PERBAIKAN: Gunakan kolom is_approved (boolean)
                 $testimonials = Cache::remember('homepage_testimonials', 3600, function () {
                     return \App\Models\Testimonial::where('is_approved', true)
@@ -175,77 +175,78 @@
                                     ->get();
                     $testimonials = $testimonials->merge($moreTestimonials);
                 }
-            @endphp
+            ?>
             
-            @forelse($testimonials as $testimonial)
+            <?php $__empty_1 = true; $__currentLoopData = $testimonials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $testimonial): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="col-md-4">
                 <div class="testimonial-card">
                     <div class="testimonial-quote mb-3">
                         <i class="fas fa-quote-left fa-2x" style="color: #c1a067; opacity: 0.3;"></i>
                     </div>
                     <div class="testimonial-rating mb-2">
-                        @for($i = 1; $i <= 5; $i++)
-                            @if($i <= $testimonial->rating)
+                        <?php for($i = 1; $i <= 5; $i++): ?>
+                            <?php if($i <= $testimonial->rating): ?>
                                 <i class="fas fa-star" style="color: #c1a067;"></i>
-                            @else
+                            <?php else: ?>
                                 <i class="far fa-star" style="color: #c1a067;"></i>
-                            @endif
-                        @endfor
+                            <?php endif; ?>
+                        <?php endfor; ?>
                     </div>
-                    <p class="testimonial-comment">"{{ Str::limit($testimonial->comment, 120) }}"</p>
+                    <p class="testimonial-comment">"<?php echo e(Str::limit($testimonial->comment, 120)); ?>"</p>
                     <div class="testimonial-author">
                         <div class="d-flex align-items-center">
-                            @if($testimonial->customer_photo)
-                                <img src="{{ asset('storage/' . $testimonial->customer_photo) }}" 
+                            <?php if($testimonial->customer_photo): ?>
+                                <img src="<?php echo e(asset('storage/' . $testimonial->customer_photo)); ?>" 
                                      class="rounded-circle me-2" 
                                      width="32" height="32"
                                      style="object-fit: cover;">
-                            @else
+                            <?php else: ?>
                                 <div class="rounded-circle bg-light me-2 d-flex align-items-center justify-content-center"
                                      style="width: 32px; height: 32px;">
                                     <i class="fas fa-user fa-sm" style="color: #c1a067;"></i>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                             <div>
-                                <h6 class="fw-bold mb-0">{{ $testimonial->customer_name }}</h6>
+                                <h6 class="fw-bold mb-0"><?php echo e($testimonial->customer_name); ?></h6>
                                 <small class="text-muted">
-                                    @if($testimonial->service_type)
-                                        {{ ucfirst($testimonial->service_type) }} Visitor
-                                    @else
+                                    <?php if($testimonial->service_type): ?>
+                                        <?php echo e(ucfirst($testimonial->service_type)); ?> Visitor
+                                    <?php else: ?>
                                         Customer
-                                    @endif
-                                    • {{ $testimonial->created_at->diffForHumans() }}
+                                    <?php endif; ?>
+                                    • <?php echo e($testimonial->created_at->diffForHumans()); ?>
+
                                 </small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="col-12 text-center">
                 <div class="testimonial-card p-4">
                     <i class="fas fa-star fa-3x mb-3" style="color: #c1a067; opacity: 0.4;"></i>
                     <p class="text-muted">No testimonials yet. Be the first to write a review!</p>
-                    <a href="{{ route('branding.testimonials.create') }}" class="btn btn-gold btn-sm">
+                    <a href="<?php echo e(route('branding.testimonials.create')); ?>" class="btn btn-gold btn-sm">
                         <i class="fas fa-star me-2"></i> Write a Review
                     </a>
                 </div>
             </div>
-            @endforelse
+            <?php endif; ?>
         </div>
 
         <div class="text-center mt-4">
-            <a href="{{ route('branding.testimonials') }}" class="btn btn-outline-gold">
+            <a href="<?php echo e(route('branding.testimonials')); ?>" class="btn btn-outline-gold">
                 Read All Reviews <i class="fas fa-arrow-right ms-2"></i>
             </a>
-            <a href="{{ route('branding.testimonials.create') }}" class="btn btn-gold ms-2">
+            <a href="<?php echo e(route('branding.testimonials.create')); ?>" class="btn btn-gold ms-2">
                 <i class="fas fa-star me-2"></i> Write a Review
             </a>
         </div>
     </div>
 </section>
 
-{{-- EVENTS SECTION --}}
+
 <section class="events-section py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
@@ -255,7 +256,7 @@
         </div>
 
         <div class="row g-4 justify-content-center">
-            @php
+            <?php
                 $events = Cache::remember('homepage_events', 3600, function () {
                     return \App\Models\Promo::where('promo_type', 'event')
                                     ->where('is_active', true)
@@ -264,25 +265,26 @@
                                     ->take(3)
                                     ->get();
                 });
-            @endphp
+            ?>
             
-            @if($events->count() > 0)
-                @foreach($events as $event)
+            <?php if($events->count() > 0): ?>
+                <?php $__currentLoopData = $events; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $event): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="col-md-4">
                     <div class="event-card">
                         <div class="event-icon mb-3">
                             <i class="fas fa-calendar-alt fa-3x" style="color: #c1a067;"></i>
                         </div>
-                        <h5 class="fw-bold">{{ $event->title }}</h5>
-                        <p class="text-muted">{{ Str::limit($event->description, 80) }}</p>
+                        <h5 class="fw-bold"><?php echo e($event->title); ?></h5>
+                        <p class="text-muted"><?php echo e(Str::limit($event->description, 80)); ?></p>
                         <span class="badge bg-gold">
-                            {{ \Carbon\Carbon::parse($event->start_date)->format('d M') }} - 
-                            {{ \Carbon\Carbon::parse($event->end_date)->format('d M Y') }}
+                            <?php echo e(\Carbon\Carbon::parse($event->start_date)->format('d M')); ?> - 
+                            <?php echo e(\Carbon\Carbon::parse($event->end_date)->format('d M Y')); ?>
+
                         </span>
                     </div>
                 </div>
-                @endforeach
-            @else
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <?php else: ?>
                 <div class="col-md-4">
                     <div class="event-card">
                         <div class="event-icon mb-3">
@@ -313,14 +315,14 @@
                         <span class="badge bg-gold">Best Offer</span>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 </section>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
     /* Hero Section */
     .hero-section {
@@ -607,4 +609,5 @@
         background-color: #1a1a2a !important;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/pages/home.blade.php ENDPATH**/ ?>
