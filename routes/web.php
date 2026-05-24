@@ -238,3 +238,10 @@ Route::prefix('google')->name('google.')->group(function () {
     Route::get('/auth', [GmailAuthController::class, 'redirectToGoogle'])->name('auth');
     Route::get('/callback', [GmailAuthController::class, 'handleGoogleCallback'])->name('callback');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Promo Check Route (AJAX)
+|--------------------------------------------------------------------------
+*/
+Route::post('/check-promo', [App\Http\Controllers\Api\PromoCheckController::class, 'check'])->name('check.promo');

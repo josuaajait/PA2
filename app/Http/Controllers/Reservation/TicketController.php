@@ -11,6 +11,8 @@ use App\Notifications\AdminNewTicketNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Services\PromoServiceClient;
 
 class TicketController extends Controller
 {
@@ -64,11 +66,10 @@ class TicketController extends Controller
             'visit_time'        => 'nullable',
             'ticket_type'       => 'required|in:adult,child,family',
             'number_of_tickets' => 'required|integer|min:1',
-            'promo_code'        => 'nullable|string|exists:promos,promo_code'
+            'promo_code'        => 'nullable|string', // Hanya validasi string, tidak perlu exists karena akan validasi via service
         ]);
 
         $capacity = PoolTicket::checkCapacity($validated['visit_date']);
-
         if ($capacity['available'] < $validated['number_of_tickets']) {
             return back()->with('error', 'Maaf, tiket tidak tersedia untuk tanggal tersebut. Sisa tiket: ' . $capacity['available']);
         }
@@ -78,23 +79,37 @@ class TicketController extends Controller
             'child'  => 25000,
             'family' => 100000
         ];
-
         $pricePerTicket = $prices[$validated['ticket_type']];
         $totalAmount = $pricePerTicket * $validated['number_of_tickets'];
+
+        // Validasi promo via microservice
+        $discount = 0;
+        if ($request->filled('promo_code')) {
+            try {
+                $promoService = app(PromoServiceClient::class);
+                $result = $promoService->validatePromo($request->promo_code, $totalAmount);
+                if ($result && isset($result['valid']) && $result['valid']) {
+                    $discount = $result['discount_amount'];
+                    $totalAmount = $result['final_amount']; // atau kurangi sendiri
+                } else {
+                    return back()->withInput()->with('error', 'Kode promo tidak valid atau sudah habis masa berlaku.');
+                }
+            } catch (\Exception $e) {
+                Log::error('Promo validation error: ' . $e->getMessage());
+                // Bisa tetap lanjut tanpa promo
+            }
+        }
 
         try {
             DB::beginTransaction();
 
-            // Generate ticket code unik
+            // Generate ticket code
             $ticketCode = 'TKT-' . strtoupper(uniqid());
             while (PoolTicket::where('ticket_code', $ticketCode)->exists()) {
                 $ticketCode = 'TKT-' . strtoupper(uniqid());
             }
 
-            // 🔥 INI YANG PENTING: Simpan user_id jika user login
             $userId = Auth::check() ? Auth::id() : null;
-            
-            // Jika user tidak login tapi email cocok dengan user yang terdaftar
             if (!$userId) {
                 $existingUser = User::where('email', $validated['customer_email'])->first();
                 if ($existingUser) {
@@ -115,26 +130,26 @@ class TicketController extends Controller
                 'total_amount'      => $totalAmount,
                 'payment_status'    => 'unpaid',
                 'status'            => 'active',
-                'user_id'           => $userId, // 🔥 INI YANG HARUS ADA!
+                'user_id'           => $userId,
             ]);
 
-            // Notifikasi ke customer yang login
+            // Jika ada diskon, bisa simpan info promo (opsional)
+            if ($discount > 0) {
+                // $ticket->update(['promo_code' => $request->promo_code, 'discount_amount' => $discount]);
+            }
+
+            // Notifikasi ke customer
             if ($userId) {
                 $customer = User::find($userId);
                 if ($customer) {
                     $customer->notify(new TicketNotification($ticket, 'purchased'));
                 }
-            } else {
-                // Customer tidak login, kirim notifikasi ke email? Bisa dengan cara lain
-                // Misalnya: kirim email (opsional)
             }
 
-            // Notifikasi ke semua admin
+            // Notifikasi ke admin
             $admins = User::where('role', 'admin')->get();
-            if ($admins->count() > 0) {
-                foreach ($admins as $admin) {
-                    $admin->notify(new AdminNewTicketNotification($ticket));
-                }
+            foreach ($admins as $admin) {
+                $admin->notify(new AdminNewTicketNotification($ticket));
             }
 
             DB::commit();
@@ -147,6 +162,7 @@ class TicketController extends Controller
             return back()->with('error', 'Gagal memesan tiket: ' . $e->getMessage());
         }
     }
+
 
     public function success($ticketCode)
     {

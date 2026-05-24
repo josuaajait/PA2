@@ -69,7 +69,6 @@
         padding: 24px;
     }
 
-    /* Table */
     .report-main-card .table thead th {
         font-size: 12px;
         font-weight: 700;
@@ -203,6 +202,10 @@
 
     .empty-state i { color: #dde2e8; margin-bottom: 16px; display: block; }
     .empty-state p { font-size: 14px; margin-bottom: 16px; }
+
+    .pagination-wrapper {
+        margin-top: 20px;
+    }
 </style>
 @endpush
 
@@ -236,83 +239,129 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($promos as $promo)
-                    <tr>
-                        <td>
-                            @if($promo->banner_image)
-                                <img src="{{ asset('storage/' . $promo->banner_image) }}"
-                                     class="promo-thumb"
-                                     onerror="this.parentElement.innerHTML='<div class=\'promo-thumb-fallback\'><i class=\'fas fa-image\'></i></div>'">
-                            @else
-                                <div class="promo-thumb-fallback">
-                                    <i class="fas fa-image"></i>
-                                </div>
-                            @endif
-                        </td>
-                        <td class="fw-bold" style="color:#1c3451;">{{ $promo->title }}</td>
-                        <td><span class="badge-promo-code">{{ $promo->promo_code }}</span></td>
-                        <td>
-                            <span class="discount-value">
-                                @if($promo->discount_type == 'percentage')
-                                    {{ $promo->discount_value }}%
-                                @else
-                                    Rp {{ number_format($promo->discount_value, 0, ',', '.') }}
-                                @endif
-                            </span>
-                        </td>
-                        <td>
-                            <div class="period-text">
-                                {{ \Carbon\Carbon::parse($promo->start_date)->format('d M Y') }}<br>
-                                s/d {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}
-                            </div>
-                        </td>
-                        <td>
-                            @if($promo->is_active && now()->between($promo->start_date, $promo->end_date))
-                                <span class="badge-active"><i class="fas fa-circle me-1" style="font-size:7px;"></i>Aktif</span>
-                            @elseif(!$promo->is_active)
-                                <span class="badge-inactive">Nonaktif</span>
-                            @elseif(now()->gt($promo->end_date))
-                                <span class="badge-expired">Berakhir</span>
-                            @elseif(now()->lt($promo->start_date))
-                                <span class="badge-upcoming">Akan Datang</span>
-                            @endif
-                        </td>
-                        <td>
-                            <div class="d-flex gap-1">
-                                <a href="{{ route('admin.promos.edit', $promo) }}" class="btn btn-action-edit" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('admin.promos.destroy', $promo) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-action-delete" title="Hapus"
-                                            onclick="return confirm('Yakin hapus promo ini?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <i class="fas fa-tags fa-4x"></i>
-                                <p>Belum ada data promo</p>
-                                <a href="{{ route('admin.promos.create') }}" class="btn-add">
-                                    <i class="fas fa-plus"></i> Tambah Promo
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforelse
+@forelse($promos as $promo)
+    @php
+        // Jika $promo adalah integer, lewati
+        if (is_int($promo)) {
+            continue;
+        }
+        // Jika $promo adalah array, konversi ke object
+        if (is_array($promo)) {
+            $promo = (object) $promo;
+        }
+        // Cek jika tidak ada properti yang diperlukan
+        if (!isset($promo->title) && !isset($promo->id)) {
+            continue;
+        }
+    @endphp
+    <tr>
+        <td>
+            @if(isset($promo->banner_image) && $promo->banner_image)
+                <img src="{{ asset('storage/' . $promo->banner_image) }}"
+                     class="promo-thumb"
+                     onerror="this.parentElement.innerHTML='<div class=\'promo-thumb-fallback\'><i class=\'fas fa-image\'></i></div>'">
+            @else
+                <div class="promo-thumb-fallback">
+                    <i class="fas fa-image"></i>
+                </div>
+            @endif
+        </td>
+        <td class="fw-bold" style="color:#1c3451;">{{ $promo->title ?? 'N/A' }}</td>
+        <td><span class="badge-promo-code">{{ $promo->promo_code ?? '-' }}</span></td>
+        <td>
+            <span class="discount-value">
+                @if(isset($promo->discount_type) && $promo->discount_type == 'percentage')
+                    {{ $promo->discount_value ?? 0 }}%
+                @else
+                    Rp {{ number_format($promo->discount_value ?? 0, 0, ',', '.') }}
+                @endif
+            </span>
+        </td>
+        <td>
+        <div class="period-text">
+            @if(isset($promo->start_date))
+                {{ \Carbon\Carbon::parse($promo->start_date)->setTimezone('Asia/Jakarta')->format('d M Y H:i') }}<br>
+                s/d {{ \Carbon\Carbon::parse($promo->end_date)->setTimezone('Asia/Jakarta')->format('d M Y H:i') }}
+            @else
+                -
+            @endif
+        </div>
+        </td>
+        <td>
+        @php
+            // Gunakan timezone lokal untuk menampilkan
+            $startDate = \Carbon\Carbon::parse($promo->start_date)->setTimezone('Asia/Jakarta');
+            $endDate = \Carbon\Carbon::parse($promo->end_date)->setTimezone('Asia/Jakarta');
+            $now = \Carbon\Carbon::now('Asia/Jakarta');
+            $isActive = $promo->is_active ?? false;
+            
+            $statusClass = 'badge-inactive';
+            $statusText = 'Tidak Aktif';
+            $showIcon = false;
+            
+            if ($isActive) {
+                if ($now->between($startDate, $endDate)) {
+                    $statusClass = 'badge-active';
+                    $statusText = 'Aktif';
+                    $showIcon = true;
+                } elseif ($now->lt($startDate)) {
+                    $statusClass = 'badge-upcoming';
+                    $statusText = 'Akan Datang';
+                } elseif ($now->gt($endDate)) {
+                    $statusClass = 'badge-expired';
+                    $statusText = 'Berakhir';
+                }
+            } else {
+                $statusClass = 'badge-inactive';
+                $statusText = 'Nonaktif';
+            }
+        @endphp
+        <span class="{{ $statusClass }}">
+            @if($showIcon)
+                <i class="fas fa-circle me-1" style="font-size:7px;"></i>
+            @endif
+            {{ $statusText }}
+        </span>
+        </td>
+        <td>
+            <div class="d-flex gap-1">
+                <a href="{{ route('admin.promos.edit', $promo->id ?? 0) }}" class="btn btn-action-edit" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form action="{{ route('admin.promos.destroy', $promo->id ?? 0) }}" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-action-delete" title="Hapus"
+                            onclick="return confirm('Yakin hapus promo ini?')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+@empty
+    <tr>
+        <td colspan="7">
+            <div class="empty-state">
+                <i class="fas fa-tags fa-4x"></i>
+                <p>Belum ada data promo</p>
+                <a href="{{ route('admin.promos.create') }}" class="btn-add">
+                    <i class="fas fa-plus"></i> Tambah Promo
+                </a>
+            </div>
+        </td>
+    </tr>
+@endforelse
                 </tbody>
             </table>
         </div>
 
-        <div class="mt-4">
-            {{ $promos->links() }}
-        </div>
+        {{-- Pagination - Hanya tampilkan jika $promos adalah object paginator --}}
+        @if(is_object($promos) && method_exists($promos, 'links'))
+            <div class="pagination-wrapper">
+                {{ $promos->links() }}
+            </div>
+        @endif
     </div>
 </div>
 

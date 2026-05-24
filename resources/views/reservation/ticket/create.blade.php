@@ -105,6 +105,20 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Kode Promo -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold" style="color: #1c3451;">
+                                <i class="fas fa-tag me-1" style="color: #c1a067;"></i> Kode Promo (Opsional)
+                            </label>
+                            <div class="input-group">
+                                <input type="text" name="promo_code" id="promo_code" class="form-control caldera-input" 
+                                    placeholder="Masukkan kode promo" value="{{ old('promo_code') }}">
+                                <button type="button" id="checkPromoBtn" class="btn btn-outline-gold" style="border-radius: 0 12px 12px 0;">
+                                    <i class="fas fa-check-circle"></i> Cek
+                                </button>
+                            </div>
+                            <div id="promoMessage" class="small mt-1"></div>
+                        </div>
                         
                         <div class="d-flex gap-3 mt-4">
                             <a href="{{ route('branding.home') }}" class="btn btn-outline-custom flex-grow-1">
@@ -253,6 +267,30 @@
         if (visitDateInput.value) {
             checkCapacity();
         }
+    });
+
+        document.getElementById('checkPromoBtn')?.addEventListener('click', function() {
+        const promoCode = document.getElementById('promo_code').value;
+        const totalAmount = parseInt(document.getElementById('totalPrice').innerText.replace(/[^0-9]/g, '')) || 0;
+        if (!promoCode) return;
+
+        fetch('/check-promo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ promo_code: promoCode, total_amount: totalAmount })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const msgDiv = document.getElementById('promoMessage');
+            if (data.valid) {
+                msgDiv.innerHTML = `<span class="text-success">✅ Promo berlaku! Potongan Rp ${data.discount_amount.toLocaleString()}</span>`;
+            } else {
+                msgDiv.innerHTML = `<span class="text-danger">❌ ${data.message}</span>`;
+            }
+        });
     });
 </script>
 @endpush

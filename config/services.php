@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'promo' => [
+    'url' => env('PROMO_SERVICE_URL', 'http://localhost:8083/api/promo'),
+    ],
+
 ];

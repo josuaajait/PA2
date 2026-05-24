@@ -298,7 +298,8 @@
 
 <div class="card report-main-card">
     <div class="card-body">
-        <form action="{{ route('admin.promos.update', $promo) }}" method="POST" enctype="multipart/form-data">
+        {{-- SESUDAH (BENAR) --}}
+        <form action="{{ route('admin.promos.update', $promo->id ?? $promo['id'] ?? 0) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
