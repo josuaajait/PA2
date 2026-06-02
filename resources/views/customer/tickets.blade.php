@@ -107,6 +107,36 @@
                                 </a>
                             </div>
                         </div>
+                        
+                        <!-- Status Bar (Informasi status saja, tanpa tombol upload) -->
+                        <div class="row mt-3 pt-2 border-top">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <small class="text-muted">Status Tiket:</small>
+                                        @if($ticket->status == 'pending')
+                                            <span class="badge bg-warning text-dark ms-2">Pending</span>
+                                        @elseif($ticket->status == 'active')
+                                            <span class="badge bg-success ms-2">Aktif</span>
+                                        @elseif($ticket->status == 'used')
+                                            <span class="badge bg-secondary ms-2">Digunakan</span>
+                                        @else
+                                            <span class="badge bg-danger ms-2">{{ ucfirst($ticket->status) }}</span>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Status Pembayaran:</small>
+                                        @if($ticket->payment_status == 'unpaid')
+                                            <span class="badge bg-danger ms-2">Belum Bayar</span>
+                                        @elseif($ticket->payment_status == 'payment_verified')
+                                            <span class="badge bg-info text-dark ms-2">Menunggu Verifikasi</span>
+                                        @elseif($ticket->payment_status == 'paid')
+                                            <span class="badge bg-success ms-2">Lunas</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     @empty
                     <div class="empty-state text-center py-5">
@@ -161,7 +191,6 @@
         box-shadow: 0 12px 28px rgba(28,52,81,0.12) !important;
     }
 
-    /* Sidebar Buttons */
     .btn-sidebar {
         background: white;
         color: #1c3451;
@@ -188,7 +217,6 @@
         box-shadow: 0 4px 12px rgba(28,52,81,0.2);
     }
 
-    /* Ticket Item */
     .ticket-item {
         background: white;
         border: 1px solid #f0ebe0;
@@ -221,20 +249,6 @@
         opacity: 1;
     }
 
-    .ticket-item small.text-muted {
-        font-size: 11px;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-    }
-
-    .ticket-code p,
-    .visit-date p,
-    .quantity p,
-    .total-amount p {
-        margin-top: 4px;
-    }
-
-    /* Detail Button */
     .btn-detail {
         background: white;
         color: #1c3451;
@@ -253,7 +267,6 @@
         box-shadow: 0 4px 12px rgba(28,52,81,0.2);
     }
 
-    /* Book Button */
     .btn-book {
         background: linear-gradient(135deg, #1c3451, #01516e);
         color: white;
@@ -271,27 +284,6 @@
         box-shadow: 0 6px 16px rgba(193,160,103,0.3);
     }
 
-    /* Empty State */
-    .empty-state {
-        padding: 60px 20px;
-    }
-
-    .empty-icon {
-        animation: fadeInUp 0.5s ease;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
         .ticket-item {
             padding: 16px;
@@ -303,11 +295,6 @@
         
         .btn-sidebar:hover {
             transform: translateY(-2px);
-        }
-        
-        .card-header .d-flex {
-            flex-direction: column;
-            align-items: flex-start !important;
         }
     }
 

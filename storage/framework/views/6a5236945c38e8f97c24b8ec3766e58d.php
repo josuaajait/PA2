@@ -24,9 +24,8 @@
                                data-bs-toggle="dropdown" id="notificationBell">
                                 <i class="fas fa-bell"></i>
                                 <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                                      style="font-size: 9px; padding: 2px 5px; margin-top: -2px; <?php echo e(Auth::user()->unreadNotifications->count() > 0 ? '' : 'display: none;'); ?>">
-                                    <?php echo e(Auth::user()->unreadNotifications->count()); ?>
-
+                                      style="font-size: 9px; padding: 2px 5px; margin-top: -2px; display: none;">
+                                    0
                                 </span>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end shadow border-0 notification-dropdown" 
@@ -35,56 +34,22 @@
                                     <span class="fw-bold" style="font-size: 14px; color: #1c3451;">
                                         <i class="fas fa-bell me-2" style="color: #c1a067;"></i>Notifikasi
                                     </span>
-                                    <form action="<?php echo e(route('notifications.mark-all-read')); ?>" method="POST" id="markAllReadForm">
-                                        <?php echo csrf_field(); ?>
-                                        <button type="submit" class="btn btn-sm btn-link p-0" style="font-size: 11px; color: #c1a067; text-decoration: none;">
-                                            Tandai semua dibaca
-                                        </button>
-                                    </form>
+                                    <button type="button" id="markAllReadBtn" class="btn btn-sm btn-link p-0" style="font-size: 11px; color: #c1a067; text-decoration: none;">
+                                        Tandai semua dibaca
+                                    </button>
                                 </div>
                                 <div id="notificationList" style="max-height: 400px; overflow-y: auto;">
-                                    <?php $__empty_1 = true; $__currentLoopData = Auth::user()->notifications()->latest()->take(10)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notif): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                        <div class="notification-item <?php echo e($notif->read_at ? '' : 'unread'); ?>" data-id="<?php echo e($notif->id); ?>">
-                                            <div class="d-flex">
-                                                <div class="me-3">
-                                                    <div class="notification-icon <?php echo e($notif->data['color'] ?? 'primary'); ?>">
-                                                        <i class="fas <?php echo e($notif->data['icon'] ?? 'fa-bell'); ?>"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <div class="notification-title"><?php echo e($notif->data['title'] ?? 'Notifikasi'); ?></div>
-                                                    <div class="notification-body"><?php echo e($notif->data['body'] ?? ''); ?></div>
-                                                    <div class="notification-time"><?php echo e($notif->created_at->diffForHumans()); ?></div>
-                                                </div>
-                                                <?php if(!$notif->read_at): ?>
-                                                    <div>
-                                                        <form action="<?php echo e(route('notifications.mark-read', $notif->id)); ?>" method="POST" class="mark-read-form">
-                                                            <?php echo csrf_field(); ?>
-                                                            <button type="submit" class="btn btn-sm btn-link p-0" style="color: #c1a067;">
-                                                                <i class="fas fa-check-circle"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
+                                    <div class="text-center py-3">
+                                        <div class="spinner-border spinner-border-sm text-muted" role="status">
+                                            <span class="visually-hidden">Loading...</span>
                                         </div>
-                                        <?php if(!$loop->last): ?>
-                                            <div class="dropdown-divider m-0"></div>
-                                        <?php endif; ?>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                        <div class="text-center py-4">
-                                            <i class="fas fa-bell-slash text-muted mb-2" style="font-size: 32px;"></i>
-                                            <p class="text-muted mb-0" style="font-size: 13px;">Belum ada notifikasi</p>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <?php if(Auth::user()->notifications()->count() > 0): ?>
-                                    <div class="border-top text-center py-2">
-                                        <a href="<?php echo e(route('notifications.index')); ?>" class="small" style="color: #c1a067; text-decoration: none;">
-                                            Lihat semua notifikasi <i class="fas fa-arrow-right ms-1"></i>
-                                        </a>
                                     </div>
-                                <?php endif; ?>
+                                </div>
+                                <div class="border-top text-center py-2" id="notificationFooter" style="display: none;">
+                                    <a href="<?php echo e(route('notifications.index')); ?>" class="small" style="color: #c1a067; text-decoration: none;">
+                                        Lihat semua notifikasi <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -143,42 +108,39 @@
     <div style="background: #ffffff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
         <div class="container">
             <!-- Desktop Nav -->
-        <div class="d-none d-lg-flex align-items-center">
-            <a class="nav-custom-link <?php echo e(request()->routeIs('branding.home') ? 'active' : ''); ?>"
-            href="<?php echo e(route('branding.home')); ?>">
-                <i class="fas fa-home me-1"></i>Home
-            </a>
-            <a class="nav-custom-link <?php echo e(request()->routeIs('branding.about') ? 'active' : ''); ?>"
-            href="<?php echo e(route('branding.about')); ?>">
-                <i class="fas fa-mug-hot me-1"></i>About Us
-            </a>
-            <a class="nav-custom-link <?php echo e(request()->routeIs('branding.pool*') ? 'active' : ''); ?>"
-            href="<?php echo e(route('branding.pool')); ?>">
-                <i class="fas fa-swimmer me-1"></i>Pool
-            </a>
-            <!-- Reserving Meja - Menu Baru -->
-            <a class="nav-custom-link <?php echo e(request()->routeIs('reservation.table*') ? 'active' : ''); ?>"
-            href="<?php echo e(route('reservation.table')); ?>">
-                <i class="fas fa-chair me-1"></i>Reservasi Meja
-            </a>
-            <a class="nav-custom-link <?php echo e(request()->routeIs('branding.events*') ? 'active' : ''); ?>"
-            href="<?php echo e(route('branding.promos')); ?>">
-                <i class="fas fa-bullhorn me-1"></i>Promo
-            </a>
-            <a class="nav-custom-link <?php echo e(request()->routeIs('branding.gallery*') ? 'active' : ''); ?>"
-            href="<?php echo e(route('branding.gallery')); ?>">
-                <i class="fas fa-image me-1"></i>Gallery
-            </a>
-            <a class="nav-custom-link <?php echo e(request()->routeIs('branding.menu*') ? 'active' : ''); ?>"
-            href="<?php echo e(route('branding.menu')); ?>">
-                <i class="fas fa-utensils me-1"></i>Menu
-            </a>
-            <a class="nav-custom-link <?php echo e(request()->routeIs('branding.testimonials*') ? 'active' : ''); ?>"
-            href="<?php echo e(route('branding.testimonials')); ?>">
-                <i class="fas fa-comments me-1"></i>Testimoni
-            </a>
-
-        </div>
+            <div class="d-none d-lg-flex align-items-center">
+                <a class="nav-custom-link <?php echo e(request()->routeIs('branding.home') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('branding.home')); ?>">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+                <a class="nav-custom-link <?php echo e(request()->routeIs('branding.about') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('branding.about')); ?>">
+                    <i class="fas fa-mug-hot me-1"></i>About Us
+                </a>
+                <a class="nav-custom-link <?php echo e(request()->routeIs('branding.pool*') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('branding.pool')); ?>">
+                    <i class="fas fa-swimmer me-1"></i>Pool
+                </a>
+                <a class="nav-custom-link <?php echo e(request()->routeIs('reservation.table*') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('reservation.table')); ?>">
+                    <i class="fas fa-chair me-1"></i>Reservasi Meja
+                </a>
+                <a class="nav-custom-link <?php echo e(request()->routeIs('branding.promos*') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('branding.promos')); ?>">
+                    <i class="fas fa-bullhorn me-1"></i>Promo
+                </a>
+                <a class="nav-custom-link <?php echo e(request()->routeIs('branding.gallery*') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('branding.gallery')); ?>">
+                    <i class="fas fa-image me-1"></i>Gallery
+                </a>
+                <a class="nav-custom-link <?php echo e(request()->routeIs('branding.menu*') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('branding.menu')); ?>">
+                    <i class="fas fa-utensils me-1"></i>Menu
+                </a>
+                <a class="nav-custom-link <?php echo e(request()->routeIs('branding.testimonials*') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('branding.testimonials')); ?>">
+                    <i class="fas fa-comments me-1"></i>Testimoni
+                </a>
             </div>
 
             <!-- Mobile Nav Toggle -->
@@ -197,14 +159,16 @@
                        href="<?php echo e(route('branding.about')); ?>"><i class="fas fa-mug-hot me-2"></i>About Us</a>
                     <a class="nav-custom-link-mobile <?php echo e(request()->routeIs('branding.pool*') ? 'active' : ''); ?>"
                        href="<?php echo e(route('branding.pool')); ?>"><i class="fas fa-swimmer me-2"></i>Pool</a>
-                    <a class="nav-custom-link-mobile <?php echo e(request()->routeIs('branding.events*') ? 'active' : ''); ?>"
-                       href="<?php echo e(route('branding.events')); ?>"><i class="fas fa-bullhorn me-2"></i>Promo</a>
+                    <a class="nav-custom-link-mobile <?php echo e(request()->routeIs('branding.promos*') ? 'active' : ''); ?>"
+                       href="<?php echo e(route('branding.promos')); ?>"><i class="fas fa-bullhorn me-2"></i>Promo</a>
                     <a class="nav-custom-link-mobile <?php echo e(request()->routeIs('branding.gallery*') ? 'active' : ''); ?>"
                        href="<?php echo e(route('branding.gallery')); ?>"><i class="fas fa-image me-2"></i>Gallery</a>
                     <a class="nav-custom-link-mobile <?php echo e(request()->routeIs('branding.menu*') ? 'active' : ''); ?>"
                        href="<?php echo e(route('branding.menu')); ?>"><i class="fas fa-utensils me-2"></i>Menu</a>
                     <a class="nav-custom-link-mobile <?php echo e(request()->routeIs('reservation.table*') ? 'active' : ''); ?>"
                        href="<?php echo e(route('reservation.table')); ?>"><i class="fas fa-chair me-2"></i>Reservasi Meja</a>
+                    <a class="nav-custom-link-mobile <?php echo e(request()->routeIs('branding.testimonials*') ? 'active' : ''); ?>"
+                       href="<?php echo e(route('branding.testimonials')); ?>"><i class="fas fa-comments me-2"></i>Testimoni</a>
                 </div>
             </div>
         </div>
@@ -215,9 +179,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
 header {
-    position: relative;
-    z-index: 100;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
     width: 100%;
+    background: #fff;
 }
 
 .nav-custom-link {
@@ -293,7 +259,6 @@ header {
 .notification-dropdown {
     width: 380px;
     max-height: 500px;
-    overflow-y: auto;
     border-radius: 12px;
     padding: 0;
 }
@@ -308,6 +273,7 @@ header {
 
 .notification-item:hover {
     background: #f9f7f3;
+    cursor: pointer;
 }
 
 .notification-item.unread {
@@ -368,14 +334,20 @@ header {
     color: #9ca3af;
 }
 
-/* Search bar */
-#searchInput {
-    outline: none;
+.btn-outline-caldera {
+    border: 1px solid #c1a067;
+    color: #c1a067;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 11px;
+    padding: 3px 8px;
+    transition: all 0.2s;
+    text-decoration: none;
 }
 
-#searchInput:focus {
-    box-shadow: none;
-    border-color: #c1a067;
+.btn-outline-caldera:hover {
+    background: #c1a067;
+    color: white;
 }
 
 /* Responsive */
@@ -385,11 +357,197 @@ header {
         right: -50px;
     }
 }
+
+/* Dark Mode */
+body.dark-mode .notification-item:hover {
+    background: #2d2d3a;
+}
+
+body.dark-mode .notification-item.unread {
+    background: #2a2a3a;
+}
+
+body.dark-mode .btn-outline-caldera {
+    border-color: #c1a067;
+    color: #c1a067;
+}
+
+body.dark-mode .btn-outline-caldera:hover {
+    background: #c1a067;
+    color: #1c3451;
+}
+
+body.dark-mode .caldera-dropdown-item:hover {
+    background: #2d2d3a;
+}
 </style>
 
 <script>
-// Real-time search functionality
+const csrfToken = '<?php echo e(csrf_token()); ?>';
+
+function getTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMinutes = Math.floor((now - date) / 60000);
+    
+    if (diffMinutes < 1) return 'Baru saja';
+    if (diffMinutes < 60) return `${diffMinutes} menit lalu`;
+    if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)} jam lalu`;
+    return `${Math.floor(diffMinutes / 1440)} hari lalu`;
+}
+
+function buildNotificationHtml(notif) {
+    const unreadClass = notif.read_at ? '' : 'unread';
+    let detailUrl = '#';
+    
+    if (notif.booking_code) {
+        detailUrl = `/reservation/table/view/${notif.booking_code}`;
+    } else if (notif.ticket_code) {
+        detailUrl = `/reservation/ticket/view/${notif.ticket_code}`;
+    } else if (notif.url) {
+        detailUrl = notif.url;
+    }
+    
+    const colorClass = notif.color || 'primary';
+    const icon = notif.icon || 'fa-bell';
+    const title = notif.title || 'Notifikasi';
+    const body = notif.body || '';
+    const timeAgo = notif.created_at || 'Baru saja';
+    
+    return `
+        <div class="notification-item ${unreadClass}" data-id="${notif.id}">
+            <div class="d-flex">
+                <div class="me-3">
+                    <div class="notification-icon ${colorClass}">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="notification-title">${escapeHtml(title)}</div>
+                    <div class="notification-body">${escapeHtml(body)}</div>
+                    <div class="notification-time">${escapeHtml(timeAgo)}</div>
+                    <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
+                        <a href="${detailUrl}" class="btn-outline-caldera">
+                            <i class="fas fa-eye me-1"></i> Lihat Detail
+                        </a>
+                        ${!notif.read_at ? `
+                            <button onclick="markAsRead('${notif.id}')" class="btn btn-sm btn-link p-0" style="color: #c1a067; font-size: 11px;">
+                                <i class="fas fa-check-circle"></i> Tandai Dibaca
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function loadNotifications() {
+    fetch('<?php echo e(route("notifications.latest")); ?>')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('notificationBadge');
+            const list = document.getElementById('notificationList');
+            const footer = document.getElementById('notificationFooter');
+            
+            if (badge) {
+                if (data.count > 0) {
+                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            if (list && data.notifications && data.notifications.length > 0) {
+                let html = '';
+                data.notifications.forEach((notif, index) => {
+                    html += buildNotificationHtml(notif);
+                    if (index < data.notifications.length - 1) {
+                        html += '<div class="dropdown-divider m-0"></div>';
+                    }
+                });
+                list.innerHTML = html;
+                if (footer) footer.style.display = 'block';
+            } else if (list) {
+                list.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-bell-slash text-muted mb-2" style="font-size: 32px;"></i>
+                        <p class="text-muted mb-0" style="font-size: 13px;">Belum ada notifikasi</p>
+                    </div>
+                `;
+                if (footer) footer.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading notifications:', error);
+            const list = document.getElementById('notificationList');
+            if (list) {
+                list.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle text-danger mb-2" style="font-size: 32px;"></i>
+                        <p class="text-muted mb-0" style="font-size: 13px;">Gagal memuat notifikasi</p>
+                    </div>
+                `;
+            }
+        });
+}
+
+function markAsRead(id) {
+    fetch(`/notifications/${id}/mark-read`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadNotifications();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function markAllAsRead() {
+    fetch('<?php echo e(route("notifications.mark-all-read")); ?>', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadNotifications();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Load notifikasi saat halaman dimuat
 document.addEventListener('DOMContentLoaded', function() {
+    loadNotifications();
+    
+    // Refresh setiap 30 detik
+    setInterval(loadNotifications, 30000);
+    
+    // Event listener untuk tombol "Tandai semua dibaca"
+    const markAllBtn = document.getElementById('markAllReadBtn');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', markAllAsRead);
+    }
+    
+    // Search functionality
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('keypress', function(e) {
@@ -399,25 +557,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-// Refresh notifikasi badge
-function refreshNotificationBadge() {
-    fetch('<?php echo e(route("notifications.latest")); ?>')
-        .then(response => response.json())
-        .then(data => {
-            const badge = document.getElementById('notificationBadge');
-            if (badge) {
-                if (data.count > 0) {
-                    badge.textContent = data.count;
-                    badge.style.display = '';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        })
-        .catch(err => console.log('Error fetching notifications'));
-}
-
-// Optional: refresh every 30 seconds
-// setInterval(refreshNotificationBadge, 30000);
 </script><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/components/navbar.blade.php ENDPATH**/ ?>

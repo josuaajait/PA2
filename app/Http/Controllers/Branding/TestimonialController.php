@@ -40,7 +40,7 @@ class TestimonialController extends Controller
 
     public function create()
     {
-        return view('branding.testimonials-create');
+        return view('pages.testimonials-create');
     }
 
     public function store(Request $request)

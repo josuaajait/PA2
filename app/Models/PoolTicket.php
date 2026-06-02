@@ -45,12 +45,16 @@ class PoolTicket extends Model
         
         // Generate ticket code otomatis saat membuat tiket baru
         static::creating(function ($ticket) {
-            $ticket->ticket_code = 'TKT-' . strtoupper(uniqid());
+            if (empty($ticket->ticket_code)) {
+                $ticket->ticket_code = 'TKT-' . strtoupper(uniqid());
+            }
         });
 
-        // Hitung total amount otomatis
+        // Hitung total amount otomatis hanya jika belum dikirim dari controller
         static::creating(function ($ticket) {
-            $ticket->total_amount = $ticket->number_of_tickets * $ticket->price_per_ticket;
+            if ($ticket->total_amount === null) {
+                $ticket->total_amount = $ticket->number_of_tickets * $ticket->price_per_ticket;
+            }
         });
     }
 
@@ -159,16 +163,15 @@ class PoolTicket extends Model
         return $labels[$this->ticket_type] ?? $this->ticket_type;
     }
 
-    /**
-     * Get status label with badge
-     */
+    // Pastikan method getStatusLabelAttribute() sudah mencakup 'pending'
     public function getStatusLabelAttribute()
     {
         $labels = [
+            'pending' => '<span class="badge bg-warning">Pending</span>',
             'active' => '<span class="badge bg-success">Aktif</span>',
             'used' => '<span class="badge bg-secondary">Digunakan</span>',
             'expired' => '<span class="badge bg-danger">Kadaluarsa</span>',
-            'cancelled' => '<span class="badge bg-warning">Dibatalkan</span>'
+            'cancelled' => '<span class="badge bg-danger">Dibatalkan</span>'
         ];
         
         return $labels[$this->status] ?? '<span class="badge bg-info">' . $this->status . '</span>';

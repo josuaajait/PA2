@@ -117,7 +117,7 @@ Route::prefix('reservation')->name('reservation.')->middleware(['auth'])->group(
     Route::post('/ticket/store', [CustomerTicketController::class, 'store'])->name('ticket.store');
     Route::get('/ticket/success/{ticket_code}', [CustomerTicketController::class, 'success'])->name('ticket.success');
     Route::get('/ticket/view/{ticket_code}', [CustomerTicketController::class, 'view'])->name('ticket.view');
-        Route::post('/ticket/payment/upload', [PaymentController::class, 'uploadTicketPayment'])->name('ticket.payment.upload');
+    Route::post('/ticket/payment/upload', [PaymentController::class, 'uploadTicketPayment'])->name('ticket.payment.upload');
 
     // Payment Routes
     Route::post('/payment/upload-proof', [PaymentController::class, 'uploadProof'])->name('payment.upload');

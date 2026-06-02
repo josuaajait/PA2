@@ -1,5 +1,3 @@
-{{-- resources/views/branding/promo-detail.blade.php --}}
-
 @extends('layouts.app')
 
 @section('title', isset($promo->title) ? $promo->title . ' - Caldera' : 'Promo Detail - Caldera')
@@ -10,7 +8,6 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm promo-detail-card">
                 @php
-                    // Generate image URL
                     $imageUrl = null;
                     if (isset($promo->banner_image) && $promo->banner_image) {
                         if (str_starts_with($promo->banner_image, 'storage/')) {
@@ -143,122 +140,129 @@
 
 @push('scripts')
 <script>
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function() {
-            alert('Kode promo ' + text + ' telah disalin!');
-        }, function() {
-            alert('Gagal menyalin kode');
-        });
-    }
+function copyToClipboard(text) {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(function() {
+        alert('Kode promo ' + text + ' telah disalin!');
+    }).catch(function() {
+        alert('Gagal menyalin kode');
+    });
+}
 </script>
 @endpush
 
 @push('styles')
 <style>
-    .badge-promo {
-        background: rgba(193,160,103,0.15);
-        color: #c1a067;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    
-    .discount-badge {
-        background: linear-gradient(135deg, #1c3451, #01516e);
-        padding: 8px 20px;
-        border-radius: 30px;
-    }
-    
-    .discount-percent, .discount-amount {
-        color: white;
-        font-weight: bold;
-        font-size: 18px;
-    }
-    
-    .promo-code-box {
-        margin-top: 10px;
-    }
-    
-    .promo-code-box code {
-        font-size: 20px;
-        letter-spacing: 2px;
-        font-weight: 700;
-    }
-    
-    .btn-copy {
-        background: #e8e0d0;
-        color: #c1a067;
-        border: none;
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        transition: all 0.2s;
-    }
-    
-    .btn-copy:hover {
-        background: #c1a067;
-        color: white;
-    }
-    
-    .btn-promo {
-        background: linear-gradient(135deg, #1c3451, #01516e);
-        color: white;
-        border-radius: 40px;
-        padding: 14px 40px;
-        font-weight: 600;
-        font-size: 16px;
-        transition: all 0.3s;
-    }
-    
-    .btn-promo:hover {
-        background: linear-gradient(135deg, #c1a067, #a8894f);
-        color: white;
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(193,160,103,0.3);
-    }
-    
-    .info-card {
-        border: 1px solid #e8e0d0;
-        transition: all 0.2s;
-        height: 100%;
-    }
-    
-    .info-card:hover {
-        border-color: #c1a067;
-        transform: translateY(-3px);
-    }
-    
-    .promo-detail-card {
-        border-radius: 24px !important;
-        overflow: hidden;
-    }
-    
-    /* Dark Mode */
-    body.dark-mode .info-card {
-        background: #1e1e2a !important;
-        border-color: #2d2d3a;
-    }
-    
-    body.dark-mode .info-card:hover {
-        border-color: #c1a067;
-    }
-    
-    body.dark-mode .btn-copy {
-        background: #2d2d3a;
-        color: #c1a067;
-    }
-    
-    body.dark-mode .btn-copy:hover {
-        background: #c1a067;
-        color: #1c3451;
-    }
-    
-    body.dark-mode .promo-code-box code {
-        background: #2d2d3a !important;
-        color: #c1a067 !important;
-    }
+.badge-promo {
+    background: rgba(193,160,103,0.15);
+    color: #c1a067;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.discount-badge {
+    background: linear-gradient(135deg, #1c3451, #01516e);
+    padding: 8px 20px;
+    border-radius: 30px;
+}
+
+.discount-percent,
+.discount-amount {
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.promo-code-box {
+    margin-top: 10px;
+}
+
+.promo-code-box code {
+    font-size: 20px;
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.btn-copy {
+    background: #e8e0d0;
+    color: #c1a067;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.btn-copy:hover {
+    background: #c1a067;
+    color: white;
+}
+
+.btn-promo {
+    background: linear-gradient(135deg, #1c3451, #01516e);
+    color: white;
+    border-radius: 40px;
+    padding: 14px 40px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.btn-promo:hover {
+    background: linear-gradient(135deg, #c1a067, #a8894f);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(193,160,103,0.3);
+}
+
+.info-card {
+    border: 1px solid #e8e0d0;
+    transition: all 0.2s;
+    height: 100%;
+}
+
+.info-card:hover {
+    border-color: #c1a067;
+    transform: translateY(-3px);
+}
+
+.promo-detail-card {
+    border-radius: 24px !important;
+    overflow: hidden;
+}
+
+/* Dark Mode */
+body.dark-mode .info-card {
+    background: #1e1e2a !important;
+    border-color: #2d2d3a;
+}
+
+body.dark-mode .info-card:hover {
+    border-color: #c1a067;
+}
+
+body.dark-mode .btn-copy {
+    background: #2d2d3a;
+    color: #c1a067;
+}
+
+body.dark-mode .btn-copy:hover {
+    background: #c1a067;
+    color: #1c3451;
+}
+
+body.dark-mode .promo-code-box code {
+    background: #2d2d3a !important;
+    color: #c1a067 !important;
+}
+
+body.dark-mode .bg-light {
+    background-color: #2d2d3a !important;
+}
 </style>
 @endpush
+@endsection

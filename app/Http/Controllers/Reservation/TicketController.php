@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Reservation;
 
 use App\Http\Controllers\Controller;
 use App\Models\PoolTicket;
-use App\Models\Promo;
 use App\Models\User;
 use App\Notifications\TicketNotification;
 use App\Notifications\AdminNewTicketNotification;
@@ -12,23 +11,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Services\PromoServiceClient;
 
 class TicketController extends Controller
 {
     public function create()
     {
-        $promos = Promo::active()
-            ->where('promo_type', 'ticket')
-            ->get();
-
         $ticketPrices = [
             'adult'  => 35000,
             'child'  => 25000,
             'family' => 100000
         ];
 
-        return view('reservation.ticket.create', compact('promos', 'ticketPrices'));
+        return view('reservation.ticket.create', compact('ticketPrices'));
     }
 
     public function calculate(Request $request)
@@ -58,6 +52,10 @@ class TicketController extends Controller
 
     public function store(Request $request)
     {
+        // Log semua request
+        Log::info('=== FULL REQUEST ===', $request->all());
+        
+        // Validasi
         $validated = $request->validate([
             'customer_name'     => 'required|string|max:255',
             'customer_email'    => 'required|email|max:255',
@@ -66,12 +64,14 @@ class TicketController extends Controller
             'visit_time'        => 'nullable',
             'ticket_type'       => 'required|in:adult,child,family',
             'number_of_tickets' => 'required|integer|min:1',
-            'promo_code'        => 'nullable|string', // Hanya validasi string, tidak perlu exists karena akan validasi via service
+            'promo_code'        => 'nullable|string',
+            'final_total_amount' => 'nullable|numeric|min:0',
+            'discount_amount'   => 'nullable|numeric|min:0',
         ]);
 
         $capacity = PoolTicket::checkCapacity($validated['visit_date']);
         if ($capacity['available'] < $validated['number_of_tickets']) {
-            return back()->with('error', 'Maaf, tiket tidak tersedia untuk tanggal tersebut. Sisa tiket: ' . $capacity['available']);
+            return back()->withInput()->with('error', 'Maaf, tiket tidak tersedia untuk tanggal tersebut. Sisa tiket: ' . $capacity['available']);
         }
 
         $prices = [
@@ -80,30 +80,30 @@ class TicketController extends Controller
             'family' => 100000
         ];
         $pricePerTicket = $prices[$validated['ticket_type']];
-        $totalAmount = $pricePerTicket * $validated['number_of_tickets'];
-
-        // Validasi promo via microservice
+        $normalTotal = $pricePerTicket * $validated['number_of_tickets'];
+        
+        // 🔥 PAKSA MENGGUNAKAN final_total_amount DARI REQUEST
+        // Jika ada final_total_amount, gunakan itu. Jika tidak, pakai normal.
+        $totalAmount = $normalTotal;
         $discount = 0;
-        if ($request->filled('promo_code')) {
-            try {
-                $promoService = app(PromoServiceClient::class);
-                $result = $promoService->validatePromo($request->promo_code, $totalAmount);
-                if ($result && isset($result['valid']) && $result['valid']) {
-                    $discount = $result['discount_amount'];
-                    $totalAmount = $result['final_amount']; // atau kurangi sendiri
-                } else {
-                    return back()->withInput()->with('error', 'Kode promo tidak valid atau sudah habis masa berlaku.');
-                }
-            } catch (\Exception $e) {
-                Log::error('Promo validation error: ' . $e->getMessage());
-                // Bisa tetap lanjut tanpa promo
-            }
+        
+        if ($request->has('final_total_amount') && $request->final_total_amount > 0) {
+            $totalAmount = $request->final_total_amount;
+            $discount = $request->discount_amount ?? ($normalTotal - $totalAmount);
         }
+        
+        // 🔥 LOG NILAI YANG AKAN DISIMPAN
+        Log::info('💰💰💰 VALUE TO SAVE 💰💰💰', [
+            'normal_total' => $normalTotal,
+            'final_total_amount_from_request' => $request->final_total_amount,
+            'total_amount_to_save' => $totalAmount,
+            'discount' => $discount,
+            'promo_code' => $request->promo_code
+        ]);
 
         try {
             DB::beginTransaction();
 
-            // Generate ticket code
             $ticketCode = 'TKT-' . strtoupper(uniqid());
             while (PoolTicket::where('ticket_code', $ticketCode)->exists()) {
                 $ticketCode = 'TKT-' . strtoupper(uniqid());
@@ -127,30 +127,18 @@ class TicketController extends Controller
                 'ticket_type'       => $validated['ticket_type'],
                 'number_of_tickets' => $validated['number_of_tickets'],
                 'price_per_ticket'  => $pricePerTicket,
-                'total_amount'      => $totalAmount,
+                'total_amount'      => $totalAmount,  // 🔥 INI YANG AKAN TERSIMPAN
                 'payment_status'    => 'unpaid',
-                'status'            => 'active',
+                'status'            => 'pending',
                 'user_id'           => $userId,
             ]);
 
-            // Jika ada diskon, bisa simpan info promo (opsional)
-            if ($discount > 0) {
-                // $ticket->update(['promo_code' => $request->promo_code, 'discount_amount' => $discount]);
-            }
-
-            // Notifikasi ke customer
-            if ($userId) {
-                $customer = User::find($userId);
-                if ($customer) {
-                    $customer->notify(new TicketNotification($ticket, 'purchased'));
-                }
-            }
-
-            // Notifikasi ke admin
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new AdminNewTicketNotification($ticket));
-            }
+            Log::info('💾💾💾 TICKET SAVED 💾💾💾', [
+                'ticket_code' => $ticketCode,
+                'total_amount_saved' => $ticket->total_amount,
+                'normal_total' => $normalTotal,
+                'discount' => $discount
+            ]);
 
             DB::commit();
 
@@ -159,10 +147,10 @@ class TicketController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal memesan tiket: ' . $e->getMessage());
+            Log::error('Ticket purchase error: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal memesan tiket: ' . $e->getMessage());
         }
     }
-
 
     public function success($ticketCode)
     {

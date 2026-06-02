@@ -3,10 +3,6 @@
 
 <head>
     <title>@yield('title', 'Caldera Resto & Pool')</title>
-    
-    @if(session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -31,12 +27,10 @@
             overflow-x: hidden;
         }
 
-        /* Hapus padding-top karena navbar bukan fixed/sticky */
         main {
             min-height: 100vh;
         }
 
-        /* Dark mode toggle button */
         .dark-mode-toggle {
             position: fixed;
             bottom: 20px;
@@ -65,7 +59,6 @@
             color: #333;
         }
         
-        /* Dark mode body */
         body.dark-mode {
             background-color: #121212;
             color: #ffffff;
@@ -92,7 +85,7 @@
     <!-- Navbar -->
     @include('components.navbar')
 
-    <!-- ALERT VERIFIKASI EMAIL -->
+    <!-- ALERT VERIFIKASI EMAIL (dipindah ke sini, setelah navbar) -->
     @auth
         @if(!Auth::user()->hasVerifiedEmail())
             <div class="alert alert-warning text-center mb-0 rounded-0">

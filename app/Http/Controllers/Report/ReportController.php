@@ -7,15 +7,22 @@ use App\Models\PoolTicket;
 use App\Models\TableReservation;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    /**
+     * Dashboard laporan
+     */
     public function index()
     {
         return view('admin.reports.index');
     }
 
+    /**
+     * Laporan Reservasi Meja
+     */
     public function reservations(Request $request)
     {
         $query = TableReservation::query();
@@ -40,7 +47,6 @@ class ReportController extends Controller
             'total_guests' => TableReservation::sum('number_of_guests'),
         ];
 
-        // Chart data
         $chartData = TableReservation::selectRaw("TO_CHAR(reservation_date, 'DD Mon') as label, COUNT(*) as total")
             ->groupBy('label')
             ->orderBy('label')
@@ -48,11 +54,14 @@ class ReportController extends Controller
             ->pluck('total', 'label');
 
         $chartLabels = $chartData->keys()->toArray();
-        $chartData   = $chartData->values()->toArray();
+        $chartValues = $chartData->values()->toArray();
 
-        return view('admin.reports.reservations', compact('reservations', 'summary', 'chartLabels', 'chartData'));
+        return view('admin.reports.reservations', compact('reservations', 'summary', 'chartLabels', 'chartValues'));
     }
 
+    /**
+     * Laporan Tiket Kolam
+     */
     public function tickets(Request $request)
     {
         $query = PoolTicket::query();
@@ -76,73 +85,149 @@ class ReportController extends Controller
             'average_price'      => PoolTicket::where('payment_status', 'paid')->avg('total_amount') ?? 0,
         ];
 
-        $typeData   = [
+        $typeData = [
             PoolTicket::where('ticket_type', 'adult')->count(),
             PoolTicket::where('ticket_type', 'child')->count(),
             PoolTicket::where('ticket_type', 'family')->count(),
         ];
         $typeLabels = ['Dewasa', 'Anak', 'Keluarga'];
 
-        $trendRaw    = PoolTicket::selectRaw("TO_CHAR(visit_date, 'DD Mon') as label, SUM(number_of_tickets) as total")
-            ->groupBy('label')->orderBy('label')->limit(14)->pluck('total', 'label');
+        $trendRaw = PoolTicket::selectRaw("TO_CHAR(visit_date, 'DD Mon') as label, SUM(number_of_tickets) as total")
+            ->groupBy('label')
+            ->orderBy('label')
+            ->limit(14)
+            ->pluck('total', 'label');
+        
         $trendLabels = $trendRaw->keys()->toArray();
-        $trendData   = $trendRaw->values()->toArray();
+        $trendData = $trendRaw->values()->toArray();
 
         return view('admin.reports.tickets', compact('tickets', 'summary', 'typeLabels', 'typeData', 'trendLabels', 'trendData'));
     }
 
+    /**
+     * Laporan Pemasukan (Gabungan Tiket + Reservasi)
+     */
     public function income(Request $request)
     {
-        $query = Payment::where('payment_status', 'paid');
-
+        // Kumpulkan data dari tiket yang sudah lunas
+        $ticketQuery = PoolTicket::where('payment_status', 'paid');
+        
+        // Kumpulkan data dari reservasi yang sudah lunas
+        $reservationQuery = TableReservation::where('payment_status', 'paid');
+        
+        // Filter tanggal
         if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->start_date);
+            $startDate = $request->start_date;
+            $ticketQuery->whereDate('paid_at', '>=', $startDate);
+            $reservationQuery->whereDate('paid_at', '>=', $startDate);
         }
         if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->end_date);
+            $endDate = $request->end_date;
+            $ticketQuery->whereDate('paid_at', '<=', $endDate);
+            $reservationQuery->whereDate('paid_at', '<=', $endDate);
         }
-        if ($request->filled('payment_type')) {
-            $query->where('payment_type', $request->payment_type);
+        
+        $collections = collect();
+        
+        // Tambah data tiket
+        if (!$request->filled('payment_type') || $request->payment_type == 'full_payment') {
+            $tickets = $ticketQuery->get()->map(function($ticket) {
+                return (object)[
+                    'payment_code' => $ticket->ticket_code,
+                    'payment_type' => 'full_payment',
+                    'payment_method' => $ticket->payment_method ?? 'transfer',
+                    'amount' => $ticket->total_amount,
+                    'payment_status' => $ticket->payment_status,
+                    'created_at' => $ticket->paid_at ?? $ticket->created_at,
+                ];
+            });
+            $collections = $collections->concat($tickets);
         }
-
-        $payments = $query->latest()->paginate(15);
-
+        
+        // Tambah data reservasi
+        if (!$request->filled('payment_type') || $request->payment_type == 'down_payment') {
+            $reservations = $reservationQuery->get()->map(function($reservation) {
+                return (object)[
+                    'payment_code' => $reservation->booking_code,
+                    'payment_type' => 'down_payment',
+                    'payment_method' => 'transfer',
+                    'amount' => $reservation->down_payment ?? 50000,
+                    'payment_status' => $reservation->payment_status,
+                    'created_at' => $reservation->paid_at ?? $reservation->created_at,
+                ];
+            });
+            $collections = $collections->concat($reservations);
+        }
+        
+        // Urutkan berdasarkan tanggal
+        $collections = $collections->sortByDesc('created_at');
+        
+        // Pagination
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 15;
+        $currentItems = $collections->slice(($currentPage - 1) * $perPage, $perPage);
+        
+        $payments = new LengthAwarePaginator(
+            $currentItems,
+            $collections->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+        
+        // Summary
         $summary = [
-            'total_income'       => Payment::where('payment_status', 'paid')->sum('amount'),
-            'ticket_income'      => Payment::where('payment_status', 'paid')->where('payment_type', 'full_payment')->sum('amount'),
-            'reservation_income' => Payment::where('payment_status', 'paid')->where('payment_type', 'down_payment')->sum('amount'),
+            'total_income'       => $collections->sum('amount'),
+            'ticket_income'      => $collections->where('payment_type', 'full_payment')->sum('amount'),
+            'reservation_income' => $collections->where('payment_type', 'down_payment')->sum('amount'),
         ];
-
-        $dailyRaw    = Payment::where('payment_status', 'paid')
-            ->selectRaw("TO_CHAR(created_at, 'DD Mon') as label, SUM(amount) as total")
-            ->groupBy('label')->orderBy('label')->limit(14)->pluck('total', 'label');
-        $dailyLabels = $dailyRaw->keys()->toArray();
-        $dailyData   = $dailyRaw->values()->toArray();
-
+        
+        // Data untuk chart
+        $dailyData = [];
+        $dailyLabels = [];
+        
+        $grouped = $collections->groupBy(function($item) {
+            return $item->created_at->format('d M');
+        });
+        
+        foreach ($grouped as $label => $items) {
+            $dailyLabels[] = $label;
+            $dailyData[] = $items->sum('amount');
+        }
+        
+        // Ambil 14 terakhir
+        $dailyLabels = array_slice($dailyLabels, -14);
+        $dailyData = array_slice($dailyData, -14);
+        
         return view('admin.reports.income', compact('payments', 'summary', 'dailyLabels', 'dailyData'));
     }
 
-    // ── EXPORT EXCEL ──
-
+    /**
+     * Export CSV Reservasi
+     */
     public function exportReservations(Request $request)
     {
         $query = TableReservation::query();
-        if ($request->filled('start_date')) $query->whereDate('reservation_date', '>=', $request->start_date);
-        if ($request->filled('end_date'))   $query->whereDate('reservation_date', '<=', $request->end_date);
-        if ($request->filled('status'))     $query->where('status', $request->status);
+        if ($request->filled('start_date')) {
+            $query->whereDate('reservation_date', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('reservation_date', '<=', $request->end_date);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
         $reservations = $query->latest()->get();
-
         $filename = 'laporan-reservasi-' . now()->format('Ymd-His') . '.csv';
 
         $headers = [
-            'Content-Type'        => 'text/csv',
+            'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
         $callback = function () use ($reservations) {
             $file = fopen('php://output', 'w');
-            // BOM untuk Excel agar bisa baca UTF-8
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             fputcsv($file, ['No', 'Kode Booking', 'Nama Customer', 'Telepon', 'Tanggal', 'Jam', 'Tamu', 'DP', 'Status', 'Dibuat']);
@@ -153,7 +238,7 @@ class ReportController extends Controller
                     $r->booking_code,
                     $r->customer_name,
                     $r->customer_phone,
-                    $r->reservation_date->format('d/m/Y'),
+                    \Carbon\Carbon::parse($r->reservation_date)->format('d/m/Y'),
                     $r->reservation_time,
                     $r->number_of_guests,
                     'Rp ' . number_format($r->down_payment ?? 0, 0, ',', '.'),
@@ -167,18 +252,27 @@ class ReportController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    /**
+     * Export CSV Tiket
+     */
     public function exportTickets(Request $request)
     {
         $query = PoolTicket::query();
-        if ($request->filled('start_date')) $query->whereDate('visit_date', '>=', $request->start_date);
-        if ($request->filled('end_date'))   $query->whereDate('visit_date', '<=', $request->end_date);
-        if ($request->filled('status'))     $query->where('status', $request->status);
+        if ($request->filled('start_date')) {
+            $query->whereDate('visit_date', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('visit_date', '<=', $request->end_date);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
-        $tickets  = $query->latest()->get();
+        $tickets = $query->latest()->get();
         $filename = 'laporan-tiket-' . now()->format('Ymd-His') . '.csv';
 
         $headers = [
-            'Content-Type'        => 'text/csv',
+            'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
@@ -186,7 +280,7 @@ class ReportController extends Controller
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            fputcsv($file, ['No', 'Kode Tiket', 'Nama Customer', 'Telepon', 'Tanggal Kunjungan', 'Jenis', 'Jumlah', 'Total', 'Status Bayar', 'Status']);
+            fputcsv($file, ['No', 'Kode Tiket', 'Nama Customer', 'Telepon', 'Tanggal Kunjungan', 'Jenis', 'Jumlah', 'Total', 'Status Bayar', 'Status Tiket']);
 
             foreach ($tickets as $i => $t) {
                 fputcsv($file, [
@@ -198,8 +292,8 @@ class ReportController extends Controller
                     ucfirst($t->ticket_type),
                     $t->number_of_tickets,
                     'Rp ' . number_format($t->total_amount, 0, ',', '.'),
-                    $t->payment_status,
-                    $t->status,
+                    $t->payment_status == 'paid' ? 'Lunas' : ($t->payment_status == 'payment_verified' ? 'Menunggu Verifikasi' : 'Belum Bayar'),
+                    $t->status == 'active' ? 'Aktif' : ($t->status == 'pending' ? 'Pending' : ucfirst($t->status)),
                 ]);
             }
             fclose($file);
@@ -208,36 +302,82 @@ class ReportController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    /**
+     * Export CSV Pemasukan
+     */
     public function exportIncome(Request $request)
     {
-        $query = Payment::where('payment_status', 'paid');
-        if ($request->filled('start_date'))   $query->whereDate('created_at', '>=', $request->start_date);
-        if ($request->filled('end_date'))     $query->whereDate('created_at', '<=', $request->end_date);
-        if ($request->filled('payment_type')) $query->where('payment_type', $request->payment_type);
-
-        $payments = $query->latest()->get();
+        // Kumpulkan data dari tiket yang sudah lunas
+        $ticketQuery = PoolTicket::where('payment_status', 'paid');
+        $reservationQuery = TableReservation::where('payment_status', 'paid');
+        
+        // Filter tanggal
+        if ($request->filled('start_date')) {
+            $startDate = $request->start_date;
+            $ticketQuery->whereDate('paid_at', '>=', $startDate);
+            $reservationQuery->whereDate('paid_at', '>=', $startDate);
+        }
+        if ($request->filled('end_date')) {
+            $endDate = $request->end_date;
+            $ticketQuery->whereDate('paid_at', '<=', $endDate);
+            $reservationQuery->whereDate('paid_at', '<=', $endDate);
+        }
+        
+        $collections = collect();
+        
+        // Tambah data tiket
+        if (!$request->filled('payment_type') || $request->payment_type == 'full_payment') {
+            $tickets = $ticketQuery->get()->map(function($ticket) {
+                return [
+                    'payment_code' => $ticket->ticket_code,
+                    'payment_type' => 'full_payment',
+                    'payment_method' => $ticket->payment_method ?? 'transfer',
+                    'amount' => $ticket->total_amount,
+                    'status' => $ticket->payment_status,
+                    'created_at' => $ticket->paid_at ?? $ticket->created_at,
+                ];
+            });
+            $collections = $collections->concat($tickets);
+        }
+        
+        // Tambah data reservasi
+        if (!$request->filled('payment_type') || $request->payment_type == 'down_payment') {
+            $reservations = $reservationQuery->get()->map(function($reservation) {
+                return [
+                    'payment_code' => $reservation->booking_code,
+                    'payment_type' => 'down_payment',
+                    'payment_method' => 'transfer',
+                    'amount' => $reservation->down_payment ?? 50000,
+                    'status' => $reservation->payment_status,
+                    'created_at' => $reservation->paid_at ?? $reservation->created_at,
+                ];
+            });
+            $collections = $collections->concat($reservations);
+        }
+        
+        $collections = $collections->sortByDesc('created_at');
         $filename = 'laporan-pemasukan-' . now()->format('Ymd-His') . '.csv';
 
         $headers = [
-            'Content-Type'        => 'text/csv',
+            'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $callback = function () use ($payments) {
+        $callback = function () use ($collections) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            fputcsv($file, ['No', 'Kode Pembayaran', 'Tipe', 'Metode', 'Jumlah', 'Status', 'Tanggal']);
+            fputcsv($file, ['No', 'Kode Transaksi', 'Tipe', 'Metode', 'Jumlah (Rp)', 'Status', 'Tanggal']);
 
-            foreach ($payments as $i => $p) {
+            foreach ($collections as $i => $item) {
                 fputcsv($file, [
                     $i + 1,
-                    $p->payment_code,
-                    $p->payment_type == 'down_payment' ? 'DP Reservasi' : 'Full Payment Tiket',
-                    $p->payment_method,
-                    'Rp ' . number_format($p->amount, 0, ',', '.'),
-                    $p->payment_status,
-                    $p->created_at->format('d/m/Y H:i'),
+                    $item['payment_code'],
+                    $item['payment_type'] == 'down_payment' ? 'DP Reservasi' : 'Full Payment Tiket',
+                    $item['payment_method'],
+                    number_format($item['amount'], 0, ',', '.'),
+                    $item['status'] == 'paid' ? 'Lunas' : ($item['status'] == 'payment_verified' ? 'Menunggu Verifikasi' : 'Belum Bayar'),
+                    is_string($item['created_at']) ? $item['created_at'] : $item['created_at']->format('d/m/Y H:i'),
                 ]);
             }
             fclose($file);

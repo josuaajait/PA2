@@ -28,7 +28,6 @@
                         @endif
 
                         <div class="row g-3">
-                            <!-- Nama Lengkap -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-user me-1" style="color: #c1a067;"></i> Nama Lengkap 
@@ -38,7 +37,6 @@
                                        value="{{ old('customer_name', Auth::user()->name ?? '') }}" required>
                             </div>
                             
-                            <!-- Email -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-envelope me-1" style="color: #c1a067;"></i> Email 
@@ -48,7 +46,6 @@
                                        value="{{ old('customer_email', Auth::user()->email ?? '') }}" required>
                             </div>
                             
-                            <!-- Nomor Telepon -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-phone me-1" style="color: #c1a067;"></i> Nomor Telepon 
@@ -58,7 +55,6 @@
                                        value="{{ old('customer_phone') }}" placeholder="0812-3456-7890" required>
                             </div>
                             
-                            <!-- Tanggal Kunjungan -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-calendar-day me-1" style="color: #c1a067;"></i> Tanggal Kunjungan 
@@ -69,7 +65,6 @@
                                 <small class="text-muted" id="capacityInfo"></small>
                             </div>
                             
-                            <!-- Tipe Tiket -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-ticket-alt me-1" style="color: #c1a067;"></i> Tipe Tiket 
@@ -83,7 +78,6 @@
                                 </select>
                             </div>
                             
-                            <!-- Jumlah Tiket -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-shopping-cart me-1" style="color: #c1a067;"></i> Jumlah Tiket 
@@ -95,7 +89,6 @@
                                 <small class="text-muted" id="ticketInfo"></small>
                             </div>
                             
-                            <!-- Total Harga -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-money-bill me-1" style="color: #c1a067;"></i> Total Harga
@@ -105,8 +98,8 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Kode Promo -->
-                        <div class="col-md-12">
+                        
+                        <div class="mt-3">
                             <label class="form-label fw-semibold" style="color: #1c3451;">
                                 <i class="fas fa-tag me-1" style="color: #c1a067;"></i> Kode Promo (Opsional)
                             </label>
@@ -119,6 +112,10 @@
                             </div>
                             <div id="promoMessage" class="small mt-1"></div>
                         </div>
+                        
+                        <!-- Hidden fields untuk total setelah diskon -->
+                        <input type="hidden" name="final_total_amount" id="final_total_amount" value="0">
+                        <input type="hidden" name="discount_amount" id="discount_amount" value="0">
                         
                         <div class="d-flex gap-3 mt-4">
                             <a href="{{ route('branding.home') }}" class="btn btn-outline-custom flex-grow-1">
@@ -138,159 +135,224 @@
 
 @push('styles')
 <style>
-    .caldera-input {
-        border: 1.5px solid #e8e0d0;
-        border-radius: 12px;
-        padding: 10px 16px;
-        font-size: 14px;
-        transition: all 0.2s;
-        background: #fff;
-    }
-    .caldera-input:focus {
-        border-color: #c1a067;
-        box-shadow: 0 0 0 3px rgba(193,160,103,0.1);
-        outline: none;
-    }
-    .btn-outline-custom {
-        background: white;
-        color: #1c3451;
-        border: 1.5px solid #1c3451;
-        border-radius: 12px;
-        padding: 12px 20px;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-    .btn-outline-custom:hover {
-        background: #1c3451;
-        color: white;
-    }
-    .btn-submit {
-        background: linear-gradient(135deg, #1c3451, #01516e);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 12px 20px;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-    .btn-submit:hover {
-        background: linear-gradient(135deg, #c1a067, #a8894f);
-    }
+.caldera-input {
+    border: 1.5px solid #e8e0d0;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 14px;
+    transition: all 0.2s;
+    background: #fff;
+}
+.caldera-input:focus {
+    border-color: #c1a067;
+    box-shadow: 0 0 0 3px rgba(193,160,103,0.1);
+    outline: none;
+}
+.btn-outline-custom {
+    background: white;
+    color: #1c3451;
+    border: 1.5px solid #1c3451;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-outline-custom:hover {
+    background: #1c3451;
+    color: white;
+}
+.btn-submit {
+    background: linear-gradient(135deg, #1c3451, #01516e);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-submit:hover {
+    background: linear-gradient(135deg, #c1a067, #a8894f);
+}
+.btn-outline-gold {
+    border: 2px solid #c1a067;
+    color: #c1a067;
+    background: transparent;
+    border-radius: 0 12px 12px 0;
+    padding: 9px 16px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-outline-gold:hover {
+    background: #c1a067;
+    color: white;
+}
 </style>
 @endpush
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const visitDateInput = document.getElementById('visit_date');
-        const ticketTypeSelect = document.getElementById('ticket_type');
-        const quantityInput = document.getElementById('number_of_tickets');
-        const totalPriceSpan = document.getElementById('totalPrice');
-        const capacityInfoSpan = document.getElementById('capacityInfo');
-        const ticketInfoSpan = document.getElementById('ticketInfo');
+document.addEventListener('DOMContentLoaded', function() {
+    const visitDateInput = document.getElementById('visit_date');
+    const ticketTypeSelect = document.getElementById('ticket_type');
+    const quantityInput = document.getElementById('number_of_tickets');
+    const totalPriceSpan = document.getElementById('totalPrice');
+    const capacityInfoSpan = document.getElementById('capacityInfo');
+    const ticketInfoSpan = document.getElementById('ticketInfo');
+    const promoCodeInput = document.getElementById('promo_code');
+    const promoMessageDiv = document.getElementById('promoMessage');
+    const finalTotalHidden = document.getElementById('final_total_amount');
+    const discountHidden = document.getElementById('discount_amount');
+    
+    const prices = {
+        'adult': 35000,
+        'child': 25000,
+        'family': 100000
+    };
+    
+    let currentDiscount = 0;
+    let originalTotal = 0;
+    
+    function calculateOriginalTotal() {
+        const ticketType = ticketTypeSelect.value;
+        const quantity = parseInt(quantityInput.value) || 0;
         
-        // Harga per tiket
-        const prices = {
-            'adult': 35000,
-            'child': 25000,
-            'family': 100000
-        };
+        if (ticketType && quantity > 0) {
+            originalTotal = prices[ticketType] * quantity;
+            return originalTotal;
+        }
+        originalTotal = 0;
+        return 0;
+    }
+    
+    function updateTotalPrice() {
+        calculateOriginalTotal();
+        const finalTotal = originalTotal - currentDiscount;
         
-        // Update total harga
-        function updateTotalPrice() {
-            const ticketType = ticketTypeSelect.value;
-            const quantity = parseInt(quantityInput.value) || 0;
-            
-            if (ticketType && quantity > 0) {
-                let pricePerTicket = prices[ticketType];
-                let total = pricePerTicket * quantity;
-                
-                totalPriceSpan.innerHTML = `Rp ${total.toLocaleString('id-ID')}`;
-                
-                // Informasi tambahan untuk tiket keluarga
-                if (ticketType === 'family') {
-                    ticketInfoSpan.innerHTML = '💡 Paket keluarga sudah termasuk 2 dewasa + 2 anak';
-                    ticketInfoSpan.style.color = '#c1a067';
-                } else {
-                    ticketInfoSpan.innerHTML = '';
-                }
-            } else {
-                totalPriceSpan.innerHTML = 'Rp 0';
-            }
+        if (finalTotal > 0) {
+            totalPriceSpan.innerHTML = `Rp ${finalTotal.toLocaleString('id-ID')}`;
+        } else if (originalTotal > 0 && currentDiscount >= originalTotal) {
+            totalPriceSpan.innerHTML = `Rp 0`;
+        } else if (originalTotal > 0) {
+            totalPriceSpan.innerHTML = `Rp ${originalTotal.toLocaleString('id-ID')}`;
+        } else {
+            totalPriceSpan.innerHTML = 'Rp 0';
         }
         
-        // Cek kapasitas
-        function checkCapacity() {
-            const visitDate = visitDateInput.value;
-            
-            if (visitDate) {
-                fetch('{{ route("reservation.ticket.calculate") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        ticket_type: ticketTypeSelect.value || 'adult',
-                        number_of_tickets: quantityInput.value || 1,
-                        visit_date: visitDate
-                    })
+        finalTotalHidden.value = finalTotal > 0 ? finalTotal : 0;
+        discountHidden.value = currentDiscount;
+        
+        if (ticketTypeSelect.value === 'family') {
+            ticketInfoSpan.innerHTML = '💡 Paket keluarga sudah termasuk 2 dewasa + 2 anak';
+            ticketInfoSpan.style.color = '#c1a067';
+        } else {
+            ticketInfoSpan.innerHTML = '';
+        }
+    }
+    
+    function checkCapacity() {
+        const visitDate = visitDateInput.value;
+        
+        if (visitDate) {
+            fetch('{{ route("reservation.ticket.calculate") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    ticket_type: ticketTypeSelect.value || 'adult',
+                    number_of_tickets: quantityInput.value || 1,
+                    visit_date: visitDate
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.capacity) {
-                        if (data.capacity.available <= 0) {
-                            capacityInfoSpan.innerHTML = '⚠️ Kuota penuh untuk tanggal ini!';
-                            capacityInfoSpan.style.color = 'red';
-                        } else if (data.capacity.available < 10) {
-                            capacityInfoSpan.innerHTML = `🎟️ Sisa ${data.capacity.available} tiket`;
-                            capacityInfoSpan.style.color = 'orange';
-                        } else {
-                            capacityInfoSpan.innerHTML = `✅ Tersedia ${data.capacity.available} tiket`;
-                            capacityInfoSpan.style.color = 'green';
-                        }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.capacity) {
+                    if (data.capacity.available <= 0) {
+                        capacityInfoSpan.innerHTML = '⚠️ Kuota penuh untuk tanggal ini!';
+                        capacityInfoSpan.style.color = 'red';
+                    } else if (data.capacity.available < 10) {
+                        capacityInfoSpan.innerHTML = `🎟️ Sisa ${data.capacity.available} tiket`;
+                        capacityInfoSpan.style.color = 'orange';
+                    } else {
+                        capacityInfoSpan.innerHTML = `✅ Tersedia ${data.capacity.available} tiket`;
+                        capacityInfoSpan.style.color = 'green';
                     }
-                })
-                .catch(error => console.error('Error:', error));
-            }
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
+    }
+    
+    function checkPromo() {
+        const promoCode = promoCodeInput.value;
+        const total = calculateOriginalTotal();
         
-        // Event listeners
-        ticketTypeSelect.addEventListener('change', updateTotalPrice);
-        quantityInput.addEventListener('input', updateTotalPrice);
-        visitDateInput.addEventListener('change', checkCapacity);
-        
-        // Panggil saat halaman load (untuk old value)
-        if (ticketTypeSelect.value && quantityInput.value) {
+        if (!promoCode) {
+            promoMessageDiv.innerHTML = '';
+            currentDiscount = 0;
             updateTotalPrice();
+            return;
         }
-        if (visitDateInput.value) {
-            checkCapacity();
+        
+        if (total <= 0) {
+            promoMessageDiv.innerHTML = '<span class="text-warning">⚠️ Pilih tiket terlebih dahulu</span>';
+            return;
         }
-    });
-
-        document.getElementById('checkPromoBtn')?.addEventListener('click', function() {
-        const promoCode = document.getElementById('promo_code').value;
-        const totalAmount = parseInt(document.getElementById('totalPrice').innerText.replace(/[^0-9]/g, '')) || 0;
-        if (!promoCode) return;
-
+        
+        promoMessageDiv.innerHTML = '<span class="text-info">⏳ Mengecek promo...</span>';
+        
         fetch('/check-promo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify({ promo_code: promoCode, total_amount: totalAmount })
+            body: JSON.stringify({ 
+                promo_code: promoCode, 
+                total_amount: total 
+            })
         })
         .then(res => res.json())
         .then(data => {
-            const msgDiv = document.getElementById('promoMessage');
             if (data.valid) {
-                msgDiv.innerHTML = `<span class="text-success">✅ Promo berlaku! Potongan Rp ${data.discount_amount.toLocaleString()}</span>`;
+                currentDiscount = data.discount_amount;
+                promoMessageDiv.innerHTML = `<span class="text-success">✅ Promo berlaku! Potongan Rp ${currentDiscount.toLocaleString('id-ID')}</span>`;
             } else {
-                msgDiv.innerHTML = `<span class="text-danger">❌ ${data.message}</span>`;
+                currentDiscount = 0;
+                promoMessageDiv.innerHTML = `<span class="text-danger">❌ ${data.message || 'Kode promo tidak valid'}</span>`;
             }
+            updateTotalPrice();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            promoMessageDiv.innerHTML = '<span class="text-danger">❌ Gagal mengecek promo</span>';
         });
+    }
+    
+    ticketTypeSelect.addEventListener('change', function() {
+        checkPromo();
+        updateTotalPrice();
+        checkCapacity();
     });
+    quantityInput.addEventListener('input', function() {
+        checkPromo();
+        updateTotalPrice();
+    });
+    visitDateInput.addEventListener('change', checkCapacity);
+    
+    document.getElementById('checkPromoBtn').addEventListener('click', checkPromo);
+    
+    promoCodeInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            checkPromo();
+        }
+    });
+    
+    calculateOriginalTotal();
+    updateTotalPrice();
+    if (visitDateInput.value) checkCapacity();
+});
 </script>
 @endpush

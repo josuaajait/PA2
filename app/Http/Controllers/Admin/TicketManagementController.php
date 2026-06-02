@@ -34,14 +34,37 @@ class TicketManagementController extends Controller
         return view('admin.tickets.show', compact('ticket'));
     }
     
+    /**
+     * Verifikasi pembayaran tiket (manual oleh admin)
+     * Endpoint ini dipanggil via AJAX
+     */
     public function verify(PoolTicket $ticket)
     {
-        $ticket->update([
-            'payment_status' => 'paid',
-            'status' => 'active'
-        ]);
-        
-        return redirect()->back()->with('success', 'Tiket berhasil diverifikasi');
+        try {
+            // 🔥 HANYA bisa verifikasi jika payment_status = 'payment_verified'
+            if ($ticket->payment_status !== 'payment_verified') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tiket tidak dapat diverifikasi. Status saat ini: ' . $ticket->payment_status
+                ]);
+            }
+            
+            $ticket->update([
+                'payment_status' => 'paid',
+                'status' => 'active'
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Pembayaran tiket berhasil diverifikasi'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
+        }
     }
     
     public function checkCapacity(Request $request)

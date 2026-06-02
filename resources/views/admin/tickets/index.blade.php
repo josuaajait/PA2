@@ -121,6 +121,15 @@
     }
 
     .btn-verify:hover { background: #16a34a; color: #fff; }
+
+    /* Custom badge colors */
+    .badge-pending { background: #ffc107; color: #000; }
+    .badge-paid { background: #198754; color: #fff; }
+    .badge-unpaid { background: #dc3545; color: #fff; }
+    .badge-verified { background: #0dcaf0; color: #000; }
+    .badge-active { background: #198754; color: #fff; }
+    .badge-used { background: #6c757d; color: #fff; }
+    .badge-cancelled { background: #dc3545; color: #fff; }
 </style>
 @endpush
 
@@ -142,18 +151,19 @@
             <div class="row g-2">
                 <div class="col-md-3">
                     <select class="form-select" id="statusFilter" onchange="filterTickets()">
-                        <option value="">Semua Status</option>
+                        <option value="">Semua Status Tiket</option>
+                        <option value="pending">Pending</option>
                         <option value="active">Aktif</option>
                         <option value="used">Digunakan</option>
-                        <option value="expired">Kadaluarsa</option>
                         <option value="cancelled">Dibatalkan</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="paymentFilter" onchange="filterTickets()">
-                        <option value="">Semua Pembayaran</option>
-                        <option value="paid">Lunas</option>
+                        <option value="">Semua Status Bayar</option>
                         <option value="unpaid">Belum Bayar</option>
+                        <option value="payment_verified">Menunggu Verifikasi</option>
+                        <option value="paid">Lunas</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -172,7 +182,8 @@
                         <th>Jenis Tiket</th>
                         <th>Jumlah</th>
                         <th>Total</th>
-                        <th>Status</th>
+                        <th>Status Tiket</th>
+                        <th>Status Bayar</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -198,25 +209,58 @@
                             @endif
                         </td>
                         <td class="text-center">{{ $ticket->number_of_tickets }} tiket</td>
-                        <td>Rp {{ number_format($ticket->total_amount, 0, ',', '.') }}</td>
+                        <td class="fw-bold">Rp {{ number_format($ticket->total_amount, 0, ',', '.') }}</td>
+                        
+                        {{-- Status Tiket --}}
                         <td>
-                            {!! $ticket->status_label !!}<br>
-                            <small>{!! $ticket->payment_status_label !!}</small>
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-view">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            @if($ticket->status == 'active' && $ticket->payment_status == 'paid')
-                                <button onclick="verifyTicket({{ $ticket->id }})" class="btn btn-verify ms-1">
-                                    <i class="fas fa-check"></i>
-                                </button>
+                            @if($ticket->status == 'pending')
+                                <span class="badge badge-pending">Pending</span>
+                            @elseif($ticket->status == 'active')
+                                <span class="badge badge-active">Aktif</span>
+                            @elseif($ticket->status == 'used')
+                                <span class="badge badge-used">Digunakan</span>
+                            @elseif($ticket->status == 'cancelled')
+                                <span class="badge badge-cancelled">Dibatalkan</span>
+                            @else
+                                <span class="badge bg-secondary">{{ $ticket->status }}</span>
                             @endif
+                        </td>
+                        
+                        {{-- Status Pembayaran --}}
+                        <td>
+                            @if($ticket->payment_status == 'unpaid')
+                                <span class="badge badge-unpaid">Belum Bayar</span>
+                            @elseif($ticket->payment_status == 'payment_verified')
+                                <span class="badge badge-verified">Menunggu Verifikasi</span>
+                            @elseif($ticket->payment_status == 'paid')
+                                <span class="badge badge-paid">Lunas</span>
+                            @else
+                                <span class="badge bg-secondary">{{ $ticket->payment_status }}</span>
+                            @endif
+                        </td>
+                        
+                        {{-- Aksi --}}
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-view" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                
+                                {{-- 🔥 TOMBOL VERIFIKASI: Hanya untuk payment_verified --}}
+                                @if($ticket->payment_status == 'payment_verified')
+                                    <button onclick="verifyTicket({{ $ticket->id }})" class="btn btn-verify" title="Verifikasi Pembayaran">
+                                        <i class="fas fa-check-circle"></i> Verif
+                                    </button>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">Belum ada data tiket kolam</td>
+                        <td colspan="9" class="text-center text-muted py-4">
+                            <i class="fas fa-ticket-alt fa-3x mb-2 d-block" style="color: #c1a067; opacity: 0.4;"></i>
+                            Belum ada data tiket kolam
+                        </td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -233,39 +277,47 @@
 @push('scripts')
 <script>
     function verifyTicket(id) {
-        if(confirm('Tandai tiket ini sebagai sudah digunakan?')) {
+        if(confirm('Verifikasi pembayaran tiket ini? Tiket akan menjadi aktif setelah diverifikasi.')) {
             fetch(`/admin/tickets/${id}/verify`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Content-Type': 'application/json'
                 }
-            }).then(response => response.json()).then(data => {
-                if(data.success) location.reload();
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    location.reload();
+                } else {
+                    alert('Gagal memverifikasi tiket');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan');
             });
         }
     }
 
     function filterTickets() {
-        const status  = document.getElementById('statusFilter').value;
-        const payment = document.getElementById('paymentFilter').value;
-        const search  = document.getElementById('searchFilter').value.toLowerCase();
-        const rows    = document.querySelectorAll('#ticketsTable tbody tr');
-
+        const status = document.getElementById('statusFilter').value.toLowerCase();
+        const payment = document.getElementById('paymentFilter').value.toLowerCase();
+        const search = document.getElementById('searchFilter').value.toLowerCase();
+        const rows = document.querySelectorAll('#ticketsTable tbody tr');
+        
         rows.forEach(row => {
+            if (row.cells.length < 9) return;
+            
             let show = true;
-            if (status) {
-                const statusCell = row.cells[6]?.innerText.toLowerCase();
-                if (!statusCell || !statusCell.includes(status)) show = false;
-            }
-            if (payment && show) {
-                const paymentCell = row.cells[6]?.innerHTML.toLowerCase();
-                if (!paymentCell || !paymentCell.includes(payment)) show = false;
-            }
-            if (search && show) {
-                const text = row.innerText.toLowerCase();
-                if (!text.includes(search)) show = false;
-            }
+            const rowStatus = row.cells[6]?.innerText.toLowerCase() || '';
+            const rowPayment = row.cells[7]?.innerText.toLowerCase() || '';
+            const rowText = row.innerText.toLowerCase();
+            
+            if (status && !rowStatus.includes(status)) show = false;
+            if (payment && !rowPayment.includes(payment)) show = false;
+            if (search && !rowText.includes(search)) show = false;
+            
             row.style.display = show ? '' : 'none';
         });
     }

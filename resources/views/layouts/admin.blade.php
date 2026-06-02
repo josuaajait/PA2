@@ -360,7 +360,7 @@
                 </a>
                 <a href="{{ route('admin.tickets.index') }}"
                    class="nav-link {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
-                    <i class="fas fa-swimming-pool"></i> Facilities
+                    <i class="fas fa-swimming-pool"></i> Pool Tickets
                 </a>
                 <a href="{{ route('admin.reservations.index') }}"
                    class="nav-link {{ request()->routeIs('admin.reservations.*') ? 'active' : '' }}">
