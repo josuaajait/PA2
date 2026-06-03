@@ -282,9 +282,6 @@
         </div>
         <h6>Daftar Reservasi</h6>
     </div>
-    <a href="{{ route('admin.reservations.export') }}" class="btn-export">
-        <i class="fas fa-download"></i> Export
-    </a>
 </div>
 
 <div class="card report-main-card">

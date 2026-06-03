@@ -232,9 +232,6 @@
         </div>
         <h6>Daftar Testimoni</h6>
     </div>
-    <a href="{{ route('admin.testimonials.export') }}" class="btn-export">
-        <i class="fas fa-download"></i> Export
-    </a>
 </div>
 
 <div class="card report-main-card">

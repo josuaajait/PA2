@@ -19,6 +19,8 @@ class LoginController extends Controller
     /**
      * Handle a login request.
      */
+    // app/Http/Controllers/Auth/LoginController.php
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -26,12 +28,11 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-        // Cek apakah email sudah diverifikasi
         $user = \App\Models\User::where('email', $request->email)->first();
         
         if ($user && !$user->hasVerifiedEmail()) {
             return back()->withErrors([
-                'email' => 'Email belum diverifikasi. Silakan cek email Anda untuk verifikasi.',
+                'email' => 'Email belum diverifikasi.',
             ])->onlyInput('email');
         }
 
@@ -40,11 +41,14 @@ class LoginController extends Controller
             
             $user = Auth::user();
             
+            // 🔥 PASTIKAN REDIRECT KE URL YANG BENAR
             if ($user->role === 'admin' || $user->role === 'staff') {
-                return redirect()->intended(route('admin.dashboard'));
+                // Redirect ke dashboard admin
+                return redirect()->to('/admin/dashboard');
             }
             
-            return redirect()->intended(route('branding.home'));
+            // Redirect ke halaman home
+            return redirect()->to('/');
         }
 
         return back()->withErrors([

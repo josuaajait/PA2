@@ -18,12 +18,49 @@ class NotificationController extends Controller
             return redirect()->route('login');
         }
         
+        // 🔥 AMBIL NOTIFIKASI DENGAN FILTER ROLE
         $notifications = DB::table('notifications')
             ->where('notifiable_type', 'App\Models\User')
             ->where('notifiable_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->take(10)
-            ->get();
+            ->get()
+            ->filter(function($notif) use ($user) {
+                $data = json_decode($notif->data, true);
+                $type = $data['type'] ?? 'general';
+                
+                // Admin-only notification types
+                $adminOnlyTypes = [
+                    'admin_payment_uploaded',
+                    'admin_new_ticket', 
+                    'admin_new_reservation',
+                    'admin_ticket_payment',
+                    'admin_reservation_payment',
+                    'AdminNewTicketNotification',
+                    'AdminNewReservationNotification',
+                    'AdminPaymentNotification',
+                    'admin_payment'
+                ];
+                
+                // Jika user bukan admin, filter notifikasi admin
+                if ($user->role !== 'admin' && in_array($type, $adminOnlyTypes)) {
+                    return false;
+                }
+                
+                return true;
+            });
+        
+        // Pagination manual
+        $perPage = 10;
+        $currentPage = request()->get('page', 1);
+        $currentItems = $notifications->slice(($currentPage - 1) * $perPage, $perPage);
+        
+        $notifications = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentItems,
+            $notifications->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
         
         foreach ($notifications as $notif) {
             $data = json_decode($notif->data, true);
@@ -39,11 +76,7 @@ class NotificationController extends Controller
             $notif->created_at = Carbon::parse($notif->created_at);
         }
         
-        $unreadCount = DB::table('notifications')
-            ->where('notifiable_type', 'App\Models\User')
-            ->where('notifiable_id', $user->id)
-            ->whereNull('read_at')
-            ->count();
+        $unreadCount = $notifications->whereNull('read_at')->count();
         
         return view('customer.notifications', compact('notifications', 'unreadCount'));
     }
@@ -59,16 +92,24 @@ class NotificationController extends Controller
                 ->where('notifiable_id', $user->id)
                 ->update(['read_at' => now()]);
             
+            // 🔥 KALAU AJAX REQUEST, RETURN JSON
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Notifikasi ditandai dibaca']);
+            }
+            
             return redirect()->back()->with('success', 'Notifikasi ditandai dibaca');
             
         } catch (\Exception $e) {
             Log::error('Mark as read error: ' . $e->getMessage());
+            
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Gagal menandai notifikasi']);
+            }
+            
             return redirect()->back()->with('error', 'Gagal menandai notifikasi');
         }
     }
     
-    // app/Http/Controllers/NotificationController.php
-
     public function markAllAsRead()
     {
         try {
@@ -83,6 +124,7 @@ class NotificationController extends Controller
             return response()->json(['success' => true, 'message' => 'Semua notifikasi ditandai dibaca']);
             
         } catch (\Exception $e) {
+            Log::error('Mark all as read error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
@@ -93,28 +135,41 @@ class NotificationController extends Controller
             $user = Auth::user();
             
             if (!$user) {
-                return response()->json(['count' => 0, 'notifications' => []]);
+                return response()->json(['success' => true, 'count' => 0, 'notifications' => []]);
             }
             
+            // 🔥 AMBIL NOTIFIKASI UNTUK USER INI
             $notifications = DB::table('notifications')
                 ->where('notifiable_type', 'App\Models\User')
                 ->where('notifiable_id', $user->id)
                 ->orderBy('created_at', 'desc')
-                ->take(5)
+                ->take(10)
                 ->get();
             
-            $unreadCount = DB::table('notifications')
-                ->where('notifiable_type', 'App\Models\User')
-                ->where('notifiable_id', $user->id)
-                ->whereNull('read_at')
-                ->count();
-            
             $formatted = [];
+            $seenIds = [];
+            
             foreach ($notifications as $notif) {
                 $data = json_decode($notif->data, true);
+                $type = $data['type'] ?? 'general';
+                
+                // 🔥 HINDARI DUPLIKAT ID
+                if (in_array($notif->id, $seenIds)) {
+                    continue;
+                }
+                $seenIds[] = $notif->id;
+                
+                // 🔥 FILTER ADMIN NOTIFICATIONS UNTUK CUSTOMER
+                if ($user->role === 'customer') {
+                    // Customer hanya boleh melihat notifikasi dengan type 'general'
+                    if ($type !== 'general' && $type !== 'ticket_purchased' && $type !== 'reservation_created') {
+                        continue;
+                    }
+                }
+                
                 $formatted[] = [
                     'id' => $notif->id,
-                    'type' => $data['type'] ?? 'general',
+                    'type' => $type,
                     'title' => $data['title'] ?? 'Notifikasi',
                     'body' => $data['body'] ?? '',
                     'icon' => $data['icon'] ?? 'fa-bell',
@@ -126,6 +181,8 @@ class NotificationController extends Controller
                     'created_at' => $this->getTimeAgo($notif->created_at),
                 ];
             }
+            
+            $unreadCount = collect($formatted)->whereNull('read_at')->count();
             
             return response()->json([
                 'success' => true,

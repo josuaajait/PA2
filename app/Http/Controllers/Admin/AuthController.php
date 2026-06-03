@@ -14,6 +14,8 @@ class AuthController extends Controller
         return view('admin.auth.login');
     }
     
+    // app/Http/Controllers/Admin/AuthController.php
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -30,7 +32,9 @@ class AuthController extends Controller
             }
             
             $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            
+            // 🔥 REDIRECT KE DASHBOARD ADMIN
+            return redirect()->to('/admin/dashboard');
         }
         
         return back()->withErrors(['email' => 'Email atau password salah.']);
