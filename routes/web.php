@@ -245,3 +245,8 @@ Route::prefix('google')->name('google.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::post('/check-promo', [App\Http\Controllers\Api\PromoCheckController::class, 'check'])->name('check.promo');
+
+Route::get('/test-microservice', function () {
+    $client = app(App\Services\PromoServiceClient::class);
+    return $client->getAll();
+});

@@ -1,8 +1,8 @@
-@extends('layouts.admin')
 
-@section('title', 'Pool Tickets')
 
-@push('styles')
+<?php $__env->startSection('title', 'Pool Tickets'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     .report-page-header {
         background: linear-gradient(135deg, #1c3451 0%, #2a4a6b 100%);
@@ -190,9 +190,9 @@
         }
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="report-page-header">
     <div class="d-flex align-items-center">
@@ -247,100 +247,101 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($tickets as $ticket)
+                    <?php $__empty_1 = true; $__currentLoopData = $tickets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ticket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
-                        <td class="fw-bold">{{ $ticket->ticket_code }}</td>
+                        <td class="fw-bold"><?php echo e($ticket->ticket_code); ?></td>
                         <td>
-                            {{ $ticket->customer_name }}<br>
-                            <small class="text-muted">{{ $ticket->customer_phone }}</small>
+                            <?php echo e($ticket->customer_name); ?><br>
+                            <small class="text-muted"><?php echo e($ticket->customer_phone); ?></small>
                         </td>
                         <td>
-                            {{ \Carbon\Carbon::parse($ticket->visit_date)->format('d M Y') }}<br>
-                            <small class="text-muted">{{ $ticket->visit_time ?? 'Fleksibel' }}</small>
+                            <?php echo e(\Carbon\Carbon::parse($ticket->visit_date)->format('d M Y')); ?><br>
+                            <small class="text-muted"><?php echo e($ticket->visit_time ?? 'Fleksibel'); ?></small>
                         </td>
                         <td>
-                            @if($ticket->ticket_type == 'adult')
+                            <?php if($ticket->ticket_type == 'adult'): ?>
                                 <span class="badge bg-primary">Dewasa</span>
-                            @elseif($ticket->ticket_type == 'child')
+                            <?php elseif($ticket->ticket_type == 'child'): ?>
                                 <span class="badge bg-info">Anak</span>
-                            @else
+                            <?php else: ?>
                                 <span class="badge bg-success">Keluarga</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
-                        <td class="text-center">{{ $ticket->number_of_tickets }} tiket</td>
-                        <td class="fw-bold">Rp {{ number_format($ticket->total_amount, 0, ',', '.') }}</td>
+                        <td class="text-center"><?php echo e($ticket->number_of_tickets); ?> tiket</td>
+                        <td class="fw-bold">Rp <?php echo e(number_format($ticket->total_amount, 0, ',', '.')); ?></td>
                         
-                        {{-- Status Tiket --}}
+                        
                         <td>
-                            @if($ticket->status == 'pending')
+                            <?php if($ticket->status == 'pending'): ?>
                                 <span class="badge badge-pending">Pending</span>
-                            @elseif($ticket->status == 'active')
+                            <?php elseif($ticket->status == 'active'): ?>
                                 <span class="badge badge-active">Aktif</span>
-                            @elseif($ticket->status == 'used')
+                            <?php elseif($ticket->status == 'used'): ?>
                                 <span class="badge badge-used">Digunakan</span>
-                            @elseif($ticket->status == 'cancelled')
+                            <?php elseif($ticket->status == 'cancelled'): ?>
                                 <span class="badge badge-cancelled">Dibatalkan</span>
-                            @else
-                                <span class="badge bg-secondary">{{ $ticket->status }}</span>
-                            @endif
+                            <?php else: ?>
+                                <span class="badge bg-secondary"><?php echo e($ticket->status); ?></span>
+                            <?php endif; ?>
                         </td>
                         
-                        {{-- Status Pembayaran --}}
+                        
                         <td>
-                            @if($ticket->payment_status == 'unpaid')
+                            <?php if($ticket->payment_status == 'unpaid'): ?>
                                 <span class="badge badge-unpaid">Belum Bayar</span>
-                            @elseif($ticket->payment_status == 'payment_verified')
+                            <?php elseif($ticket->payment_status == 'payment_verified'): ?>
                                 <span class="badge badge-verified">Menunggu Verifikasi</span>
-                            @elseif($ticket->payment_status == 'paid')
+                            <?php elseif($ticket->payment_status == 'paid'): ?>
                                 <span class="badge badge-paid">Lunas</span>
-                            @else
-                                <span class="badge bg-secondary">{{ $ticket->payment_status }}</span>
-                            @endif
+                            <?php else: ?>
+                                <span class="badge bg-secondary"><?php echo e($ticket->payment_status); ?></span>
+                            <?php endif; ?>
                         </td>
                         
-                        {{-- Aksi --}}
+                        
                         <td>
                             <div class="d-flex gap-1">
-                                <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-view" title="Lihat Detail">
+                                <a href="<?php echo e(route('admin.tickets.show', $ticket)); ?>" class="btn btn-view" title="Lihat Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 
-                                {{-- 🔥 TOMBOL VERIFIKASI: Hanya untuk payment_verified --}}
-                                @if($ticket->payment_status == 'payment_verified')
-                                    <button onclick="verifyTicket({{ $ticket->id }})" class="btn btn-verify" title="Verifikasi Pembayaran">
+                                
+                                <?php if($ticket->payment_status == 'payment_verified'): ?>
+                                    <button onclick="verifyTicket(<?php echo e($ticket->id); ?>)" class="btn btn-verify" title="Verifikasi Pembayaran">
                                         <i class="fas fa-check-circle"></i> Verif
                                     </button>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="9" class="text-center text-muted py-4">
                             <i class="fas fa-ticket-alt fa-3x mb-2 d-block" style="color: #c1a067; opacity: 0.4;"></i>
                             Belum ada data tiket kolam
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
         <div class="mt-4">
-        {{ $tickets->withQueryString()->links('vendor.pagination.admin') }}
+        <?php echo e($tickets->withQueryString()->links('vendor.pagination.admin')); ?>
+
         </div>
 
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     function verifyTicket(id) {
         if(confirm('Verifikasi pembayaran tiket ini? Tiket akan menjadi aktif setelah diverifikasi.')) {
             fetch(`/admin/tickets/${id}/verify`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                     'Content-Type': 'application/json'
                 }
             })
@@ -381,6 +382,7 @@
         });
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/admin/tickets/index.blade.php ENDPATH**/ ?>

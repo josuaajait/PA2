@@ -92,7 +92,6 @@ class NotificationController extends Controller
                 ->where('notifiable_id', $user->id)
                 ->update(['read_at' => now()]);
             
-            // 🔥 KALAU AJAX REQUEST, RETURN JSON
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json(['success' => true, 'message' => 'Notifikasi ditandai dibaca']);
             }
@@ -160,13 +159,24 @@ class NotificationController extends Controller
                 $seenIds[] = $notif->id;
                 
                 // 🔥 FILTER ADMIN NOTIFICATIONS UNTUK CUSTOMER
-                if ($user->role === 'customer') {
-                    // Customer hanya boleh melihat notifikasi dengan type 'general'
-                    if ($type !== 'general' && $type !== 'ticket_purchased' && $type !== 'reservation_created') {
-                        continue;
-                    }
+                $adminOnlyTypes = [
+                    'admin_payment_uploaded',
+                    'admin_new_ticket', 
+                    'admin_new_reservation',
+                    'admin_ticket_payment',
+                    'admin_reservation_payment',
+                    'AdminNewTicketNotification',
+                    'AdminNewReservationNotification',
+                    'AdminPaymentNotification',
+                    'admin_payment'
+                ];
+                
+                // Jika user BUKAN admin, SKIP notifikasi admin
+                if ($user->role !== 'admin' && in_array($type, $adminOnlyTypes)) {
+                    continue;
                 }
                 
+                // 🔥 SEMUA NOTIFIKASI LAINNYA DITAMPILKAN (termasuk purchased, created, dll)
                 $formatted[] = [
                     'id' => $notif->id,
                     'type' => $type,

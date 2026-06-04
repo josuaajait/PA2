@@ -310,7 +310,8 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({ 
                 promo_code: promoCode, 
-                total_amount: total 
+                total_amount: total,
+                transaction_type: 'ticket'
             })
         })
         .then(res => res.json())

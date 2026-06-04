@@ -23,52 +23,71 @@
     </div>
 </section>
 
-{{-- WEEKLY OFFERS SECTION --}}
-<section class="offers-section py-5">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title fw-bold">Special Offers</h2>
-            <div class="section-divider"></div>
-            <p class="section-subtitle text-muted">Exclusive deals every week at Caldera</p>
-        </div>
+        {{-- WEEKLY OFFERS SECTION --}}
+        <section class="offers-section py-5">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title fw-bold">Special Offers</h2>
+                    <div class="section-divider"></div>
+                    <p class="section-subtitle text-muted">Exclusive deals every week at Caldera</p>
+                </div>
 
-        <div class="row g-4">
-            @php
-                // Optimasi query dengan caching
-                $activePromos = Cache::remember('homepage_promos', 3600, function () {
-                    return \App\Models\Promo::where('is_active', true)
-                                    ->whereDate('start_date', '<=', now())
-                                    ->whereDate('end_date', '>=', now())
-                                    ->latest()
-                                    ->take(3)
-                                    ->get();
-                });
-            @endphp
-            
-            @forelse($activePromos as $promo)
-            <div class="col-md-4">
-                <div class="offer-card text-center p-4">
-                    <div class="offer-day">{{ $promo->promo_type == 'ticket' ? 'Ticket Promo' : 'Food Promo' }}</div>
-                    <div class="offer-title">{{ $promo->title }}</div>
-                    <div class="offer-price">{{ $promo->discount_percent ? $promo->discount_percent . '% OFF' : 'Special Price' }}</div>
-                    <div class="offer-desc">{{ Str::limit($promo->description, 80) }}</div>
-                    <div class="offer-badge">Valid until {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}</div>
+                <div class="row g-4">
+                    @forelse($activePromos as $promo)
+                    <div class="col-md-4">
+                        <div class="offer-card text-center p-4">
+                            <div class="offer-day">
+                                @if($promo['promo_type'] == 'ticket')
+                                    <i class="fas fa-ticket-alt me-1"></i> Ticket Promo
+                                @elseif($promo['promo_type'] == 'reservation')
+                                    <i class="fas fa-calendar-check me-1"></i> Reservation Promo
+                                @elseif($promo['promo_type'] == 'event')
+                                    <i class="fas fa-calendar-alt me-1"></i> Event
+                                @else
+                                    <i class="fas fa-utensils me-1"></i> Food Promo
+                                @endif
+                            </div>
+                            <div class="offer-title">{{ $promo['title'] }}</div>
+                            <div class="offer-price">
+                                @if($promo['discount_type'] == 'percentage')
+                                    <span class="discount-value-big">{{ $promo['discount_value'] }}% OFF</span>
+                                @else
+                                    <span class="discount-value-big">Rp {{ number_format($promo['discount_value'], 0, ',', '.') }}</span>
+                                @endif
+                            </div>
+                            <div class="offer-desc">{{ Str::limit($promo['description'], 80) }}</div>
+                            <div class="offer-badge">
+                                <i class="far fa-calendar-alt me-1"></i>
+                                {{ \Carbon\Carbon::parse($promo['end_date'])->setTimezone('Asia/Jakarta')->format('d M Y') }}
+                            </div>
+                            @if(\Carbon\Carbon::parse($promo['created_at'])->diffInDays(now()) <= 7)
+                                <div class="mt-2">
+                                    <span class="badge" style="background: #c1a067; color: white; font-size: 9px;">
+                                        <i class="fas fa-fire me-1"></i> JUST ADDED
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-12 text-center">
+                        <div class="empty-state p-5">
+                            <i class="fas fa-tags fa-3x mb-3" style="color: #c1a067; opacity: 0.4;"></i>
+                            <p class="text-muted">No promos available at the moment</p>
+                            <p class="text-muted small">Check back later for exciting discounts!</p>
+                        </div>
+                    </div>
+                    @endforelse
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ route('branding.promos') }}" class="btn btn-outline-gold">
+                        View All Promos <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
                 </div>
             </div>
-            @empty
-            <div class="col-12 text-center">
-                <p class="text-muted">No active promos at the moment</p>
-            </div>
-            @endforelse
-        </div>
-
-        <div class="text-center mt-4">
-            <a href="{{ route('branding.promos') }}" class="btn btn-outline-gold">
-                View All Promos <i class="fas fa-arrow-right ms-2"></i>
-            </a>
-        </div>
-    </div>
-</section>
+        </section>
+        
 
 {{-- LEGENDARY ATMOSPHERE SECTION --}}
 <section class="atmosphere-section py-5">
@@ -245,7 +264,7 @@
     </div>
 </section>
 
-{{-- EVENTS SECTION --}}
+{{-- EVENTS SECTION 
 <section class="events-section py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
@@ -316,7 +335,7 @@
             @endif
         </div>
     </div>
-</section>
+</section>--}}
 
 @endsection
 

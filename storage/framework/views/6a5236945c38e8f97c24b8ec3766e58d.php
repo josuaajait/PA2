@@ -123,7 +123,7 @@
                 </a>
                 <a class="nav-custom-link <?php echo e(request()->routeIs('reservation.table*') ? 'active' : ''); ?>"
                    href="<?php echo e(route('reservation.table')); ?>">
-                    <i class="fas fa-chair me-1"></i>Reservasi Meja
+                    <i class="fas fa-chair me-1"></i>Book a Table
                 </a>
                 <a class="nav-custom-link <?php echo e(request()->routeIs('branding.promos*') ? 'active' : ''); ?>"
                    href="<?php echo e(route('branding.promos')); ?>">

@@ -31,7 +31,7 @@
             <div class="col-md-3 col-sm-6 mb-4">
                 <h6 class="footer-heading mb-3" style="color: #c1a067 !important;">Information</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{{ route('branding.promos') }}" class="footer-link">Promos & Events</a></li>
+                    <li class="mb-2"><a href="{{ route('branding.promos') }}" class="footer-link">Promos</a></li>
                     <li class="mb-2"><a href="{{ route('branding.testimonials') }}" class="footer-link">Testimonials</a></li>
                     <li class="mb-2"><a href="{{ route('branding.contact') }}" class="footer-link">Contact Us</a></li>
                     <li class="mb-2"><a href="{{ route('reservation.table') }}" class="footer-link">Book a Table</a></li>

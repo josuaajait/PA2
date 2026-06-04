@@ -1,8 +1,8 @@
-@extends('layouts.admin')
 
-@section('title', 'Testimonials')
 
-@push('styles')
+<?php $__env->startSection('title', 'Testimonials'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     .report-page-header {
         background: linear-gradient(135deg, #1c3451 0%, #2a4a6b 100%);
@@ -280,9 +280,9 @@
         }
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="report-page-header">
     <div class="d-flex align-items-center">
@@ -330,64 +330,65 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($testimonials as $testimonial)
+                    <?php $__empty_1 = true; $__currentLoopData = $testimonials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $testimonial): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
                         <td>
-                            <div class="customer-name">{{ $testimonial->customer_name }}</div>
-                            <div class="customer-email">{{ $testimonial->customer_email }}</div>
+                            <div class="customer-name"><?php echo e($testimonial->customer_name); ?></div>
+                            <div class="customer-email"><?php echo e($testimonial->customer_email); ?></div>
                         </td>
                         <td>
-                            @for($i = 1; $i <= 5; $i++)
-                                @if($i <= $testimonial->rating)
+                            <?php for($i = 1; $i <= 5; $i++): ?>
+                                <?php if($i <= $testimonial->rating): ?>
                                     <i class="fas fa-star text-warning" style="font-size:12px;"></i>
-                                @else
+                                <?php else: ?>
                                     <i class="far fa-star" style="font-size:12px; color:#e5e7eb;"></i>
-                                @endif
-                            @endfor
+                                <?php endif; ?>
+                            <?php endfor; ?>
                         </td>
                         <td style="max-width:220px; color:#6b7280;">
-                            {{ \Str::limit($testimonial->comment, 100) }}
+                            <?php echo e(\Str::limit($testimonial->comment, 100)); ?>
+
                         </td>
                         <td>
-                            @if($testimonial->service_type == 'restaurant')
+                            <?php if($testimonial->service_type == 'restaurant'): ?>
                                 <span class="badge-service-restaurant">Restoran</span>
-                            @elseif($testimonial->service_type == 'pool')
+                            <?php elseif($testimonial->service_type == 'pool'): ?>
                                 <span class="badge-service-pool">Kolam</span>
-                            @else
+                            <?php else: ?>
                                 <span class="badge-service-event">Event</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td>
-                            @if($testimonial->is_approved)
+                            <?php if($testimonial->is_approved): ?>
                                 <span class="badge-approved">Disetujui</span>
-                            @else
+                            <?php else: ?>
                                 <span class="badge-pending">Pending</span>
-                            @endif
-                            @if($testimonial->is_featured)
+                            <?php endif; ?>
+                            <?php if($testimonial->is_featured): ?>
                                 <span class="badge-featured"><i class="fas fa-star me-1" style="font-size:9px;"></i>Featured</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td>
                             <div class="d-flex gap-1 flex-wrap">
-                                <a href="{{ route('admin.testimonials.show', $testimonial->id) }}"
+                                <a href="<?php echo e(route('admin.testimonials.show', $testimonial->id)); ?>"
                                    class="btn btn-action-view" title="Lihat Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                @if(!$testimonial->is_approved)
-                                    <form action="{{ route('admin.testimonials.approve', $testimonial->id) }}" method="POST" class="d-inline">
-                                        @csrf
+                                <?php if(!$testimonial->is_approved): ?>
+                                    <form action="<?php echo e(route('admin.testimonials.approve', $testimonial->id)); ?>" method="POST" class="d-inline">
+                                        <?php echo csrf_field(); ?>
                                         <button type="submit" class="btn btn-action-approve" title="Setujui">
                                             <i class="fas fa-check"></i>
                                         </button>
                                     </form>
-                                @endif
-                                <button onclick="toggleFeatured({{ $testimonial->id }})"
+                                <?php endif; ?>
+                                <button onclick="toggleFeatured(<?php echo e($testimonial->id); ?>)"
                                         class="btn btn-action-star" title="Toggle Featured">
                                     <i class="fas fa-star"></i>
                                 </button>
-                                <form action="{{ route('admin.testimonials.destroy', $testimonial->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
+                                <form action="<?php echo e(route('admin.testimonials.destroy', $testimonial->id)); ?>" method="POST" class="d-inline">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                     <button type="submit" class="btn btn-action-delete" title="Hapus"
                                             onclick="return confirm('Yakin hapus testimoni ini?')">
                                         <i class="fas fa-trash"></i>
@@ -396,7 +397,7 @@
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="6">
                             <div class="empty-state">
@@ -405,24 +406,25 @@
                             </div>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
         <div class="mt-4">
-        {{ $testimonials->withQueryString()->links('vendor.pagination.admin') }}
+        <?php echo e($testimonials->withQueryString()->links('vendor.pagination.admin')); ?>
+
         </div>
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     function toggleFeatured(id) {
         fetch(`/admin/testimonials/${id}/toggle-featured`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Content-Type': 'application/json'
             }
         }).then(response => response.json()).then(data => {
@@ -461,6 +463,7 @@
         });
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/admin/testimonials/index.blade.php ENDPATH**/ ?>

@@ -2,16 +2,7 @@
 
 @section('title', 'Promos - Caldera Resto & Pool')
 
-
 @section('content')
-    @php
-    // Debug: tampilkan path yang dihasilkan
-    if (isset($promo->banner_image) && $promo->banner_image) {
-        $debugUrl = asset('storage/' . $promo->banner_image);
-        echo "<!-- Debug: " . $debugUrl . " -->";
-    }
-    @endphp
-
 <div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold mb-2" style="font-family: 'Playfair Display', serif; color: #1c3451;">Special Promos</h1>
@@ -33,32 +24,11 @@
                 $promo = (object) $promo;
             }
             
-
-            // 🔥 PATH GAMBAR dari microservice
-            $imageUrl = null;
-            if (isset($promo->banner_image) && $promo->banner_image) {
-                // Path dari microservice: "promos/namafile.jpg"
-                $imageUrl = asset('storage/' . $promo->banner_image);
-            }
-            
             $endDate = isset($promo->end_date) ? \Carbon\Carbon::parse($promo->end_date)->setTimezone('Asia/Jakarta') : null;
         @endphp
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm h-100 promo-card">
-                @if($imageUrl)
-                    <img src="{{ $imageUrl }}" 
-                         class="card-img-top" 
-                         alt="{{ $promo->title ?? 'Promo' }}" 
-                         style="height: 200px; object-fit: cover;"
-                         onerror="this.onerror=null; this.src='https://placehold.co/400x200/e8e0d0/c1a067?text=No+Image';">
-                @else
-                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px; flex-direction: column;">
-                        <i class="fas fa-tag fa-3x" style="color: #c1a067;"></i>
-                        <code class="mt-2" style="background: transparent; color: #c1a067; font-size: 14px;">
-                            {{ $promo->promo_code ?? 'PROMO' }}
-                        </code>
-                    </div>
-                @endif
+                <!-- HAPUS BAGIAN GAMBAR, LANGSUNG TAMPILKAN CONTENT -->
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <span class="badge-promo">
@@ -68,6 +38,8 @@
                                 <i class="fas fa-utensils me-1"></i> Menu
                             @elseif(isset($promo->promo_type) && $promo->promo_type == 'event')
                                 <i class="fas fa-calendar-alt me-1"></i> Event
+                            @elseif(isset($promo->promo_type) && $promo->promo_type == 'reservation')
+                                <i class="fas fa-calendar-check me-1"></i> Reservasi
                             @else
                                 Promo
                             @endif
@@ -79,8 +51,10 @@
                         </small>
                         @endif
                     </div>
+                    
                     <h5 class="fw-bold mb-2" style="color: #1c3451;">{{ $promo->title ?? 'N/A' }}</h5>
                     <p class="text-muted small">{{ Str::limit($promo->description ?? '', 100) }}</p>
+                    
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <div class="discount-badge">
                             @if(isset($promo->discount_type) && $promo->discount_type == 'percentage')
@@ -96,7 +70,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-transparent border-0 pb-3">
+                <div class="card-footer bg-transparent border-0 pb-3 pt-0">
                     <a href="{{ route('branding.promos.detail', $promo->slug ?? '#') }}" class="btn btn-promo w-100">
                         View Details <i class="fas fa-arrow-right ms-2"></i>
                     </a>
@@ -129,15 +103,19 @@
         margin: 12px auto;
         border-radius: 2px;
     }
+    
     .promo-card {
         border-radius: 20px !important;
         overflow: hidden;
         transition: transform 0.3s, box-shadow 0.3s;
+        border-top: 3px solid #c1a067 !important;
     }
+    
     .promo-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 12px 28px rgba(28,52,81,0.12) !important;
     }
+    
     .badge-promo {
         background: rgba(193,160,103,0.15);
         color: #c1a067;
@@ -146,16 +124,19 @@
         font-size: 11px;
         font-weight: 600;
     }
+    
     .discount-badge {
         background: linear-gradient(135deg, #1c3451, #01516e);
         padding: 6px 12px;
         border-radius: 25px;
     }
+    
     .discount-percent, .discount-amount {
         color: white;
         font-weight: bold;
         font-size: 14px;
     }
+    
     .btn-promo {
         background: white;
         color: #1c3451;
@@ -165,29 +146,32 @@
         font-weight: 600;
         transition: all 0.2s;
     }
+    
     .btn-promo:hover {
         background: #1c3451;
         color: white;
         transform: translateY(-2px);
     }
+    
     code {
         font-size: 12px;
         font-weight: 600;
     }
+    
+    /* Dark Mode */
     body.dark-mode .promo-card {
         background: #1e1e2a;
     }
+    
     body.dark-mode .btn-promo {
         background: #1e1e2a;
         border-color: #c1a067;
         color: #c1a067;
     }
+    
     body.dark-mode .btn-promo:hover {
         background: #c1a067;
         color: #1c3451;
-    }
-    body.dark-mode .bg-light {
-        background-color: #2d2d3a !important;
     }
 </style>
 @endpush

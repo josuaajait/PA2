@@ -7,38 +7,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm promo-detail-card">
-                @php
-                    $imageUrl = null;
-                    if (isset($promo->banner_image) && $promo->banner_image) {
-                        if (str_starts_with($promo->banner_image, 'storage/')) {
-                            $imageUrl = asset($promo->banner_image);
-                        } elseif (str_contains($promo->banner_image, 'promos/')) {
-                            $imageUrl = asset('storage/' . $promo->banner_image);
-                        } elseif (filter_var($promo->banner_image, FILTER_VALIDATE_URL)) {
-                            $imageUrl = $promo->banner_image;
-                        } else {
-                            $imageUrl = asset('storage/' . $promo->banner_image);
-                        }
-                    }
-                    
-                    $startDate = isset($promo->start_date) ? \Carbon\Carbon::parse($promo->start_date)->setTimezone('Asia/Jakarta') : null;
-                    $endDate = isset($promo->end_date) ? \Carbon\Carbon::parse($promo->end_date)->setTimezone('Asia/Jakarta') : null;
-                @endphp
-                
-                @if($imageUrl)
-                    <img src="{{ $imageUrl }}" 
-                         class="card-img-top" 
-                         alt="{{ $promo->title ?? 'Promo' }}"
-                         style="height: 350px; object-fit: cover;"
-                         onerror="this.onerror=null; this.src='https://placehold.co/800x350/e8e0d0/c1a067?text=No+Image';">
-                @else
-                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 350px;">
-                        <i class="fas fa-tag fa-4x" style="color: #c1a067;"></i>
-                        <span class="ms-3 text-muted">{{ $promo->promo_code ?? 'Promo' }}</span>
-                    </div>
-                @endif
-                
-                <div class="card-body p-4">
+                <div class="card-body p-4 p-lg-5">
                     <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
                         <h1 class="fw-bold mb-0" style="color: #1c3451;">{{ $promo->title ?? 'Promo' }}</h1>
                         <span class="badge-promo px-3 py-2">
@@ -92,6 +61,10 @@
                                     <small class="text-muted">Periode Promo</small>
                                 </div>
                                 <p class="fw-bold mb-0" style="color: #1c3451;">
+                                    @php
+                                        $startDate = isset($promo->start_date) ? \Carbon\Carbon::parse($promo->start_date)->setTimezone('Asia/Jakarta') : null;
+                                        $endDate = isset($promo->end_date) ? \Carbon\Carbon::parse($promo->end_date)->setTimezone('Asia/Jakarta') : null;
+                                    @endphp
                                     @if($startDate && $endDate)
                                         {{ $startDate->format('d F Y') }}<br>
                                         <span class="small">s/d</span><br>
@@ -124,13 +97,6 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="text-center mt-4">
-                        <a href="{{ route('reservation.ticket') }}" class="btn btn-promo btn-lg px-5">
-                            <i class="fas fa-ticket-alt me-2"></i> Gunakan Promo Sekarang
-                            <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
                     </div>
                 </div>
             </div>
@@ -202,23 +168,6 @@ function copyToClipboard(text) {
     color: white;
 }
 
-.btn-promo {
-    background: linear-gradient(135deg, #1c3451, #01516e);
-    color: white;
-    border-radius: 40px;
-    padding: 14px 40px;
-    font-weight: 600;
-    font-size: 16px;
-    transition: all 0.3s;
-}
-
-.btn-promo:hover {
-    background: linear-gradient(135deg, #c1a067, #a8894f);
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(193,160,103,0.3);
-}
-
 .info-card {
     border: 1px solid #e8e0d0;
     transition: all 0.2s;
@@ -233,6 +182,7 @@ function copyToClipboard(text) {
 .promo-detail-card {
     border-radius: 24px !important;
     overflow: hidden;
+    border-top: 3px solid #c1a067 !important;
 }
 
 /* Dark Mode */
@@ -258,10 +208,6 @@ body.dark-mode .btn-copy:hover {
 body.dark-mode .promo-code-box code {
     background: #2d2d3a !important;
     color: #c1a067 !important;
-}
-
-body.dark-mode .bg-light {
-    background-color: #2d2d3a !important;
 }
 </style>
 @endpush

@@ -23,52 +23,72 @@
     </div>
 </section>
 
+        
+        <section class="offers-section py-5">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title fw-bold">Special Offers</h2>
+                    <div class="section-divider"></div>
+                    <p class="section-subtitle text-muted">Exclusive deals every week at Caldera</p>
+                </div>
 
-<section class="offers-section py-5">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title fw-bold">Special Offers</h2>
-            <div class="section-divider"></div>
-            <p class="section-subtitle text-muted">Exclusive deals every week at Caldera</p>
-        </div>
+                <div class="row g-4">
+                    <?php $__empty_1 = true; $__currentLoopData = $activePromos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $promo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <div class="col-md-4">
+                        <div class="offer-card text-center p-4">
+                            <div class="offer-day">
+                                <?php if($promo['promo_type'] == 'ticket'): ?>
+                                    <i class="fas fa-ticket-alt me-1"></i> Ticket Promo
+                                <?php elseif($promo['promo_type'] == 'reservation'): ?>
+                                    <i class="fas fa-calendar-check me-1"></i> Reservation Promo
+                                <?php elseif($promo['promo_type'] == 'event'): ?>
+                                    <i class="fas fa-calendar-alt me-1"></i> Event
+                                <?php else: ?>
+                                    <i class="fas fa-utensils me-1"></i> Food Promo
+                                <?php endif; ?>
+                            </div>
+                            <div class="offer-title"><?php echo e($promo['title']); ?></div>
+                            <div class="offer-price">
+                                <?php if($promo['discount_type'] == 'percentage'): ?>
+                                    <span class="discount-value-big"><?php echo e($promo['discount_value']); ?>% OFF</span>
+                                <?php else: ?>
+                                    <span class="discount-value-big">Rp <?php echo e(number_format($promo['discount_value'], 0, ',', '.')); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="offer-desc"><?php echo e(Str::limit($promo['description'], 80)); ?></div>
+                            <div class="offer-badge">
+                                <i class="far fa-calendar-alt me-1"></i>
+                                <?php echo e(\Carbon\Carbon::parse($promo['end_date'])->setTimezone('Asia/Jakarta')->format('d M Y')); ?>
 
-        <div class="row g-4">
-            <?php
-                // Optimasi query dengan caching
-                $activePromos = Cache::remember('homepage_promos', 3600, function () {
-                    return \App\Models\Promo::where('is_active', true)
-                                    ->whereDate('start_date', '<=', now())
-                                    ->whereDate('end_date', '>=', now())
-                                    ->latest()
-                                    ->take(3)
-                                    ->get();
-                });
-            ?>
-            
-            <?php $__empty_1 = true; $__currentLoopData = $activePromos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $promo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div class="col-md-4">
-                <div class="offer-card text-center p-4">
-                    <div class="offer-day"><?php echo e($promo->promo_type == 'ticket' ? 'Ticket Promo' : 'Food Promo'); ?></div>
-                    <div class="offer-title"><?php echo e($promo->title); ?></div>
-                    <div class="offer-price"><?php echo e($promo->discount_percent ? $promo->discount_percent . '% OFF' : 'Special Price'); ?></div>
-                    <div class="offer-desc"><?php echo e(Str::limit($promo->description, 80)); ?></div>
-                    <div class="offer-badge">Valid until <?php echo e(\Carbon\Carbon::parse($promo->end_date)->format('d M Y')); ?></div>
+                            </div>
+                            <?php if(\Carbon\Carbon::parse($promo['created_at'])->diffInDays(now()) <= 7): ?>
+                                <div class="mt-2">
+                                    <span class="badge" style="background: #c1a067; color: white; font-size: 9px;">
+                                        <i class="fas fa-fire me-1"></i> JUST ADDED
+                                    </span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <div class="col-12 text-center">
+                        <div class="empty-state p-5">
+                            <i class="fas fa-tags fa-3x mb-3" style="color: #c1a067; opacity: 0.4;"></i>
+                            <p class="text-muted">No promos available at the moment</p>
+                            <p class="text-muted small">Check back later for exciting discounts!</p>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="<?php echo e(route('branding.promos')); ?>" class="btn btn-outline-gold">
+                        View All Promos <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
                 </div>
             </div>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-            <div class="col-12 text-center">
-                <p class="text-muted">No active promos at the moment</p>
-            </div>
-            <?php endif; ?>
-        </div>
-
-        <div class="text-center mt-4">
-            <a href="<?php echo e(route('branding.promos')); ?>" class="btn btn-outline-gold">
-                View All Promos <i class="fas fa-arrow-right ms-2"></i>
-            </a>
-        </div>
-    </div>
-</section>
+        </section>
+        
 
 
 <section class="atmosphere-section py-5">
@@ -247,78 +267,6 @@
 </section>
 
 
-<section class="events-section py-5 bg-light">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title fw-bold">Events Not to Be Missed</h2>
-            <div class="section-divider"></div>
-            <p class="section-subtitle text-muted">Get in on the action at Caldera</p>
-        </div>
-
-        <div class="row g-4 justify-content-center">
-            <?php
-                $events = Cache::remember('homepage_events', 3600, function () {
-                    return \App\Models\Promo::where('promo_type', 'event')
-                                    ->where('is_active', true)
-                                    ->whereDate('end_date', '>=', now())
-                                    ->latest()
-                                    ->take(3)
-                                    ->get();
-                });
-            ?>
-            
-            <?php if($events->count() > 0): ?>
-                <?php $__currentLoopData = $events; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $event): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-icon mb-3">
-                            <i class="fas fa-calendar-alt fa-3x" style="color: #c1a067;"></i>
-                        </div>
-                        <h5 class="fw-bold"><?php echo e($event->title); ?></h5>
-                        <p class="text-muted"><?php echo e(Str::limit($event->description, 80)); ?></p>
-                        <span class="badge bg-gold">
-                            <?php echo e(\Carbon\Carbon::parse($event->start_date)->format('d M')); ?> - 
-                            <?php echo e(\Carbon\Carbon::parse($event->end_date)->format('d M Y')); ?>
-
-                        </span>
-                    </div>
-                </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            <?php else: ?>
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-icon mb-3">
-                            <i class="fas fa-music fa-3x" style="color: #c1a067;"></i>
-                        </div>
-                        <h5 class="fw-bold">Live Music Every Friday</h5>
-                        <p class="text-muted">Enjoy live acoustic performances<br>7 PM - 10 PM</p>
-                        <span class="badge bg-gold">Free Entry</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-icon mb-3">
-                            <i class="fas fa-birthday-cake fa-3x" style="color: #c1a067;"></i>
-                        </div>
-                        <h5 class="fw-bold">Birthday Celebration</h5>
-                        <p class="text-muted">Book your special day with us<br>Get special discounts</p>
-                        <span class="badge bg-gold">Free Cake</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-icon mb-3">
-                            <i class="fas fa-glass-cheers fa-3x" style="color: #c1a067;"></i>
-                        </div>
-                        <h5 class="fw-bold">Family Gathering</h5>
-                        <p class="text-muted">Special package for family events<br>Call for reservation</p>
-                        <span class="badge bg-gold">Best Offer</span>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
-</section>
 
 <?php $__env->stopSection(); ?>
 

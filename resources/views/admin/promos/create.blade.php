@@ -68,7 +68,6 @@
         padding: 28px 32px;
     }
 
-    /* Form styling */
     .form-label {
         font-size: 13px;
         font-weight: 600;
@@ -123,7 +122,6 @@
         color: #374151;
     }
 
-    /* Section divider */
     .form-section {
         border-bottom: 1px solid #f0f0f0;
         padding-bottom: 20px;
@@ -149,37 +147,6 @@
         background: #f0f0f0;
     }
 
-    /* Image preview */
-    .image-preview-box {
-        border: 2px dashed #e5e7eb;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        color: #9ca3af;
-        font-size: 13px;
-        min-height: 100px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 6px;
-        transition: border-color 0.2s;
-    }
-
-    .image-preview-box.has-image {
-        border-style: solid;
-        border-color: #c1a067;
-        padding: 10px;
-    }
-
-    .image-preview-box img {
-        max-width: 100%;
-        max-height: 160px;
-        border-radius: 8px;
-        object-fit: cover;
-    }
-
-    /* Action buttons */
     .btn-submit {
         background: #c1a067;
         color: #fff;
@@ -238,10 +205,9 @@
 
 <div class="card report-main-card">
     <div class="card-body">
-        <form action="{{ route('admin.promos.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.promos.store') }}" method="POST">
             @csrf
 
-            <!-- Info Dasar -->
             <div class="form-section">
                 <div class="form-section-title">Informasi Dasar</div>
                 <div class="row">
@@ -263,7 +229,6 @@
                 </div>
             </div>
 
-            <!-- Diskon -->
             <div class="form-section">
                 <div class="form-section-title">Pengaturan Diskon</div>
                 <div class="row">
@@ -318,38 +283,28 @@
                 </div>
             </div>
 
-            <!-- Periode -->
             <div class="form-section">
                 <div class="form-section-title">Periode Promo</div>
                 <div class="row">
-                    <div class="col-md-6 mb-0">
-                        <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
-                        <input type="datetime-local" name="start_date" class="form-control @error('start_date') is-invalid @enderror" value="{{ old('start_date') }}" required>
-                        @error('start_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-6 mb-0">
-                        <label class="form-label">Tanggal Selesai <span class="text-danger">*</span></label>
-                        <input type="datetime-local" name="end_date" class="form-control @error('end_date') is-invalid @enderror" value="{{ old('end_date') }}" required>
-                        @error('end_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
+                <div class="col-md-6 mb-0">
+                    <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
+                    <input type="datetime-local" name="start_date" class="form-control @error('start_date') is-invalid @enderror" 
+                        value="{{ old('start_date', date('Y-m-d\TH:i')) }}" required>
+                    @error('start_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-6 mb-0">
+                    <label class="form-label">Tanggal Selesai <span class="text-danger">*</span></label>
+                    <input type="datetime-local" name="end_date" class="form-control @error('end_date') is-invalid @enderror" 
+                        value="{{ old('end_date', date('Y-m-d\TH:i', strtotime('+7 days'))) }}" required>
+                    @error('end_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
                 </div>
             </div>
 
-            <!-- Banner & Status -->
             <div class="form-section" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
-                <div class="form-section-title">Banner & Status</div>
+                <div class="form-section-title">Status Promo</div>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Gambar Banner <span class="text-danger">*</span></label>
-                        <input type="file" name="banner_image" class="form-control @error('banner_image') is-invalid @enderror" accept="image/*" required id="bannerInput">
-                        <div class="form-text">Format: JPG, JPEG, PNG. Maks: 2MB</div>
-                        @error('banner_image')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <div class="image-preview-box mt-2" id="imagePreviewBox">
-                            <i class="fas fa-image fa-2x mb-1"></i>
-                            <span>Preview gambar</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3 d-flex align-items-center">
+                    <div class="col-md-12 mb-0">
                         <div class="form-check">
                             <input type="checkbox" name="is_active" class="form-check-input" value="1" id="isActive" {{ old('is_active', true) ? 'checked' : '' }}>
                             <label class="form-check-label fw-semibold" for="isActive">Aktifkan Promo</label>
@@ -359,7 +314,6 @@
                 </div>
             </div>
 
-            <!-- Action -->
             <div class="d-flex justify-content-end gap-2 mt-4 pt-4" style="border-top: 1px solid #f0f0f0;">
                 <a href="{{ route('admin.promos.index') }}" class="btn-cancel">
                     <i class="fas fa-times"></i> Batal
@@ -374,24 +328,6 @@
 
 @push('scripts')
 <script>
-    document.getElementById('bannerInput')?.addEventListener('change', function () {
-        const box = document.getElementById('imagePreviewBox');
-        box.innerHTML = '';
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                box.classList.add('has-image');
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                box.appendChild(img);
-            };
-            reader.readAsDataURL(this.files[0]);
-        } else {
-            box.classList.remove('has-image');
-            box.innerHTML = '<i class="fas fa-image fa-2x mb-1"></i><span>Preview gambar</span>';
-        }
-    });
-
     document.getElementById('discountType')?.addEventListener('change', function () {
         const symbol = document.getElementById('discountSymbol');
         const label  = document.getElementById('discountValueLabel');

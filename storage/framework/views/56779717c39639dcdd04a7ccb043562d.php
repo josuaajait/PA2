@@ -1,8 +1,8 @@
-@extends('layouts.admin')
 
-@section('title', 'Promo Management')
 
-@push('styles')
+<?php $__env->startSection('title', 'Promo Management'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     .report-page-header {
         background: linear-gradient(135deg, #1c3451 0%, #2a4a6b 100%);
@@ -242,9 +242,9 @@
         }
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="report-page-header">
     <div class="d-flex align-items-center">
@@ -253,7 +253,7 @@
         </div>
         <h6>Daftar Promo</h6>
     </div>
-    <a href="{{ route('admin.promos.create') }}" class="btn-add">
+    <a href="<?php echo e(route('admin.promos.create')); ?>" class="btn-add">
         <i class="fas fa-plus"></i> Tambah Promo
     </a>
 </div>
@@ -273,8 +273,8 @@
                     </tr>
                 </thead>
                 <tbody>
-@forelse($promos as $promo)
-    @php
+<?php $__empty_1 = true; $__currentLoopData = $promos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $promo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+    <?php
         if (is_int($promo)) {
             continue;
         }
@@ -284,31 +284,33 @@
         if (!isset($promo->title) && !isset($promo->id)) {
             continue;
         }
-    @endphp
+    ?>
     <tr>
-        <td class="fw-bold" style="color:#1c3451;">{{ $promo->title ?? 'N/A' }}</td>
-        <td><span class="badge-promo-code">{{ $promo->promo_code ?? '-' }}</span></td>
+        <td class="fw-bold" style="color:#1c3451;"><?php echo e($promo->title ?? 'N/A'); ?></td>
+        <td><span class="badge-promo-code"><?php echo e($promo->promo_code ?? '-'); ?></span></td>
         <td>
             <span class="discount-value">
-                @if(isset($promo->discount_type) && $promo->discount_type == 'percentage')
-                    {{ $promo->discount_value ?? 0 }}%
-                @else
-                    Rp {{ number_format($promo->discount_value ?? 0, 0, ',', '.') }}
-                @endif
+                <?php if(isset($promo->discount_type) && $promo->discount_type == 'percentage'): ?>
+                    <?php echo e($promo->discount_value ?? 0); ?>%
+                <?php else: ?>
+                    Rp <?php echo e(number_format($promo->discount_value ?? 0, 0, ',', '.')); ?>
+
+                <?php endif; ?>
             </span>
         </td>
         <td>
             <div class="period-text">
-                @if(isset($promo->start_date))
-                    {{ \Carbon\Carbon::parse($promo->start_date)->setTimezone('Asia/Jakarta')->format('d M Y H:i') }}<br>
-                    s/d {{ \Carbon\Carbon::parse($promo->end_date)->setTimezone('Asia/Jakarta')->format('d M Y H:i') }}
-                @else
+                <?php if(isset($promo->start_date)): ?>
+                    <?php echo e(\Carbon\Carbon::parse($promo->start_date)->setTimezone('Asia/Jakarta')->format('d M Y H:i')); ?><br>
+                    s/d <?php echo e(\Carbon\Carbon::parse($promo->end_date)->setTimezone('Asia/Jakarta')->format('d M Y H:i')); ?>
+
+                <?php else: ?>
                     -
-                @endif
+                <?php endif; ?>
             </div>
         </td>
         <td>
-            @php
+            <?php
                 $startDate = \Carbon\Carbon::parse($promo->start_date)->setTimezone('Asia/Jakarta');
                 $endDate = \Carbon\Carbon::parse($promo->end_date)->setTimezone('Asia/Jakarta');
                 $now = \Carbon\Carbon::now('Asia/Jakarta');
@@ -334,22 +336,23 @@
                     $statusClass = 'badge-inactive';
                     $statusText = 'Nonaktif';
                 }
-            @endphp
-            <span class="{{ $statusClass }}">
-                @if($showIcon)
+            ?>
+            <span class="<?php echo e($statusClass); ?>">
+                <?php if($showIcon): ?>
                     <i class="fas fa-circle me-1" style="font-size:7px;"></i>
-                @endif
-                {{ $statusText }}
+                <?php endif; ?>
+                <?php echo e($statusText); ?>
+
             </span>
         </td>
         <td>
             <div class="d-flex gap-1">
-                <a href="{{ route('admin.promos.edit', $promo->id ?? 0) }}" class="btn btn-action-edit" title="Edit">
+                <a href="<?php echo e(route('admin.promos.edit', $promo->id ?? 0)); ?>" class="btn btn-action-edit" title="Edit">
                     <i class="fas fa-edit"></i>
                 </a>
-                <form action="{{ route('admin.promos.destroy', $promo->id ?? 0) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
+                <form action="<?php echo e(route('admin.promos.destroy', $promo->id ?? 0)); ?>" method="POST" class="d-inline">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="btn btn-action-delete" title="Hapus"
                             onclick="return confirm('Yakin hapus promo ini?')">
                         <i class="fas fa-trash"></i>
@@ -358,29 +361,31 @@
             </div>
         </td>
     </tr>
-@empty
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
     <tr>
         <td colspan="6">
             <div class="empty-state">
                 <i class="fas fa-tags fa-4x"></i>
                 <p>Belum ada data promo</p>
-                <a href="{{ route('admin.promos.create') }}" class="btn-add">
+                <a href="<?php echo e(route('admin.promos.create')); ?>" class="btn-add">
                     <i class="fas fa-plus"></i> Tambah Promo
                 </a>
             </div>
         </td>
     </tr>
-@endforelse
+<?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        @if(is_object($promos) && method_exists($promos, 'links'))
+        <?php if(is_object($promos) && method_exists($promos, 'links')): ?>
             <div class="mt-4">
-            {{ $promos->withQueryString()->links('vendor.pagination.admin') }}
+            <?php echo e($promos->withQueryString()->links('vendor.pagination.admin')); ?>
+
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/admin/promos/index.blade.php ENDPATH**/ ?>

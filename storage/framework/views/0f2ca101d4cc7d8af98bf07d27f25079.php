@@ -1,8 +1,8 @@
-@extends('layouts.admin')
 
-@section('title', 'Reservations')
 
-@push('styles')
+<?php $__env->startSection('title', 'Reservations'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     .report-page-header {
         background: linear-gradient(135deg, #1c3451 0%, #2a4a6b 100%);
@@ -330,9 +330,9 @@
         }
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="report-page-header">
     <div class="d-flex align-items-center">
@@ -391,22 +391,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($reservations as $reservation)
-                    <tr data-status="{{ $reservation->status }}" 
-                        data-payment="{{ $reservation->payment_status }}"
-                        data-date="{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('Y-m-d') }}">
-                        <td class="fw-bold">{{ $reservation->booking_code }}</td>
+                    <?php $__empty_1 = true; $__currentLoopData = $reservations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reservation): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <tr data-status="<?php echo e($reservation->status); ?>" 
+                        data-payment="<?php echo e($reservation->payment_status); ?>"
+                        data-date="<?php echo e(\Carbon\Carbon::parse($reservation->reservation_date)->format('Y-m-d')); ?>">
+                        <td class="fw-bold"><?php echo e($reservation->booking_code); ?></td>
                         <td>
-                            {{ $reservation->customer_name }}<br>
-                            <small class="text-muted">{{ $reservation->customer_phone }}</small>
+                            <?php echo e($reservation->customer_name); ?><br>
+                            <small class="text-muted"><?php echo e($reservation->customer_phone); ?></small>
                         </td>
-                        <td>{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i') }}</td>
-                        <td>{{ $reservation->number_of_guests }} orang</td>
-                        <td>Rp {{ number_format($reservation->down_payment ?? 50000, 0, ',', '.') }}</td>
-                        <td>{!! $reservation->status_label !!}</td>
+                        <td><?php echo e(\Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y')); ?></td>
+                        <td><?php echo e(\Carbon\Carbon::parse($reservation->reservation_time)->format('H:i')); ?></td>
+                        <td><?php echo e($reservation->number_of_guests); ?> orang</td>
+                        <td>Rp <?php echo e(number_format($reservation->down_payment ?? 50000, 0, ',', '.')); ?></td>
+                        <td><?php echo $reservation->status_label; ?></td>
                         <td>
-                            @php
+                            <?php
                                 $paymentClass = match($reservation->payment_status) {
                                     'waiting_payment' => 'payment-waiting',
                                     'payment_verified' => 'payment-verified',
@@ -419,49 +419,50 @@
                                     'paid' => 'Lunas',
                                     default => 'Belum Bayar'
                                 };
-                            @endphp
-                            <span class="payment-badge {{ $paymentClass }}">
+                            ?>
+                            <span class="payment-badge <?php echo e($paymentClass); ?>">
                                 <i class="fas 
-                                    @if($reservation->payment_status == 'waiting_payment') fa-clock
-                                    @elseif($reservation->payment_status == 'payment_verified') fa-upload
-                                    @elseif($reservation->payment_status == 'paid') fa-check-circle
-                                    @else fa-times-circle
-                                    @endif me-1"></i>
-                                {{ $paymentText }}
+                                    <?php if($reservation->payment_status == 'waiting_payment'): ?> fa-clock
+                                    <?php elseif($reservation->payment_status == 'payment_verified'): ?> fa-upload
+                                    <?php elseif($reservation->payment_status == 'paid'): ?> fa-check-circle
+                                    <?php else: ?> fa-times-circle
+                                    <?php endif; ?> me-1"></i>
+                                <?php echo e($paymentText); ?>
+
                             </span>
                         </td>
                         <td>
                             <div class="d-flex gap-1">
-                                <a href="{{ route('admin.reservations.show', $reservation) }}" class="btn btn-view" title="Lihat Detail">
+                                <a href="<?php echo e(route('admin.reservations.show', $reservation)); ?>" class="btn btn-view" title="Lihat Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 
-                                @if($reservation->payment_status == 'payment_verified' && $reservation->status == 'pending')
-                                    <button onclick="showVerifyPaymentModal({{ $reservation->id }}, '{{ $reservation->booking_code }}', '{{ $reservation->payment_proof }}')" 
+                                <?php if($reservation->payment_status == 'payment_verified' && $reservation->status == 'pending'): ?>
+                                    <button onclick="showVerifyPaymentModal(<?php echo e($reservation->id); ?>, '<?php echo e($reservation->booking_code); ?>', '<?php echo e($reservation->payment_proof); ?>')" 
                                             class="btn btn-verify" title="Verifikasi Pembayaran">
                                         <i class="fas fa-credit-card"></i>
                                     </button>
-                                @endif
+                                <?php endif; ?>
                                 
-                                @if($reservation->status == 'pending')
-                                    <button onclick="showCancelModal({{ $reservation->id }})" class="btn btn-cancel-row" title="Batalkan Reservasi">
+                                <?php if($reservation->status == 'pending'): ?>
+                                    <button onclick="showCancelModal(<?php echo e($reservation->id); ?>)" class="btn btn-cancel-row" title="Batalkan Reservasi">
                                         <i class="fas fa-times"></i>
                                     </button>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="9" class="text-center text-muted py-4">Belum ada data reservasi</td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
         <div class="mt-4">
-        {{ $reservations->withQueryString()->links('vendor.pagination.admin') }}    
+        <?php echo e($reservations->withQueryString()->links('vendor.pagination.admin')); ?>    
         </div>
 
     </div>
@@ -476,7 +477,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="cancelForm" method="POST">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Alasan Pembatalan</label>
@@ -501,7 +502,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="verifyPaymentForm" method="POST">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Kode Booking</label>
@@ -530,7 +531,7 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     let currentReservationId = null;
     
@@ -594,6 +595,7 @@
         }
     });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/admin/reservations/index.blade.php ENDPATH**/ ?>

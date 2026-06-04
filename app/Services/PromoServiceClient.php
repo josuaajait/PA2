@@ -1,4 +1,5 @@
 <?php
+// app/Services/PromoServiceClient.php
 
 namespace App\Services;
 
@@ -58,8 +59,6 @@ class PromoServiceClient
         return $response->json();
     }
 
-    // app/Services/PromoServiceClient.php
-
     public function create($data)
     {
         try {
@@ -77,16 +76,6 @@ class PromoServiceClient
                 'max_usage' => $data['max_usage'] ?? null,
                 'is_active' => (bool) ($data['is_active'] ?? true),
             ];
-            
-            // 🔥 KONVERSI GAMBAR KE BASE64
-            if (isset($data['banner_image']) && $data['banner_image']) {
-                $imagePath = storage_path('app/public/' . $data['banner_image']);
-                if (file_exists($imagePath)) {
-                    $imageData = base64_encode(file_get_contents($imagePath));
-                    $payload['banner_image_base64'] = $imageData;
-                    $payload['banner_image_extension'] = pathinfo($imagePath, PATHINFO_EXTENSION);
-                }
-            }
             
             $response = Http::timeout(10)->withHeaders([
                 'Accept' => 'application/json',
@@ -113,11 +102,18 @@ class PromoServiceClient
 
     public function update($id, $data)
     {
+        $payload = $data;
+        unset($payload['banner_image']);
+
         $response = Http::timeout(5)->withHeaders($this->getHeaders())
-            ->put($this->baseUrl . '/' . $id, $data);
+            ->put($this->baseUrl . '/' . $id, $payload);
         
         if ($response->failed()) {
-            throw new \Exception('Microservice unavailable');
+            Log::error('Microservice update failed', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            throw new \Exception('Microservice unavailable: ' . $response->body());
         }
         
         return $response->json();
@@ -135,14 +131,25 @@ class PromoServiceClient
         return true;
     }
 
-    public function validatePromo($promoCode, $totalAmount)
+    // 🔥 TAMBAHKAN PARAMETER $transactionType
+    public function validatePromo($promoCode, $totalAmount, $transactionType = null)
     {
-        $response = Http::timeout(5)->post($this->baseUrl . '/validate', [
+        $payload = [
             'promo_code' => $promoCode,
             'total_amount' => $totalAmount
-        ]);
+        ];
+        
+        if ($transactionType) {
+            $payload['transaction_type'] = $transactionType;
+        }
+        
+        $response = Http::timeout(5)->post($this->baseUrl . '/validate', $payload);
         
         if ($response->failed()) {
+            Log::error('Microservice validate failed', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
             throw new \Exception('Microservice unavailable');
         }
         

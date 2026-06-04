@@ -14,6 +14,7 @@ class Menu extends Model
         'category', 
         'description', 
         'price', 
+        'image',
         'is_available', 
         'is_recommended', 
         'sort_order'

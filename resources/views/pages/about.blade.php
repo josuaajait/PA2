@@ -109,7 +109,7 @@
         </div>
     </div>
 
-    <!-- Stats Section -->
+    <!-- Stats Section 
     <div class="row g-4 mt-3 pt-3">
         <div class="col-md-3 col-6 text-center">
             <div class="stat-card p-3">
@@ -135,7 +135,8 @@
                 <small class="text-muted">Expert Staff</small>
             </div>
         </div>
-    </div>
+    </div> -->
+    
 </div>
 @endsection
 

@@ -1,8 +1,8 @@
-@extends('layouts.admin')
 
-@section('title', 'Gallery')
 
-@push('styles')
+<?php $__env->startSection('title', 'Gallery'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     .report-page-header {
         background: linear-gradient(135deg, #1c3451 0%, #2a4a6b 100%);
@@ -299,9 +299,9 @@
         }
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="report-page-header">
     <div class="d-flex align-items-center">
@@ -310,54 +310,56 @@
         </div>
         <h6>Gallery</h6>
     </div>
-    <a href="{{ route('admin.galleries.create') }}" class="btn-add">
+    <a href="<?php echo e(route('admin.galleries.create')); ?>" class="btn-add">
         <i class="fas fa-plus"></i> Tambah Gallery
     </a>
 </div>
 
-@if(session('success'))
+<?php if(session('success')): ?>
     <div class="alert alert-success">
-        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-    </div>
-@endif
+        <i class="fas fa-check-circle me-2"></i><?php echo e(session('success')); ?>
 
-{{-- Filter --}}
+    </div>
+<?php endif; ?>
+
+
 <div class="card filter-card">
     <div class="card-body">
-        <form method="GET" action="{{ route('admin.galleries.index') }}" class="row g-2 align-items-end">
+        <form method="GET" action="<?php echo e(route('admin.galleries.index')); ?>" class="row g-2 align-items-end">
             <div class="col-md-4">
                 <input type="text" name="search" class="form-control"
-                       placeholder="Cari judul…" value="{{ request('search') }}">
+                       placeholder="Cari judul…" value="<?php echo e(request('search')); ?>">
             </div>
             <div class="col-md-2">
                 <select name="type" class="form-select">
                     <option value="">Semua Tipe</option>
-                    <option value="image" {{ request('type') === 'image' ? 'selected' : '' }}>Gambar</option>
-                    <option value="video" {{ request('type') === 'video' ? 'selected' : '' }}>Video</option>
+                    <option value="image" <?php echo e(request('type') === 'image' ? 'selected' : ''); ?>>Gambar</option>
+                    <option value="video" <?php echo e(request('type') === 'video' ? 'selected' : ''); ?>>Video</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <select name="category" class="form-select">
                     <option value="">Semua Kategori</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>
-                            {{ ucfirst($cat) }}
+                    <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($cat); ?>" <?php echo e(request('category') === $cat ? 'selected' : ''); ?>>
+                            <?php echo e(ucfirst($cat)); ?>
+
                         </option>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
             </div>
             <div class="col-md-2">
                 <select name="is_featured" class="form-select">
                     <option value="">Semua</option>
-                    <option value="1" {{ request('is_featured') === '1' ? 'selected' : '' }}>Featured</option>
-                    <option value="0" {{ request('is_featured') === '0' ? 'selected' : '' }}>Non-Featured</option>
+                    <option value="1" <?php echo e(request('is_featured') === '1' ? 'selected' : ''); ?>>Featured</option>
+                    <option value="0" <?php echo e(request('is_featured') === '0' ? 'selected' : ''); ?>>Non-Featured</option>
                 </select>
             </div>
             <div class="col-md-1 d-flex gap-1">
                 <button type="submit" class="btn-filter w-100">
                     <i class="fas fa-search"></i>
                 </button>
-                <a href="{{ route('admin.galleries.index') }}" class="btn-reset">
+                <a href="<?php echo e(route('admin.galleries.index')); ?>" class="btn-reset">
                     <i class="fas fa-times"></i>
                 </a>
             </div>
@@ -365,60 +367,60 @@
     </div>
 </div>
 
-{{-- Grid --}}
-@if($galleries->isEmpty())
+
+<?php if($galleries->isEmpty()): ?>
     <div class="empty-state">
         <i class="fas fa-images d-block"></i>
         <p>Belum ada item gallery.</p>
     </div>
-@else
+<?php else: ?>
     <div class="gallery-grid">
-        @foreach($galleries as $item)
+        <?php $__currentLoopData = $galleries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="card gallery-card">
-            {{-- Thumbnail --}}
-            @if($item->type === 'image')
-                <img src="{{ asset('storage/' . $item->file_path) }}" alt="{{ $item->title }}" class="gallery-thumb">
-            @else
+            
+            <?php if($item->type === 'image'): ?>
+                <img src="<?php echo e(asset('storage/' . $item->file_path)); ?>" alt="<?php echo e($item->title); ?>" class="gallery-thumb">
+            <?php else: ?>
                 <div class="position-relative">
                     <video class="gallery-thumb-video" muted>
-                        <source src="{{ asset('storage/' . $item->file_path) }}">
+                        <source src="<?php echo e(asset('storage/' . $item->file_path)); ?>">
                     </video>
                     <div class="gallery-video-icon">
                         <i class="fas fa-play"></i>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <div class="gallery-card-body">
-                <div class="gallery-title" title="{{ $item->title }}">{{ $item->title }}</div>
+                <div class="gallery-title" title="<?php echo e($item->title); ?>"><?php echo e($item->title); ?></div>
                 <div class="gallery-meta">
-                    <span class="badge-type">{{ $item->type_label }}</span>
-                    @if($item->is_featured)
+                    <span class="badge-type"><?php echo e($item->type_label); ?></span>
+                    <?php if($item->is_featured): ?>
                         <span class="badge-featured"><i class="fas fa-star" style="font-size:9px"></i> Featured</span>
-                    @endif
-                    @if($item->category)
-                        <span>{{ ucfirst($item->category) }}</span>
-                    @endif
+                    <?php endif; ?>
+                    <?php if($item->category): ?>
+                        <span><?php echo e(ucfirst($item->category)); ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="gallery-actions">
-                    {{-- Toggle featured --}}
-                    <button class="btn-action star {{ $item->is_featured ? 'active' : '' }}"
-                            data-id="{{ $item->id }}"
-                            title="{{ $item->is_featured ? 'Hapus featured' : 'Jadikan featured' }}"
+                    
+                    <button class="btn-action star <?php echo e($item->is_featured ? 'active' : ''); ?>"
+                            data-id="<?php echo e($item->id); ?>"
+                            title="<?php echo e($item->is_featured ? 'Hapus featured' : 'Jadikan featured'); ?>"
                             onclick="toggleFeatured(this)">
                         <i class="fas fa-star"></i>
                     </button>
 
-                    {{-- Edit --}}
-                    <a href="{{ route('admin.galleries.edit', $item) }}" class="btn-action edit" title="Edit">
+                    
+                    <a href="<?php echo e(route('admin.galleries.edit', $item)); ?>" class="btn-action edit" title="Edit">
                         <i class="fas fa-pen"></i>
                     </a>
 
-                    {{-- Delete --}}
-                    <form action="{{ route('admin.galleries.destroy', $item) }}" method="POST"
+                    
+                    <form action="<?php echo e(route('admin.galleries.destroy', $item)); ?>" method="POST"
                           onsubmit="return confirm('Hapus item ini?')">
-                        @csrf
-                        @method('DELETE')
+                        <?php echo csrf_field(); ?>
+                        <?php echo method_field('DELETE'); ?>
                         <button type="submit" class="btn-action delete" title="Hapus">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -426,16 +428,17 @@
                 </div>
             </div>
         </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
-    {{-- Pagination --}}
+    
     <div class="mt-4">
-    {{ $galleries->withQueryString()->links('vendor.pagination.admin') }}
-    </div>
-@endif
+    <?php echo e($galleries->withQueryString()->links('vendor.pagination.admin')); ?>
 
-@push('scripts')
+    </div>
+<?php endif; ?>
+
+<?php $__env->startPush('scripts'); ?>
 <script>
 function toggleFeatured(btn) {
     const id = btn.dataset.id;
@@ -471,6 +474,7 @@ function toggleFeatured(btn) {
     .catch(err => console.error(err));
 }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/admin/galleries/index.blade.php ENDPATH**/ ?>

@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+{{-- Stats Cards --}}
 <div class="row">
   <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
     <div class="card">
@@ -16,7 +17,7 @@
             <div class="numbers">
               <p class="text-sm mb-0 text-uppercase font-weight-bold">Today's Reservations</p>
               <h5 class="font-weight-bolder mb-0">
-                {{ $stats['today_reservations'] }}
+                {{ $stats['today_reservations'] ?? 0 }}
               </h5>
             </div>
           </div>
@@ -38,7 +39,7 @@
             <div class="numbers">
               <p class="text-sm mb-0 text-uppercase font-weight-bold">Today's Tickets</p>
               <h5 class="font-weight-bolder mb-0">
-                {{ $stats['today_tickets'] }}
+                {{ $stats['today_tickets'] ?? 0 }}
               </h5>
             </div>
           </div>
@@ -60,7 +61,7 @@
             <div class="numbers">
               <p class="text-sm mb-0 text-uppercase font-weight-bold">Today's Income</p>
               <h5 class="font-weight-bolder mb-0">
-                Rp {{ number_format($stats['today_income'], 0, ',', '.') }}
+                Rp {{ number_format($stats['today_income'] ?? 0, 0, ',', '.') }}
               </h5>
             </div>
           </div>
@@ -82,7 +83,7 @@
             <div class="numbers">
               <p class="text-sm mb-0 text-uppercase font-weight-bold">Pending Reservations</p>
               <h5 class="font-weight-bolder mb-0">
-                {{ $stats['pending_reservations'] }}
+                {{ $stats['pending_reservations'] ?? 0 }}
               </h5>
             </div>
           </div>
@@ -97,6 +98,98 @@
   </div>
 </div>
 
+{{-- Additional Stats Row --}}
+<div class="row mt-4">
+  <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+    <div class="card">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-8">
+            <div class="numbers">
+              <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Tickets Sold</p>
+              <h5 class="font-weight-bolder mb-0">
+                {{ $stats['total_tickets_sold'] ?? 0 }}
+              </h5>
+            </div>
+          </div>
+          <div class="col-4 text-end">
+            <div class="icon icon-shape bg-gradient-info shadow-info text-center rounded-circle">
+              <i class="fas fa-ticket-alt text-lg opacity-10" aria-hidden="true"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+    <div class="card">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-8">
+            <div class="numbers">
+              <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Income (Tickets)</p>
+              <h5 class="font-weight-bolder mb-0">
+                Rp {{ number_format($stats['total_ticket_income'] ?? 0, 0, ',', '.') }}
+              </h5>
+            </div>
+          </div>
+          <div class="col-4 text-end">
+            <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+              <i class="fas fa-money-bill-wave text-lg opacity-10" aria-hidden="true"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+    <div class="card">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-8">
+            <div class="numbers">
+              <p class="text-sm mb-0 text-uppercase font-weight-bold">Avg. Ticket Price</p>
+              <h5 class="font-weight-bolder mb-0">
+                Rp {{ number_format($stats['avg_ticket_price'] ?? 0, 0, ',', '.') }}
+              </h5>
+            </div>
+          </div>
+          <div class="col-4 text-end">
+            <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+              <i class="fas fa-chart-line text-lg opacity-10" aria-hidden="true"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-xl-3 col-sm-6">
+    <div class="card">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-8">
+            <div class="numbers">
+              <p class="text-sm mb-0 text-uppercase font-weight-bold">Pending Payments</p>
+              <h5 class="font-weight-bolder mb-0">
+                {{ $stats['pending_payments'] ?? 0 }}
+              </h5>
+            </div>
+          </div>
+          <div class="col-4 text-end">
+            <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
+              <i class="fas fa-hourglass-half text-lg opacity-10" aria-hidden="true"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Chart --}}
 <div class="row mt-4">
   <div class="col-lg-7 mb-lg-0 mb-4">
     <div class="card z-index-2">
@@ -104,7 +197,7 @@
         <h6>Weekly Overview</h6>
         <p class="text-sm">
           <i class="fa fa-arrow-up text-success"></i>
-          <span class="font-weight-bold">4% more</span> than last week
+          <span class="font-weight-bold">Performance</span> last 7 days
         </p>
       </div>
       <div class="card-body p-3">
@@ -154,29 +247,48 @@
           <div class="list-group-item border-0 d-flex justify-content-between ps-0 mb-2 border-radius-lg">
             <div class="d-flex align-items-center">
               <div class="icon icon-shape icon-sm me-3 bg-gradient-info shadow text-center">
-                <i class="fas fa-star text-white opacity-10"></i>
+                <i class="fas fa-ticket-alt text-white opacity-10"></i>
               </div>
               <div class="d-flex flex-column">
-                <h6 class="mb-1 text-dark text-sm">Pending Testimonials</h6>
+                <h6 class="mb-1 text-dark text-sm">Ticket Types</h6>
               </div>
             </div>
             <div class="d-flex">
-              <h4 class="mb-0 font-weight-bolder">{{ $stats['pending_testimonials'] }}</h4>
+              <div class="d-flex gap-2">
+                <span class="badge bg-primary">Adult: {{ \App\Models\PoolTicket::where('ticket_type', 'adult')->count() }}</span>
+                <span class="badge bg-info">Child: {{ \App\Models\PoolTicket::where('ticket_type', 'child')->count() }}</span>
+                <span class="badge bg-success">Family: {{ \App\Models\PoolTicket::where('ticket_type', 'family')->count() }}</span>
+              </div>
             </div>
           </div>
           
           <div class="list-group-item border-0 d-flex justify-content-between ps-0 mb-2 border-radius-lg">
             <div class="d-flex align-items-center">
               <div class="icon icon-shape icon-sm me-3 bg-gradient-warning shadow text-center">
-                <i class="fas fa-images text-white opacity-10"></i>
+                <i class="fas fa-clock text-white opacity-10"></i>
               </div>
               <div class="d-flex flex-column">
-                <h6 class="mb-1 text-dark text-sm">Gallery Items</h6>
+                <h6 class="mb-1 text-dark text-sm">Pending Testimonials</h6>
               </div>
             </div>
             <div class="d-flex">
-              <h4 class="mb-0 font-weight-bolder">{{ \App\Models\Gallery::count() }}</h4>
+              <h4 class="mb-0 font-weight-bolder">{{ $stats['pending_testimonials'] ?? 0 }}</h4>
             </div>
+          </div>
+                    
+          <div class="list-group-item border-0 d-flex justify-content-between ps-0 mb-2 border-radius-lg">
+              <div class="d-flex align-items-center">
+                  <div class="icon icon-shape icon-sm me-3 bg-gradient-info shadow text-center">
+                      <i class="fas fa-images text-white opacity-100"></i>
+                  </div>
+                  <div class="d-flex flex-column">
+                      <h6 class="mb-1 text-dark text-sm">Gallery Items</h6>
+                  </div>
+              </div>
+              <div class="d-flex">
+                  <h4 class="mb-0 font-weight-bolder">{{ \App\Models\Gallery::count() }}</h4>
+              </div>
+          </div>
           </div>
         </div>
       </div>
@@ -184,6 +296,7 @@
   </div>
 </div>
 
+{{-- Recent Tables --}}
 <div class="row mt-4">
   <div class="col-12">
     <div class="card">
@@ -228,6 +341,84 @@
                 </td>
                 <td class="align-middle">
                   <a href="{{ route('admin.reservations.show', $reservation) }}" class="btn btn-link text-dark px-3 mb-0">
+                    <i class="fas fa-eye text-dark me-2" aria-hidden="true"></i> View
+                  </a>
+                </td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Recent Tickets --}}
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header pb-0">
+        <h6>Recent Ticket Purchases</h6>
+      </div>
+      <div class="card-body px-0 pt-0 pb-2">
+        <div class="table-responsive p-0">
+          <table class="table align-items-center mb-0">
+            <thead>
+              <tr>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ticket Code</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Customer</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Visit Date</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Qty</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Total</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                <th class="text-secondary opacity-7"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach(\App\Models\PoolTicket::latest()->take(5)->get() as $ticket)
+              <tr>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">{{ $ticket->ticket_code }}</h6>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <p class="text-xs font-weight-bold mb-0">{{ $ticket->customer_name }}</p>
+                  <p class="text-xs text-secondary mb-0">{{ $ticket->customer_phone }}</p>
+                </td>
+                <td class="align-middle text-center">
+                  <span class="text-secondary text-xs font-weight-bold">{{ $ticket->visit_date->format('d M Y') }}</span>
+                </td>
+                <td class="align-middle text-center">
+                  @if($ticket->ticket_type == 'adult')
+                    <span class="badge bg-primary">Dewasa</span>
+                  @elseif($ticket->ticket_type == 'child')
+                    <span class="badge bg-info">Anak</span>
+                  @else
+                    <span class="badge bg-success">Keluarga</span>
+                  @endif
+                </td>
+                <td class="align-middle text-center">
+                  <span class="text-secondary text-xs font-weight-bold">{{ $ticket->number_of_tickets }}</span>
+                </td>
+                <td class="align-middle text-center">
+                  <span class="text-secondary text-xs font-weight-bold">Rp {{ number_format($ticket->total_amount, 0, ',', '.') }}</span>
+                </td>
+                <td class="align-middle text-center text-sm">
+                  @if($ticket->payment_status == 'paid')
+                    <span class="badge bg-success">Lunas</span>
+                  @elseif($ticket->payment_status == 'payment_verified')
+                    <span class="badge bg-info">Menunggu Verifikasi</span>
+                  @else
+                    <span class="badge bg-warning">Belum Bayar</span>
+                  @endif
+                </td>
+                <td class="align-middle">
+                  <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-link text-dark px-3 mb-0">
                     <i class="fas fa-eye text-dark me-2" aria-hidden="true"></i> View
                   </a>
                 </td>
@@ -308,4 +499,4 @@
     }
   });
 </script>
-@endpush    
+@endpush

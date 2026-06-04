@@ -122,7 +122,7 @@
                 </a>
                 <a class="nav-custom-link {{ request()->routeIs('reservation.table*') ? 'active' : '' }}"
                    href="{{ route('reservation.table') }}">
-                    <i class="fas fa-chair me-1"></i>Reservasi Meja
+                    <i class="fas fa-chair me-1"></i>Book a Table
                 </a>
                 <a class="nav-custom-link {{ request()->routeIs('branding.promos*') ? 'active' : '' }}"
                    href="{{ route('branding.promos') }}">

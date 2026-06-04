@@ -75,7 +75,6 @@
         padding: 28px 32px;
     }
 
-    /* Form styling */
     .form-label {
         font-size: 13px;
         font-weight: 600;
@@ -136,7 +135,6 @@
         color: #374151;
     }
 
-    /* Section divider */
     .form-section {
         border-bottom: 1px solid #f0f0f0;
         padding-bottom: 20px;
@@ -162,65 +160,6 @@
         background: #f0f0f0;
     }
 
-    /* Current banner */
-    .current-banner {
-        border: 2px solid #f0f0f0;
-        border-radius: 12px;
-        overflow: hidden;
-        position: relative;
-        display: inline-block;
-    }
-
-    .current-banner img {
-        width: 200px;
-        height: 120px;
-        object-fit: cover;
-        display: block;
-    }
-
-    .current-banner .banner-label {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(28,52,81,0.7);
-        color: #fff;
-        font-size: 11px;
-        text-align: center;
-        padding: 4px;
-    }
-
-    /* Image preview */
-    .image-preview-box {
-        border: 2px dashed #e5e7eb;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        color: #9ca3af;
-        font-size: 13px;
-        min-height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 6px;
-        transition: border-color 0.2s;
-    }
-
-    .image-preview-box.has-image {
-        border-style: solid;
-        border-color: #c1a067;
-        padding: 10px;
-    }
-
-    .image-preview-box img {
-        max-width: 100%;
-        max-height: 140px;
-        border-radius: 8px;
-        object-fit: cover;
-    }
-
-    /* Status badge */
     .promo-status-badge {
         display: inline-flex;
         align-items: center;
@@ -236,7 +175,6 @@
     .status-expired  { background: rgba(220,38,38,0.1);   color: #dc2626; }
     .status-upcoming { background: rgba(37,99,235,0.1);   color: #2563eb; }
 
-    /* Action buttons */
     .btn-submit {
         background: #c1a067;
         color: #fff;
@@ -298,12 +236,10 @@
 
 <div class="card report-main-card">
     <div class="card-body">
-        {{-- SESUDAH (BENAR) --}}
-        <form action="{{ route('admin.promos.update', $promo->id ?? $promo['id'] ?? 0) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.promos.update', $promo->id ?? $promo['id'] ?? 0) }}" method="POST">
             @csrf
             @method('PUT')
 
-            <!-- Info Dasar -->
             <div class="form-section">
                 <div class="form-section-title">Informasi Dasar</div>
                 <div class="row">
@@ -326,7 +262,6 @@
                 </div>
             </div>
 
-            <!-- Diskon -->
             <div class="form-section">
                 <div class="form-section-title">Pengaturan Diskon</div>
                 <div class="row">
@@ -357,7 +292,7 @@
                         </select>
                         @error('promo_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Minimal Pembelian</label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
@@ -366,7 +301,7 @@
                         <div class="form-text">Kosongkan jika tidak ada minimal</div>
                         @error('min_purchase')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Maksimal Diskon</label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
@@ -375,12 +310,12 @@
                         <div class="form-text">Kosongkan jika tidak ada batas</div>
                         @error('max_discount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Maksimal Penggunaan</label>
                         <input type="number" name="max_usage" class="form-control @error('max_usage') is-invalid @enderror" value="{{ old('max_usage', $promo->max_usage) }}" placeholder="Kosongkan jika unlimited">
                         @error('max_usage')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Sudah Digunakan</label>
                         <input type="number" name="used_count" class="form-control" value="{{ old('used_count', $promo->used_count) }}" readonly>
                         <div class="form-text">Otomatis terupdate</div>
@@ -388,7 +323,6 @@
                 </div>
             </div>
 
-            <!-- Periode -->
             <div class="form-section">
                 <div class="form-section-title">Periode Promo</div>
                 <div class="row">
@@ -407,29 +341,10 @@
                 </div>
             </div>
 
-            <!-- Banner & Status -->
             <div class="form-section" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
-                <div class="form-section-title">Banner & Status</div>
+                <div class="form-section-title">Status Promo</div>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        @if($promo->banner_image)
-                            <label class="form-label">Banner Saat Ini</label>
-                            <div class="mb-3">
-                                <div class="current-banner">
-                                    <img src="{{ asset('storage/' . $promo->banner_image) }}" alt="Banner">
-                                    <div class="banner-label">Banner aktif</div>
-                                </div>
-                            </div>
-                        @endif
-                        <label class="form-label">{{ $promo->banner_image ? 'Ganti Gambar Banner' : 'Gambar Banner' }}</label>
-                        <input type="file" name="banner_image" class="form-control @error('banner_image') is-invalid @enderror" accept="image/*" id="bannerInput">
-                        <div class="form-text">Kosongkan jika tidak ingin mengubah. Format: JPG, JPEG, PNG. Maks: 2MB</div>
-                        @error('banner_image')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <div class="image-preview-box mt-2" id="imagePreviewBox" style="display:none;">
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Status Promo</label>
+                    <div class="col-md-6 mb-0">
                         <div class="mb-3">
                             @if($promo->is_active && now()->between($promo->start_date, $promo->end_date))
                                 <span class="promo-status-badge status-active"><i class="fas fa-circle" style="font-size:8px;"></i> Sedang Berlangsung</span>
@@ -441,7 +356,7 @@
                                 <span class="promo-status-badge status-upcoming"><i class="fas fa-hourglass-start"></i> Akan Datang</span>
                             @endif
                         </div>
-                        <div class="form-check mt-2">
+                        <div class="form-check">
                             <input type="checkbox" name="is_active" class="form-check-input" value="1" id="isActive"
                                    {{ old('is_active', $promo->is_active) ? 'checked' : '' }}>
                             <label class="form-check-label fw-semibold" for="isActive">Aktifkan Promo</label>
@@ -450,7 +365,6 @@
                 </div>
             </div>
 
-            <!-- Action -->
             <div class="d-flex justify-content-end gap-2 mt-4 pt-4" style="border-top: 1px solid #f0f0f0;">
                 <a href="{{ route('admin.promos.index') }}" class="btn-cancel">
                     <i class="fas fa-times"></i> Batal
@@ -465,25 +379,6 @@
 
 @push('scripts')
 <script>
-    document.getElementById('bannerInput')?.addEventListener('change', function () {
-        const box = document.getElementById('imagePreviewBox');
-        if (this.files && this.files[0]) {
-            box.style.display = 'flex';
-            box.innerHTML = '';
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                box.classList.add('has-image');
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                box.appendChild(img);
-            };
-            reader.readAsDataURL(this.files[0]);
-        } else {
-            box.style.display = 'none';
-            box.classList.remove('has-image');
-        }
-    });
-
     document.getElementById('discountType')?.addEventListener('change', function () {
         const symbol = document.getElementById('discountSymbol');
         const label  = document.getElementById('discountValueLabel');
