@@ -232,10 +232,6 @@
                     </button>
 
                     <div class="form-footer">
-                        <div class="form-check">
-                            <input type="checkbox" name="remember" class="form-check-input" id="remember">
-                            <label class="form-check-label ms-1" for="remember">Ingatkan saya</label>
-                        </div>
                         @if(Route::has('password.request'))
                             <a href="{{ route('password.request') }}">Lupa Password?</a>
                         @elseif(Route::has('password.otp.form'))
