@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Lupa Password - Caldera Resto & Pool')
 
-@section('content')
+<?php $__env->startSection('title', 'Lupa Password - Caldera Resto & Pool'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
@@ -12,18 +12,19 @@
                     <div class="section-divider" style="width: 50px; height: 3px; background: #c1a067; margin: 12px auto 0; border-radius: 2px;"></div>
                 </div>
                 <div class="card-body p-4">
-                    @if(session('success'))
+                    <?php if(session('success')): ?>
                         <div class="alert alert-success" style="background: #e8f5e9; border-color: #c1a067; color: #2e7d32; border-radius: 12px;">
-                            {{ session('success') }}
+                            <?php echo e(session('success')); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?>
 
                     <p class="text-muted text-center mb-4" style="color: #6c757d !important;">
                         Masukkan email Anda, kami akan mengirimkan link reset password
                     </p>
 
-                    <form method="POST" action="{{ route('password.otp.send') }}">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('password.otp.send')); ?>">
+                        <?php echo csrf_field(); ?>
                         <div class="mb-4">
                             <label class="form-label" style="color: #1c3451; font-weight: 500;">Alamat Email</label>
                             <input type="email" name="email" class="form-control" required 
@@ -38,7 +39,7 @@
                     </form>
 
                     <div class="text-center mt-4">
-                        <a href="{{ route('login') }}" style="color: #c1a067; text-decoration: none; font-weight: 500;">
+                        <a href="<?php echo e(route('login')); ?>" style="color: #c1a067; text-decoration: none; font-weight: 500;">
                             <i class="fas fa-arrow-left me-1"></i> Kembali ke Login
                         </a>
                     </div>
@@ -47,9 +48,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
     
@@ -71,4 +72,5 @@
         outline: none;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/auth/forgot-password.blade.php ENDPATH**/ ?>

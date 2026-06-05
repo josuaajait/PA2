@@ -219,8 +219,8 @@
                     <?php echo csrf_field(); ?>
                     
                     <div class="form-group">
-                        <input type="text" name="email" class="form-control" 
-                               value="<?php echo e(old('email')); ?>" placeholder="Nama" required>
+                        <input type="email" name="email" class="form-control" 
+                               value="<?php echo e(old('email')); ?>" placeholder="Masukkan Email" required>
                     </div>
                     
                     <div class="form-group">

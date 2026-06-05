@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Write a Review - Caldera Resto & Pool')
 
-@section('content')
+<?php $__env->startSection('title', 'Write a Review - Caldera Resto & Pool'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold mb-2" style="font-family: 'Playfair Display', serif; color: #1c3451;">Write a Review</h1>
@@ -22,39 +22,54 @@
                 </div>
                 
                 <div class="card-body p-4 p-lg-5">
-                    @if(session('success'))
+                    <?php if(session('success')): ?>
                         <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                            <i class="fas fa-check-circle me-2"></i> <?php echo e(session('success')); ?>
+
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                    @endif
+                    <?php endif; ?>
                     
-                    @if($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i> Please fix the following errors:
                             <ul class="mb-0 mt-2">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
+                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li><?php echo e($error); ?></li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </ul>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                    @endif
+                    <?php endif; ?>
                     
-                    <form action="{{ route('branding.testimonials.store') }}" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route('branding.testimonials.store')); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
                         
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-user me-1" style="color: #c1a067;"></i> Your Name <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" name="customer_name" class="form-control caldera-input @error('customer_name') is-invalid @enderror" 
-                                       value="{{ old('customer_name', Auth::user()->name ?? '') }}" required>
-                                @error('customer_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <input type="text" name="customer_name" class="form-control caldera-input <?php $__errorArgs = ['customer_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                       value="<?php echo e(old('customer_name', Auth::user()->name ?? '')); ?>" required>
+                                <?php $__errorArgs = ['customer_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             
-                            {{-- BAGIAN EMAIL DIHAPUS --}}
+                            
                             
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
@@ -62,8 +77,8 @@
                                 </label>
                                 <select name="service_type" class="form-control caldera-input">
                                     <option value="">Select Service</option>
-                                    <option value="restaurant" {{ old('service_type') == 'restaurant' ? 'selected' : '' }}>🍽️ Restaurant</option>
-                                    <option value="pool" {{ old('service_type') == 'pool' ? 'selected' : '' }}>🏊 Pool</option>
+                                    <option value="restaurant" <?php echo e(old('service_type') == 'restaurant' ? 'selected' : ''); ?>>🍽️ Restaurant</option>
+                                    <option value="pool" <?php echo e(old('service_type') == 'pool' ? 'selected' : ''); ?>>🏊 Pool</option>
                                 </select>
                             </div>
                             
@@ -72,7 +87,7 @@
                                     <i class="fas fa-calendar-day me-1" style="color: #c1a067;"></i> Visit Date
                                 </label>
                                 <input type="date" name="visit_date" class="form-control caldera-input" 
-                                       value="{{ old('visit_date', date('Y-m-d')) }}" max="{{ date('Y-m-d') }}">
+                                       value="<?php echo e(old('visit_date', date('Y-m-d'))); ?>" max="<?php echo e(date('Y-m-d')); ?>">
                             </div>
                             
                             <div class="col-12">
@@ -85,24 +100,45 @@
                                     <i class="far fa-star fa-2x" data-value="3"></i>
                                     <i class="far fa-star fa-2x" data-value="4"></i>
                                     <i class="far fa-star fa-2x" data-value="5"></i>
-                                    <input type="hidden" name="rating" id="rating" value="{{ old('rating') }}" required>
+                                    <input type="hidden" name="rating" id="rating" value="<?php echo e(old('rating')); ?>" required>
                                 </div>
-                                @error('rating')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                <?php $__errorArgs = ['rating'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="text-danger small mt-1"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             
                             <div class="col-12">
                                 <label class="form-label fw-semibold" style="color: #1c3451;">
                                     <i class="fas fa-comment me-1" style="color: #c1a067;"></i> Your Review <span class="text-danger">*</span>
                                 </label>
-                                <textarea name="comment" class="form-control caldera-input @error('comment') is-invalid @enderror" 
-                                          rows="5" placeholder="Tell us about your experience..." required>{{ old('comment') }}</textarea>
+                                <textarea name="comment" class="form-control caldera-input <?php $__errorArgs = ['comment'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                          rows="5" placeholder="Tell us about your experience..." required><?php echo e(old('comment')); ?></textarea>
                                 <small class="text-muted">Minimum 10 characters</small>
-                                @error('comment')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <?php $__errorArgs = ['comment'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                         
                         <div class="d-flex gap-3 justify-content-center mt-5">
-                            <a href="{{ route('branding.testimonials') }}" class="btn btn-outline-custom px-4">
+                            <a href="<?php echo e(route('branding.testimonials')); ?>" class="btn btn-outline-custom px-4">
                                 <i class="fas fa-arrow-left me-2"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-submit px-5">
@@ -123,7 +159,7 @@
     </div>
 </div>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
 
@@ -258,9 +294,9 @@ body.dark-mode .btn-outline-custom:hover {
     color: #1c3451;
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const stars = document.querySelectorAll('.rating-input i');
@@ -299,5 +335,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/pages/testimonials-create.blade.php ENDPATH**/ ?>

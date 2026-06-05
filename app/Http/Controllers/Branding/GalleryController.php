@@ -30,8 +30,13 @@ class GalleryController extends Controller
             ->where('type', 'image')
             ->orderBy('sort_order')
             ->paginate(24);
-            
-        return view('pages.gallery-category', compact('galleries', 'category'));
+        
+        // Ambil data untuk keperluan view gallery
+        $featured = Gallery::where('is_featured', true)->where('type', 'image')->first();
+        $categories = Gallery::select('category')->whereNotNull('category')->distinct()->pluck('category');
+        
+        // Kirim variabel tambahan 'currentCategory' agar view bisa menyesuaikan judul
+        return view('pages.gallery', compact('galleries', 'featured', 'categories', 'category'));
     }
     
     public function show(Gallery $gallery)
