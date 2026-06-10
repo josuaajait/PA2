@@ -6,8 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 class User extends Authenticatable implements MustVerifyEmail, JWTSubject
 {
     use HasFactory, Notifiable;
@@ -30,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         'otp_send_count',
         'otp_send_window_start',
         'otp_verified',
+        'fcm_token',
     ];
 
     /**

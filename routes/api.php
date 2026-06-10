@@ -20,6 +20,11 @@ Route::get('/promos',         [App\Http\Controllers\Api\PromoController::class, 
 Route::get('/gallery',        [App\Http\Controllers\Api\GalleryController::class,     'index']);
 Route::get('/testimonials',   [App\Http\Controllers\Api\TestimonialController::class, 'index']);
 
+// Lupa Password Flow (API)
+Route::post('/forgot-password', [\App\Http\Controllers\Api\Auth\ForgotPasswordController::class, 'sendResetOtp']);
+Route::post('/forgot-password/verify', [\App\Http\Controllers\Api\Auth\ForgotPasswordController::class, 'verifyOtp']);
+Route::post('/reset-password', [\App\Http\Controllers\Api\Auth\ForgotPasswordController::class, 'resetPassword']);
+    
 // ── Protected Routes (perlu JWT token) ───────────────────────────────────────
 Route::middleware('jwt.auth')->group(function () {
 
@@ -31,6 +36,14 @@ Route::middleware('jwt.auth')->group(function () {
     // OTP
     Route::post('/otp/send',   [OtpController::class, 'send']);
     Route::post('/otp/verify', [OtpController::class, 'verify']);
+
+    // Notifikasi
+    Route::get('/notifications/latest', [\App\Http\Controllers\NotificationController::class, 'getLatest']);
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'getAll']);
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+    Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'apiMarkAsRead']);
+    Route::post('/update-fcm-token', [\App\Http\Controllers\Api\Auth\AuthController::class, 'updateFcmToken']);
+
 
     // Profile
     Route::get('/profile', [App\Http\Controllers\Api\ProfileController::class, 'show']);
@@ -47,10 +60,12 @@ Route::middleware('jwt.auth')->group(function () {
         Route::post('/reservations',         [App\Http\Controllers\Api\ReservationController::class, 'store']);
         Route::get('/reservations/{id}',     [App\Http\Controllers\Api\ReservationController::class, 'show']);
         Route::post('/reservations/{id}/cancel', [App\Http\Controllers\Api\ReservationController::class, 'cancel']);
+        Route::post('/reservations/{bookingCode}/payment', [App\Http\Controllers\Reservation\PaymentController::class, 'uploadTablePayment']);
 
         // Tiket kolam
         Route::get('/tickets',       [App\Http\Controllers\Api\TicketController::class, 'index']);
         Route::post('/tickets',      [App\Http\Controllers\Api\TicketController::class, 'store']);
         Route::get('/tickets/{id}',  [App\Http\Controllers\Api\TicketController::class, 'show']);
+        Route::post('/tickets/{ticketCode}/payment',        [App\Http\Controllers\Api\TicketController::class, 'uploadPayment']);
     });
 });

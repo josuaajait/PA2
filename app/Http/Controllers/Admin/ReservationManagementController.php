@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\PaymentVerifiedNotification;
 
+// FIREBASE SDK IMPORTS
+use Kreait\Laravel\Firebase\Facades\Firebase;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Illuminate\Support\Str;
+
 class ReservationManagementController extends Controller
 {
     public function index(Request $request)
@@ -55,7 +60,25 @@ class ReservationManagementController extends Controller
             // 🔥 Kirim notifikasi konfirmasi ke customer
             $customer = User::where('email', $reservation->customer_email)->first();
             if ($customer) {
+                // Notifikasi Database Lonceng Aplikasi
                 $customer->notify(new ReservationNotification($reservation, 'confirmed'));
+
+                // 👇 TEMBAK FIREBASE PUSH NOTIFICATION 👇
+                if ($customer->fcm_token) {
+                    $pesanFcm = CloudMessage::fromArray([
+                        'token' => $customer->fcm_token,
+                        'notification' => [
+                            'title' => 'Reservasi Meja Dikonfirmasi! 📅',
+                            'body'  => "Reservasi meja Anda dengan kode {$reservation->booking_code} telah dikonfirmasi oleh admin. Sampai jumpa di Caldera!"
+                        ],
+                    ]);
+
+                    try {
+                        Firebase::messaging()->send($pesanFcm);
+                    } catch (\Exception $e) {
+                        Log::error('FCM Confirm Error: ' . $e->getMessage());
+                    }
+                }
             }
             
             DB::commit();
@@ -84,7 +107,25 @@ class ReservationManagementController extends Controller
             // 🔥 Kirim notifikasi pembatalan ke customer
             $customer = User::where('email', $reservation->customer_email)->first();
             if ($customer) {
+                // Notifikasi Database Lonceng Aplikasi
                 $customer->notify(new ReservationNotification($reservation, 'cancelled'));
+
+                // 👇 TEMBAK FIREBASE PUSH NOTIFICATION 👇
+                if ($customer->fcm_token) {
+                    $pesanFcm = CloudMessage::fromArray([
+                        'token' => $customer->fcm_token,
+                        'notification' => [
+                            'title' => 'Reservasi Meja Dibatalkan ❌',
+                            'body'  => "Reservasi meja {$reservation->booking_code} dibatalkan. Alasan: " . $validated['cancellation_reason']
+                        ],
+                    ]);
+
+                    try {
+                        Firebase::messaging()->send($pesanFcm);
+                    } catch (\Exception $e) {
+                        Log::error('FCM Cancel Error: ' . $e->getMessage());
+                    }
+                }
             }
             
             return redirect()->back()->with('success', 'Reservasi berhasil dibatalkan');
@@ -147,7 +188,7 @@ class ReservationManagementController extends Controller
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
-        /**
+    /**
      * Verifikasi pembayaran reservasi (dipanggil oleh admin)
      */
     public function verifyPayment($id)
@@ -176,6 +217,7 @@ class ReservationManagementController extends Controller
 
         return redirect()->back()->with('success', 'Pembayaran berhasil diverifikasi dan reservasi dikonfirmasi.');
     }
+    
 
     /**
      * Kirim notifikasi ke customer bahwa pembayaran sudah diverifikasi
@@ -192,8 +234,26 @@ class ReservationManagementController extends Controller
         }
 
         if ($customer) {
+            // Notifikasi Database Lonceng Aplikasi
             $customer->notify(new PaymentVerifiedNotification($reservation));
             
+            // 👇 TEMBAK FIREBASE PUSH NOTIFICATION 👇
+            if ($customer->fcm_token) {
+                $pesanFcm = CloudMessage::fromArray([
+                    'token' => $customer->fcm_token,
+                    'notification' => [
+                        'title' => '✅ Pembayaran Telah Diverifikasi!',
+                        'body'  => "Pembayaran DP untuk reservasi {$reservation->booking_code} telah diverifikasi oleh admin."
+                    ],
+                ]);
+
+                try {
+                    Firebase::messaging()->send($pesanFcm);
+                } catch (\Exception $e) {
+                    Log::error('FCM Payment Verified Error: ' . $e->getMessage());
+                }
+            }
+
             Log::info('Notifikasi pembayaran diverifikasi dikirim ke customer', [
                 'customer_id' => $customer->id,
                 'customer_email' => $customer->email,

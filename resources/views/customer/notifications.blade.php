@@ -106,11 +106,8 @@
                 </div>
                 @if($notifications->hasPages())
                 <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-0">
-                    {{ $notifications->links() }}
-                </div>
                 @endif
             </div>
-        </div>
     </div>
 </div>
 
@@ -137,13 +134,8 @@
 .notification-item {
     border-radius: 16px;
     background: #fff;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(28, 52, 81, 0.08);
-}
-
 .notification-item:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(28, 52, 81, 0.1);
 }
 
 .notification-item.unread {

@@ -7,6 +7,13 @@ use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // <-- DITAMBAHKAN
+use Illuminate\Support\Facades\DB;  // <-- DITAMBAHKAN
+use Illuminate\Support\Str;          // <-- DITAMBAHKAN
+
+// FIREBASE SDK IMPORTS
+use Kreait\Laravel\Firebase\Facades\Firebase;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 class TestimonialManagementController extends Controller
 {
@@ -76,8 +83,11 @@ class TestimonialManagementController extends Controller
         $testimonial = Testimonial::findOrFail($id);
         $testimonial->is_approved = true;
         $testimonial->approved_at = now();
-$testimonial->approved_by = Auth::id();
+        $testimonial->approved_by = Auth::id();
         $testimonial->save();
+
+        // 🔥 Kirim Notifikasi Push & Database ke Customer
+        $this->sendApproveNotification($testimonial);
         
         return redirect()->back()->with('success', 'Testimoni berhasil disetujui.');
     }
@@ -138,11 +148,18 @@ $testimonial->approved_by = Auth::id();
             return response()->json(['success' => false, 'message' => 'Tidak ada testimoni dipilih.']);
         }
         
-        Testimonial::whereIn('id', $ids)->update([
-            'is_approved' => true,
-            'approved_at' => now(),
-            'approved_by' => Auth::id(),
-        ]);
+        // Loop satu per satu agar update data dan kirim notifikasi sinkron
+        $testimonials = Testimonial::whereIn('id', $ids)->get();
+        foreach ($testimonials as $testimonial) {
+            $testimonial->update([
+                'is_approved' => true,
+                'approved_at' => now(),
+                'approved_by' => Auth::id(),
+            ]);
+
+            // Kirim Notifikasi Push & Database ke masing-masing customer
+            $this->sendApproveNotification($testimonial);
+        }
         
         return response()->json(['success' => true, 'message' => count($ids) . ' testimoni disetujui.']);
     }
@@ -222,5 +239,57 @@ $testimonial->approved_by = Auth::id();
         return response($csv, 200)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    /**
+     * FUNGSI PEMBANTU: Kirim Notifikasi Persetujuan Testimoni ke Customer
+     */
+    private function sendApproveNotification(Testimonial $testimonial)
+    {
+        $customer = null;
+
+        // Cari customer berdasarkan user_id (jika ada relasi) atau dari customer_email
+        if (isset($testimonial->user_id)) {
+            $customer = \App\Models\User::find($testimonial->user_id);
+        } elseif (isset($testimonial->customer_email)) {
+            $customer = \App\Models\User::where('email', $testimonial->customer_email)->first();
+        }
+
+        if ($customer) {
+            $judul = 'Testimoni Anda Disetujui! ⭐';
+            $pesanBody = 'Terima kasih! Ulasan Anda tentang layanan Caldera telah disetujui oleh admin dan kini tampil di halaman utama.';
+
+            // 1. Simpan ke database notifications (Agar muncul di lonceng aplikasi)
+            DB::table('notifications')->insert([
+                'id'              => Str::uuid(),
+                'type'            => 'App\Notifications\SystemNotification',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id'   => $customer->id,
+                'data'            => json_encode([
+                    'title' => $judul,
+                    'body'  => $pesanBody,
+                ]),
+                'read_at'         => null,
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+
+            // 2. Tembak ke Firebase (Agar HP bergetar di luar aplikasi)
+            if ($customer->fcm_token) {
+                $pesanFcm = CloudMessage::fromArray([
+                    'token' => $customer->fcm_token,
+                    'notification' => [
+                        'title' => $judul,
+                        'body'  => $pesanBody
+                    ],
+                ]);
+
+                try {
+                    Firebase::messaging()->send($pesanFcm);
+                } catch (\Exception $e) {
+                    Log::error('FCM Testimonial Approve Error: ' . $e->getMessage());
+                }
+            }
+        }
     }
 }
