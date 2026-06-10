@@ -49,7 +49,7 @@ class AuthController extends Controller
             'user_id'    => $user->id,
             'otp'        => $otp,
             'expires_at' => now()->addMinutes(10),
-            'used'       => false,
+            'is_used'       => false,
         ]);
 
         try {
