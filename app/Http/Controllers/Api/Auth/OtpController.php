@@ -93,7 +93,7 @@ class OtpController extends Controller
             ->latest()
             ->first();
 
-        if (!$record || !password_verify($request->otp, $record->otp)) {
+        if (!$record || $request->otp !== $record->otp) {
             return response()->json([
                 'success' => false,
                 'message' => 'OTP tidak valid atau sudah kadaluarsa.',
