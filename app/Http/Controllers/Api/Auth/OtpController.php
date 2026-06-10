@@ -48,7 +48,7 @@ class OtpController extends Controller
 
         EmailOtpVerification::create([
             'user_id'    => $user->id,
-            'otp'        => bcrypt($otp),
+            'otp'        => $otp,
             'expires_at' => now()->addMinutes(10),
             'used'       => false,
         ]);
