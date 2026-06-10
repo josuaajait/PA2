@@ -128,10 +128,12 @@ class OtpController extends Controller
         // UBAH 'used' menjadi 'is_used'
         $record->update(['is_used' => true]);
 
-        $user->update([
-            'otp_verified'      => true,
-            'email_verified_at' => $user->email_verified_at ?? now(),
-        ]);
+        // 👇 UBAH KODE UPDATE MENJADI PENETAPAN LANGSUNG & SAVE AGAR MENEMBUS MASS-ASSIGNMENT PROTECTION 👇
+        $user->otp_verified = true;
+        if (!$user->email_verified_at) {
+            $user->email_verified_at = now();
+        }
+        $user->save(); // Bypasses fillable security for direct attributes
 
         return response()->json([
             'success' => true,
