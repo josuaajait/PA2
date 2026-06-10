@@ -88,12 +88,13 @@ class OtpController extends Controller
         }
 
         $record = EmailOtpVerification::where('user_id', $user->id)
+            ->where('otp', $request->otp)
             ->where('used', false)
             ->where('expires_at', '>', now())
             ->latest()
             ->first();
 
-        if (!$record || $request->otp !== $record->otp) {
+        if (!$record) {
             return response()->json([
                 'success' => false,
                 'message' => 'OTP tidak valid atau sudah kadaluarsa.',
