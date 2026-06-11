@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Promo; // 👈 Panggil Model Promo Database Utama
+use App\Models\Promo;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class PromoController extends Controller
@@ -11,18 +12,29 @@ class PromoController extends Controller
     public function index()
     {
         try {
-            // 👇 AMBIL DATA LANGSUNG DARI DATABASE LOKAL 👇
-            $promos = Promo::where('is_active', true)
-                           ->orderBy('created_at', 'desc')
-                           ->get();
+            // Meminta data ke Microservice Promo (Menggunakan IP Gateway Docker Anda yang sukses)
+            $response = Http::get('http://172.17.0.1:8083/api/promo');
+
+            if ($response->successful()) {
+                $json = $response->json();
+                
+                // 👇 PERBAIKAN UTAMA: BONGKAR BUNGKUS PAGINATION MICROSERVICE 👇
+                // Jika ada data di dalam data (paginated), ambil list dalamnya saja.
+                $promos = isset($json['data']['data']) ? $json['data']['data'] : ($json['data'] ?? []);
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $promos // Kirim list bersih ke HP
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
-                'data' => $promos
+                'data' => []
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Gagal mengambil data promo lokal: ' . $e->getMessage());
+            Log::error('Gagal mengambil data dari Microservice Promo: ' . $e->getMessage());
             return response()->json([
                 'success' => true,
                 'data' => [] 
@@ -33,10 +45,15 @@ class PromoController extends Controller
     public function show($slug)
     {
         try {
-            // 👇 AMBIL DETAIL LANGSUNG DARI DATABASE LOKAL 👇
-            $promo = Promo::where('slug', $slug)->first();
+            // Minta detail promo ke Microservice
+            $response = Http::get("http://172.17.0.1:8083/api/promo/{$slug}");
 
-            if ($promo) {
+            if ($response->successful()) {
+                $json = $response->json();
+                
+                // Bongkar bungkus jika ada key 'data'
+                $promo = isset($json['data']) ? $json['data'] : $json;
+
                 return response()->json([
                     'success' => true,
                     'data' => $promo
@@ -49,7 +66,7 @@ class PromoController extends Controller
             ], 404);
 
         } catch (\Exception $e) {
-            Log::error('Gagal mengambil detail promo lokal: ' . $e->getMessage());
+            Log::error('Gagal mengambil detail promo dari Microservice: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Layanan sedang tidak tersedia'
