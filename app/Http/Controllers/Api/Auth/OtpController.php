@@ -133,7 +133,12 @@ class OtpController extends Controller
         if (!$user->email_verified_at) {
             $user->email_verified_at = now();
         }
-        $user->save(); // Bypasses fillable security for direct attributes
+         \Illuminate\Support\Facades\DB::table('users')
+            ->where('id', $user->id)
+            ->update([
+                'otp_verified'      => true,
+                'email_verified_at' => $user->email_verified_at ?? now(),
+            ]);
 
         return response()->json([
             'success' => true,
