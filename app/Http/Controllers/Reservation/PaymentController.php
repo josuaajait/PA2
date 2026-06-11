@@ -61,6 +61,14 @@ class PaymentController extends Controller
         // Notifikasi ke admin (gunakan AdminPaymentNotification)
         $this->sendNotificationToAdmin($ticket);
 
+        // 👇 DETEKSI APAKAH REQ DARI HP (FLUTTER) 👇
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.'
+            ]);
+        }
+
         return redirect()->route('customer.tickets')
             ->with('success', 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.');
     }
@@ -105,6 +113,17 @@ class PaymentController extends Controller
 
         // Notifikasi ke admin (gunakan AdminPaymentNotification)
         $this->sendNotificationToAdmin($reservation);
+
+        // 👇 DETEKSI APAKAH REQ DARI HP (FLUTTER) 👇
+        if ($request->expectsJson() || $request->wantsJson()) {
+            // Sediakan wa_url dinamis untuk dialihkan ke WhatsApp Caldera
+            $waUrl = "https://wa.me/6285272997806?text=" . urlencode("Halo Caldera, saya telah mengupload bukti pembayaran untuk kode booking " . $bookingCode);
+            return response()->json([
+                'success' => true,
+                'message' => 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.',
+                'wa_url' => $waUrl
+            ]);
+        }
 
         return redirect()->route('customer.reservations')
             ->with('success', 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.');
@@ -160,6 +179,9 @@ class PaymentController extends Controller
         $payable = $reservation ?? $ticket;
         
         if (!$payable) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan.'], 404);
+            }
             return back()->with('error', 'Data tidak ditemukan.');
         }
         
@@ -204,11 +226,19 @@ class PaymentController extends Controller
             
             DB::commit();
             
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.']);
+            }
+            
             return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.');
             
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Upload proof error: ' . $e->getMessage());
+            
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Gagal upload bukti: ' . $e->getMessage()], 500);
+            }
             return back()->with('error', 'Gagal upload bukti: ' . $e->getMessage());
         }
     }
