@@ -127,7 +127,7 @@ class PaymentController extends Controller
             $formattedDp = "Rp " . number_format($reservation->down_payment ?? 50000, 0, ',', '.');
             
             // Ambil link bukti bayar yang barusan di-upload
-            $proofUrl = asset('storage/' . $path);
+            // $proofUrl = asset('storage/' . $path);
             
             // Ambil nomor WA Caldera dari file .env Anda secara otomatis
             $waAdminNumber = env('CALDERA_WHATSAPP_NUMBER', '6285272997806');
@@ -152,7 +152,7 @@ class PaymentController extends Controller
                   . "  Waktu Transfer: " . $transferTime . "\n\n"
                   . "  *BUKTI TRANSFER:*\n"
                   . "──────────────────\n"
-                  . "  Link Bukti Bayar: " . $proofUrl . "\n\n"
+                //   . "  Link Bukti Bayar: " . $proofUrl . "\n\n"
                   . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
                   . "  Mohon segera dikonfirmasi. Terima kasih!";
                   // Gabungkan nomor WA admin dan teks template di atas
