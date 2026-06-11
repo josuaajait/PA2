@@ -12,33 +12,41 @@ class PromoController extends Controller
     public function index()
     {
         try {
-            // Meminta data ke Microservice Promo (Menggunakan IP Gateway Docker Anda yang sukses)
-            $response = Http::get('http://172.17.0.1:8083/api/promo');
+            // 1. Coba minta data ke Microservice Promo
+            $response = Http::timeout(3)->get('http://172.17.0.1:8083/api/promo');
 
             if ($response->successful()) {
                 $json = $response->json();
-                
-                // 👇 PERBAIKAN UTAMA: BONGKAR BUNGKUS PAGINATION MICROSERVICE 👇
-                // Jika ada data di dalam data (paginated), ambil list dalamnya saja.
                 $promos = isset($json['data']['data']) ? $json['data']['data'] : ($json['data'] ?? []);
 
                 return response()->json([
                     'success' => true,
-                    'data' => $promos // Kirim list bersih ke HP
+                    'data' => $promos 
                 ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'data' => []
-            ]);
+            // Jika response dari microservice bukan 200 OK, lempar ke catch
+            throw new \Exception('Microservice merespon dengan error');
 
         } catch (\Exception $e) {
-            Log::error('Gagal mengambil data dari Microservice Promo: ' . $e->getMessage());
-            return response()->json([
-                'success' => true,
-                'data' => [] 
-            ]);
+            Log::error('Microservice Promo Down, menggunakan fallback lokal: ' . $e->getMessage());
+            
+            // 👇 2. FALLBACK: Ambil dari database lokal jika microservice mati 👇
+            try {
+                // Ambil data promo dari database lokal (tabel promos)
+                $localPromos = Promo::where('is_active', true)->get();
+                
+                return response()->json([
+                    'success' => true,
+                    'data' => $localPromos
+                ]);
+            } catch (\Exception $ex) {
+                // Jika database lokal juga gagal/kosong
+                return response()->json([
+                    'success' => true,
+                    'data' => [] 
+                ]);
+            }
         }
     }
 
@@ -60,17 +68,27 @@ class PromoController extends Controller
                 ]);
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Promo tidak ditemukan'
-            ], 404);
+            // Jika response dari microservice bukan 200 OK, lempar ke catch
+            throw new \Exception('Microservice merespon dengan error');
 
-        } catch (\Exception $e) {
-            Log::error('Gagal mengambil detail promo dari Microservice: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Layanan sedang tidak tersedia'
-            ], 500);
+            } catch (\Exception $e) {
+            Log::error('Microservice Promo Down, menggunakan fallback lokal: ' . $e->getMessage());
+
+        } // 👇 2. FALLBACK: Ambil dari database lokal jika microservice mati 👇
+            try {
+                // Ambil data promo dari database lokal (tabel promos)
+                $localPromos = Promo::where('is_active', true)->get();
+                
+                return response()->json([
+                    'success' => true,
+                    'data' => $localPromos
+                ]);
+            } catch (\Exception $ex) {
+                // Jika database lokal juga gagal/kosong
+                return response()->json([
+                    'success' => true,
+                    'data' => [] 
+                ]);
+            }
         }
-    }
 }
