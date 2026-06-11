@@ -14,7 +14,7 @@ class PromoController extends Controller
         try {
             // Main API meminta data ke Microservice Promo
             // Sesuaikan URL ini dengan host/port microservice Anda di server
-            $response = Http::get('http://127.0.0.1:8083/api/promo');
+            $response = Http::get('http://172.17.0.1:8083/api/promo');
 
             if ($response->successful()) {
                 // Langsung return response dari microservice ke Mobile App
@@ -40,7 +40,7 @@ class PromoController extends Controller
     {
         try {
             // Minta detail promo ke Microservice
-            $response = Http::get("http://127.0.0.1:8083/api/promo/{$slug}");
+            $response = Http::get("http://172.17.0.1:8083/api/promo");
 
             if ($response->successful()) {
                 // Langsung teruskan response dari microservice ke Mobile App
