@@ -89,15 +89,33 @@ class RegisterController extends Controller
     /**
      * Create a new user instance after a valid registration.
      */
-    protected function create(array $data)
-    {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'phone' => $data['phone'] ?? null,
-            'role' => 'customer',
-            'is_active' => true,
-        ]);
-    }
+
+	protected function create(array $data)
+	{
+	    // Tambahkan logging untuk memantau registrasi
+	    \Illuminate\Support\Facades\Log::info('New registration attempt', [
+	        'email' => $data['email'],
+	        'phone' => $data['phone'] ?? null,
+	        'ip' => request()->ip(),
+	        'time' => now()->toDateTimeString()
+	    ]);
+	    
+	    $user = User::create([
+	        'name' => $data['name'],
+	        'email' => $data['email'],
+	        'password' => Hash::make($data['password']),
+	        'phone' => $data['phone'] ?? null,
+	        'role' => 'customer',
+	        'is_active' => true,
+	    ]);
+	    
+	    // Log setelah user berhasil dibuat
+	    \Illuminate\Support\Facades\Log::info('User registered successfully', [
+	        'user_id' => $user->id,
+	        'email' => $user->email,
+	        'time' => now()->toDateTimeString()
+	    ]);
+	    
+	    return $user;
+	}
 }
