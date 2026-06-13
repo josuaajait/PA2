@@ -9,8 +9,8 @@ class GalleryController extends Controller
 {
     public function index()
     {
-        $galleries = Gallery::where('type', 'image')
-            ->orderBy('sort_order')
+        $galleries = Gallery::orderBy('sort_order')
+            ->orderBy('created_at', 'desc')
             ->get();
         
         return response()->json([
