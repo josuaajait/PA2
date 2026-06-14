@@ -16,6 +16,27 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+
+     // 👇 1. CEK MANUAL APAKAH EMAIL SUDAH ADA SEBELUM VALIDASI 👇
+        $existingUser = User::where('email', $request->email)->first();
+        if ($existingUser) {
+            // Cek apakah dia sudah verifikasi OTP
+            $isVerified = $existingUser->otp_verified == 1 || $existingUser->otp_verified === true || $existingUser->email_verified_at !== null;
+            
+            if ($isVerified) {
+                return response()->json([
+                    'success' => false,
+                    'is_verified' => true,
+                    'message' => 'Email sudah terdaftar dan sudah diverifikasi. Silakan Login.'
+                ], 422); // Kirim kode 422 agar ditangkap sebagai error oleh Flutter
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'is_verified' => false,
+                    'message' => 'Email sudah terdaftar namun belum verifikasi OTP. Mengalihkan ke halaman Login...'
+                ], 422);
+            }
+        }
         $validator = Validator::make($request->all(), [
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
