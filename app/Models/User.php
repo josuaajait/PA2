@@ -173,6 +173,6 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
 
     public function isOtpVerified(): bool
     {
-        return (bool) $this->otp_verified;
+        return (bool) $this->otp_verified || !is_null($this->email_verified_at);
     }
 }
