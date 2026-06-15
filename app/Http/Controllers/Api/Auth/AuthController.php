@@ -149,7 +149,7 @@ class AuthController extends Controller
             ], 403);
         }
 
-        if (!$user->otp_verified) { 
+        if (!$user->isOtpVerified()) { 
             return response()->json([
                 'success' => false,
                 'needs_verification' => true, // Flag khusus untuk Flutter
