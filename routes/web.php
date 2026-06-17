@@ -32,6 +32,13 @@ use App\Http\Controllers\Customer\CustomerTicketController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Middleware\AdminMiddleware;
 
+// 👇 IMPORT FIREBASE & USER DITAMBAHKAN DI SINI 👇
+use Kreait\Laravel\Firebase\Facades\Firebase;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use App\Models\User;
+// 👆 SAMPAI SINI 👆
+
 /*
 |--------------------------------------------------------------------------
 | Authentication Routes (Public - Guest only)
@@ -58,9 +65,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/email/verify', [OtpVerificationController::class, 'showVerifyForm'])->name('verification.notice');
-    Route::post('/email/otp/send', [OtpVerificationController::class, 'sendOtp'])->middleware('throttle:6,1')->name('verification.otp.send');
-    Route::post('/email/otp/verify', [OtpVerificationController::class, 'verifyOtp'])->name('verification.otp.verify');
+    Route::get('/email/verify', 'App\\Http\\Controllers\\Auth\\OtpVerificationController@showVerifyForm')->name('verification.notice');
+    Route::post('/email/otp/send', 'App\\Http\\Controllers\\Auth\\OtpVerificationController@sendOtp')->middleware('throttle:6,1')->name('verification.otp.send');
+    Route::post('/email/otp/verify', 'App\\Http\\Controllers\\Auth\\OtpVerificationController@verifyOtp')->name('verification.otp.verify');
 });
 
 /*
@@ -249,4 +256,48 @@ Route::post('/check-promo', [App\Http\Controllers\Api\PromoCheckController::clas
 Route::get('/test-microservice', function () {
     $client = app(App\Services\PromoServiceClient::class);
     return $client->getAll();
+});
+
+// 👇 ROUTE TEST TEMBAK PUSH NOTIFICATION 👇
+Route::get('/test-notif', function () {
+    // 1. Cari user yang punya fcm_token
+    $user = User::whereNotNull('fcm_token')->latest()->first();
+
+    if (!$user) {
+        return "Belum ada user yang punya FCM Token di database. Coba login dulu di aplikasi Flutter!";
+    }
+
+    $judul = 'Caldera Resto & Pool 🌊';
+    $pesanBody = 'Halo ' . $user->name . '! Ini adalah test Push Notification langsung dari Laravel.';
+
+    // 2. SIMPAN KE DATABASE LARAVEL (Agar muncul di lonceng aplikasi)
+    \Illuminate\Support\Facades\DB::table('notifications')->insert([
+        'id'              => \Illuminate\Support\Str::uuid(),
+        'type'            => 'App\Notifications\SystemNotification',
+        'notifiable_type' => 'App\Models\User',
+        'notifiable_id'   => $user->id,
+        'data'            => json_encode([
+            'title' => $judul,
+            'body'  => $pesanBody,
+        ]),
+        'read_at'         => null, // Status belum dibaca
+        'created_at'      => now(),
+        'updated_at'      => now(),
+    ]);
+
+    // 3. TEMBAK KE FIREBASE (Agar HP berbunyi & muncul di luar)
+    $pesanFcm = CloudMessage::fromArray([
+        'token' => $user->fcm_token,
+        'notification' => [
+            'title' => $judul,
+            'body'  => $pesanBody
+        ],
+    ]);
+
+    try {
+        Firebase::messaging()->send($pesanFcm);
+        return "SUKSES! HP berbunyi dan Notifikasi masuk ke database Lonceng untuk: " . $user->name;
+    } catch (\Exception $e) {
+        return "GAGAL KIRIM FIREBASE: " . $e->getMessage();
+    }
 });

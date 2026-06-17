@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -61,6 +62,14 @@ class PaymentController extends Controller
         // Notifikasi ke admin (gunakan AdminPaymentNotification)
         $this->sendNotificationToAdmin($ticket);
 
+        // 👇 DETEKSI APAKAH REQ DARI HP (FLUTTER) 👇
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.'
+            ]);
+        }
+
         return redirect()->route('customer.tickets')
             ->with('success', 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.');
     }
@@ -105,6 +114,55 @@ class PaymentController extends Controller
 
         // Notifikasi ke admin (gunakan AdminPaymentNotification)
         $this->sendNotificationToAdmin($reservation);
+
+        // 👇 DETEKSI APAKAH REQ DARI HP (FLUTTER) 👇
+        if ($request->expectsJson() || $request->wantsJson()) {
+           // Format tanggal (contoh: 12 June 2026)
+            $formattedDate = Carbon::parse($reservation->reservation_date)->format('d F Y');
+            
+            // Format waktu transfer sekarang
+            $transferTime = Carbon::now()->format('d M Y H:i:s');
+            
+            // Format nominal DP ke rupiah
+            $formattedDp = "Rp " . number_format($reservation->down_payment ?? 50000, 0, ',', '.');
+            
+            // Ambil link bukti bayar yang barusan di-upload
+            // $proofUrl = asset('storage/' . $path);
+            
+            // Ambil nomor WA Caldera dari file .env Anda secara otomatis
+            $waAdminNumber = env('CALDERA_WHATSAPP_NUMBER', '6285272997806');
+
+            // Susun template teks WhatsApp persis seperti di Web
+            $text = "  *KONFIRMASI PEMBAYARAN DP - CALDERA RESTO*\n\n"
+                  . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                  . "  *KODE BOOKING:* " . $reservation->booking_code . "\n\n"
+                  . "  *DATA CUSTOMER*\n"
+                  . "──────────────────\n"
+                  . "  Nama: " . $reservation->customer_name . "\n"
+                  . "  WhatsApp: " . $reservation->customer_phone . "\n\n"
+                  . "  *DETAIL RESERVASI*\n"
+                  . "──────────────────\n"
+                  . "  Tanggal: " . $formattedDate . "\n"
+                  . "  Jam: " . $reservation->reservation_time . "\n"
+                  . "  Jumlah Tamu: " . $reservation->number_of_guests . " orang\n\n"
+                  . "  *PEMBAYARAN DP*\n"
+                  . "──────────────────\n"
+                  . "  Jumlah DP: " . $formattedDp . "\n"
+                  . "  ID Transaksi: " . ($request->transaction_id ?? '-') . "\n"
+                  . "  Waktu Transfer: " . $transferTime . "\n\n"
+                  . "  *BUKTI TRANSFER:*\n"
+                  . "──────────────────\n"
+                //   . "  Link Bukti Bayar: " . $proofUrl . "\n\n"
+                  . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                  . "  Mohon segera dikonfirmasi. Terima kasih!";
+                  // Gabungkan nomor WA admin dan teks template di atas
+            $waUrl = "https://wa.me/{$waAdminNumber}?text=" . urlencode($text);
+            return response()->json([
+                'success' => true,
+                'message' => 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.',
+                'wa_url' => $waUrl
+            ]);
+        }
 
         return redirect()->route('customer.reservations')
             ->with('success', 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.');
@@ -160,6 +218,9 @@ class PaymentController extends Controller
         $payable = $reservation ?? $ticket;
         
         if (!$payable) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan.'], 404);
+            }
             return back()->with('error', 'Data tidak ditemukan.');
         }
         
@@ -204,11 +265,19 @@ class PaymentController extends Controller
             
             DB::commit();
             
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.']);
+            }
+            
             return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.');
             
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Upload proof error: ' . $e->getMessage());
+            
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Gagal upload bukti: ' . $e->getMessage()], 500);
+            }
             return back()->with('error', 'Gagal upload bukti: ' . $e->getMessage());
         }
     }

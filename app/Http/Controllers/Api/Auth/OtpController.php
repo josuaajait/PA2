@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\EmailOtpVerification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail; // <-- WAJIB DITAMBAHKAN
+use Illuminate\Support\Facades\Log;  // <-- WAJIB DITAMBAHKAN
 
 class OtpController extends Controller
 {
@@ -40,20 +42,40 @@ class OtpController extends Controller
             ], 429);
         }
 
+        // UBAH 'used' menjadi 'is_used'
         EmailOtpVerification::where('user_id', $user->id)
-            ->where('used', false)
+            ->where('is_used', false)
             ->delete();
 
-        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
+        // UBAH 'used' menjadi 'is_used'
         EmailOtpVerification::create([
             'user_id'    => $user->id,
-            'otp'        => bcrypt($otp),
+            'otp'        => $otp,
             'expires_at' => now()->addMinutes(10),
-            'used'       => false,
+            'is_used'    => false,
         ]);
 
         $user->recordOtpSend();
+
+        // 👇 TAMBAHKAN KODE KIRIM EMAIL DI SINI 👇
+        try {
+            Mail::raw(
+                "Halo {$user->name},\n\nKode OTP verifikasi email Anda: {$otp}\n\nBerlaku 10 menit.\nJangan berikan kode ini kepada siapapun.",
+                function ($message) use ($user) {
+                    $message->to((string) $user->email)
+                            ->subject('Kode OTP Verifikasi - Caldera Resto & Pool');
+                }
+            );
+        } catch (\Exception $e) {
+            Log::error("Gagal kirim OTP ulang: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim email OTP: ' . $e->getMessage(),
+            ], 500);
+        }
+        // 👆 SAMPAI SINI 👆
 
         return response()->json([
             'success' => true,
@@ -87,13 +109,15 @@ class OtpController extends Controller
             ]);
         }
 
+        // UBAH 'used' menjadi 'is_used'
         $record = EmailOtpVerification::where('user_id', $user->id)
-            ->where('used', false)
+            ->where('otp', $request->otp)
+            ->where('is_used', false)
             ->where('expires_at', '>', now())
             ->latest()
             ->first();
 
-        if (!$record || !password_verify($request->otp, $record->otp)) {
+        if (!$record) {
             return response()->json([
                 'success' => false,
                 'message' => 'OTP tidak valid atau sudah kadaluarsa.',
@@ -101,12 +125,20 @@ class OtpController extends Controller
             ], 422);
         }
 
-        $record->update(['used' => true]);
+        // UBAH 'used' menjadi 'is_used'
+        $record->update(['is_used' => true]);
 
-        $user->update([
-            'otp_verified'      => true,
-            'email_verified_at' => $user->email_verified_at ?? now(),
-        ]);
+        // 👇 UBAH KODE UPDATE MENJADI PENETAPAN LANGSUNG & SAVE AGAR MENEMBUS MASS-ASSIGNMENT PROTECTION 👇
+        $user->otp_verified = true;
+        if (!$user->email_verified_at) {
+            $user->email_verified_at = now();
+        }
+         \Illuminate\Support\Facades\DB::table('users')
+            ->where('id', $user->id)
+            ->update([
+                'otp_verified'      => true,
+                'email_verified_at' => $user->email_verified_at ?? now(),
+            ]);
 
         return response()->json([
             'success' => true,

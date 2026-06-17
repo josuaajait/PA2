@@ -5,7 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PoolTicket;
 use Illuminate\Http\Request;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\Auth;
+=======
+use Illuminate\Support\Facades\DB;  // <-- DITAMBAHKAN
+use Illuminate\Support\Facades\Log; // <-- DITAMBAHKAN
+use Illuminate\Support\Str;          // <-- DITAMBAHKAN
+
+// FIREBASE SDK IMPORTS
+use Kreait\Laravel\Firebase\Facades\Firebase;
+use Kreait\Firebase\Messaging\CloudMessage;
+>>>>>>> 4865485f241438739ebf5149f3bf76dd1f3454cb
 
 class TicketManagementController extends Controller
 {
@@ -62,6 +72,10 @@ class TicketManagementController extends Controller
     public function verify(PoolTicket $ticket)
     {
         try {
+<<<<<<< HEAD
+=======
+            // HANYA bisa verifikasi jika payment_status = 'payment_verified'
+>>>>>>> 4865485f241438739ebf5149f3bf76dd1f3454cb
             if ($ticket->payment_status !== 'payment_verified') {
                 return response()->json([
                     'success' => false,
@@ -75,6 +89,54 @@ class TicketManagementController extends Controller
                 'verified_at'    => now(),
                 'verified_by'    => Auth::id()
             ]);
+
+            // 👇 PROSES KIRIM NOTIFIKASI OTOMATIS (FCM & DATABASE) 👇
+            
+            // Cari customer berdasarkan user_id atau customer_email
+            $customer = null;
+            if ($ticket->user_id) {
+                $customer = \App\Models\User::find($ticket->user_id);
+            } elseif ($ticket->customer_email) {
+                $customer = \App\Models\User::where('email', $ticket->customer_email)->first();
+            }
+
+            if ($customer) {
+                $judul = 'Pembayaran Tiket Diverifikasi! ✅';
+                $pesanBody = "Pembayaran tiket kolam Anda dengan kode {$ticket->ticket_code} telah diverifikasi oleh admin. Tiket kini Aktif.";
+
+                // 1. Simpan ke database notifications (Agar muncul di lonceng aplikasi)
+                DB::table('notifications')->insert([
+                    'id'              => Str::uuid(),
+                    'type'            => 'App\Notifications\SystemNotification',
+                    'notifiable_type' => 'App\Models\User',
+                    'notifiable_id'   => $customer->id,
+                    'data'            => json_encode([
+                        'title' => $judul,
+                        'body'  => $pesanBody,
+                    ]),
+                    'read_at'         => null,
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ]);
+
+                // 2. Tembak ke Firebase (Agar HP bergetar di luar aplikasi)
+                if ($customer->fcm_token) {
+                    $pesanFcm = CloudMessage::fromArray([
+                        'token' => $customer->fcm_token,
+                        'notification' => [
+                            'title' => $judul,
+                            'body'  => $pesanBody
+                        ],
+                    ]);
+
+                    try {
+                        Firebase::messaging()->send($pesanFcm);
+                    } catch (\Exception $e) {
+                        Log::error('FCM Ticket Verify Error: ' . $e->getMessage());
+                    }
+                }
+            }
+            // 👆 SAMPAI SINI 👆
             
             return response()->json([
                 'success' => true,

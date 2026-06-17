@@ -80,6 +80,88 @@ class NotificationController extends Controller
         
         return view('customer.notifications', compact('notifications', 'unreadCount'));
     }
+
+    /**
+     * 👇 FUNGSI GETALL UNTUK API HP BARU DITAMBAHKAN DI SINI 👇
+     */
+    public function getAll()
+    {
+        try {
+            $user = Auth::user();
+            
+            if (!$user) {
+                return response()->json(['success' => true, 'count' => 0, 'notifications' => []]);
+            }
+            
+            // Ambil SEMUA notifikasi milik user ini
+            $notifications = DB::table('notifications')
+                ->where('notifiable_type', 'App\Models\User')
+                ->where('notifiable_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            $formatted = [];
+            $seenIds = [];
+            
+            foreach ($notifications as $notif) {
+                $data = json_decode($notif->data, true);
+                $type = $data['type'] ?? 'general';
+                
+                // Hindari duplikat ID
+                if (in_array($notif->id, $seenIds)) {
+                    continue;
+                }
+                $seenIds[] = $notif->id;
+                
+                // Filter notifikasi admin
+                $adminOnlyTypes = [
+                    'admin_payment_uploaded',
+                    'admin_new_ticket', 
+                    'admin_new_reservation',
+                    'admin_ticket_payment',
+                    'admin_reservation_payment',
+                    'AdminNewTicketNotification',
+                    'AdminNewReservationNotification',
+                    'AdminPaymentNotification',
+                    'admin_payment'
+                ];
+                
+                if ($user->role !== 'admin' && in_array($type, $adminOnlyTypes)) {
+                    continue;
+                }
+                
+                $formatted[] = [
+                    'id' => $notif->id,
+                    'type' => $type,
+                    'title' => $data['title'] ?? 'Notifikasi',
+                    'body' => $data['body'] ?? '',
+                    'icon' => $data['icon'] ?? 'fa-bell',
+                    'color' => $data['color'] ?? 'primary',
+                    'booking_code' => $data['booking_code'] ?? null,
+                    'ticket_code' => $data['ticket_code'] ?? null,
+                    'url' => $data['url'] ?? null,
+                    'read_at' => $notif->read_at,
+                    'created_at' => $this->getTimeAgo($notif->created_at),
+                ];
+            }
+            
+            $unreadCount = collect($formatted)->whereNull('read_at')->count();
+            
+            return response()->json([
+                'success' => true,
+                'count' => $unreadCount,
+                'notifications' => $formatted
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Get all notifications API error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'count' => 0,
+                'notifications' => []
+            ]);
+        }
+    }
     
     public function markAsRead($id)
     {
@@ -124,6 +206,23 @@ class NotificationController extends Controller
             
         } catch (\Exception $e) {
             Log::error('Mark all as read error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function apiMarkAsRead($id)
+    {
+        try {
+            $user = Auth::user();
+
+            \Illuminate\Support\Facades\DB::table('notifications')
+                ->where('id', $id)
+                ->where('notifiable_type', 'App\Models\User')
+                ->where('notifiable_id', $user->id)
+                ->update(['read_at' => now()]);
+
+            return response()->json(['success' => true, 'message' => 'Notifikasi ditandai dibaca']);
+        } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }

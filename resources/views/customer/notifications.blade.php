@@ -170,8 +170,13 @@
                     </div>
                     @endif
                 </div>
+<<<<<<< HEAD
+=======
+                @if($notifications->hasPages())
+                <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-0">
+                @endif
+>>>>>>> 4865485f241438739ebf5149f3bf76dd1f3454cb
             </div>
-        </div>
     </div>
 </div>
 
@@ -209,6 +214,7 @@
 .notification-page .notification-item {
     border-radius: 16px;
     background: #fff;
+<<<<<<< HEAD
     transition: all 0.25s ease;
     box-shadow: 0 1px 3px rgba(28, 52, 81, 0.06);
     border: 1px solid transparent;
@@ -218,6 +224,10 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(28, 52, 81, 0.1);
     border-color: #c1a067;
+=======
+.notification-item:hover {
+    transform: translateY(-1px);
+>>>>>>> 4865485f241438739ebf5149f3bf76dd1f3454cb
 }
 
 .notification-page .notification-item.unread {
