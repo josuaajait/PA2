@@ -138,7 +138,7 @@
                 </a>
                 <a class="nav-custom-link {{ request()->routeIs('branding.testimonials*') ? 'active' : '' }}"
                    href="{{ route('branding.testimonials') }}">
-                    <i class="fas fa-comments me-1"></i>Testimoni
+                    <i class="fas fa-comments me-1"></i>Testimony
                 </a>
             </div>
 

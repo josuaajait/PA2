@@ -1,6 +1,6 @@
 
 
-<?php $__env->startSection('title', 'Pool Info'); ?>
+<?php $__env->startSection('title', 'Pool Info - Caldera Resto & Pool'); ?>
 
 <?php $__env->startSection('content'); ?>
 <div class="container py-5">
@@ -12,32 +12,32 @@
 
     <div class="row align-items-center mb-5">
         <div class="col-lg-6 mb-4 mb-lg-0">
-        <img src="<?php echo e(asset('storage/galleries/pool1.jpeg')); ?>" 
-        class="img-fluid rounded-4 shadow-lg pool-img" 
-        alt="Caldera Pool"
-        style="max-width: 500px; width: 100%;">
+            <img src="<?php echo e(asset('storage/galleries/pool1.jpeg')); ?>" 
+                 class="img-fluid rounded-4 shadow-lg pool-img" 
+                 alt="Caldera Pool"
+                 style="max-width: 500px; width: 100%;">
         </div>
         <div class="col-lg-6">
-            <h3 class="fw-bold mb-3" style="color: #1c3451; font-family: 'Playfair Display', serif;">Tiket Masuk Kolam Renang</h3>
+            <h3 class="fw-bold mb-3" style="color: #1c3451; font-family: 'Playfair Display', serif;">Swimming Pool Ticket Prices</h3>
             <div class="table-responsive">
                 <table class="table table-bordered caldera-table">
                     <thead>
                         <tr>
-                            <th>Jenis Tiket</th>
-                            <th>Harga</th>
+                            <th>Ticket Type</th>
+                            <th>Price</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Dewasa</td>
+                            <td>Adult</td>
                             <td class="fw-semibold">Rp 35.000</td>
                         </tr>
                         <tr>
-                            <td>Anak-anak (3-12 tahun)</td>
+                            <td>Child (3-12 years)</td>
                             <td class="fw-semibold">Rp 25.000</td>
                         </tr>
                         <tr>
-                            <td>Keluarga (4 orang)</td>
+                            <td>Family (4 persons)</td>
                             <td class="fw-semibold">Rp 100.000</td>
                         </tr>
                     </tbody>
@@ -45,7 +45,7 @@
             </div>
             <div class="mt-4">
                 <a href="<?php echo e(route('reservation.ticket')); ?>" class="btn btn-caldera btn-lg">
-                    <i class="fas fa-ticket-alt me-2"></i>Beli Tiket Sekarang
+                    <i class="fas fa-ticket-alt me-2"></i>Buy Ticket Now
                 </a>
             </div>
         </div>
@@ -55,23 +55,23 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm text-center p-4 caldera-card">
                 <i class="fas fa-clock fa-3x mb-3 caldera-icon"></i>
-                <h5 class="fw-bold" style="color: #1c3451;">Jam Operasional</h5>
-                <p class="text-muted mb-0">Setiap Hari</p>
+                <h5 class="fw-bold" style="color: #1c3451;">Operating Hours</h5>
+                <p class="text-muted mb-0">Every Day</p>
                 <p class="text-muted">08:00 - 18:00 WIB</p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm text-center p-4 caldera-card">
                 <i class="fas fa-check-circle fa-3x mb-3 caldera-icon"></i>
-                <h5 class="fw-bold" style="color: #1c3451;">Fasilitas</h5>
-                <p class="text-muted mb-0">Kolam Dewasa, Kolam Anak, Water Slide, Gazebo, Locker, Shower</p>
+                <h5 class="fw-bold" style="color: #1c3451;">Facilities</h5>
+                <p class="text-muted mb-0">Adult Pool, Children's Pool, Water Slide, Gazebo, Locker, Shower</p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm text-center p-4 caldera-card">
                 <i class="fas fa-shield-alt fa-3x mb-3 caldera-icon"></i>
-                <h5 class="fw-bold" style="color: #1c3451;">Peraturan</h5>
-                <p class="text-muted mb-0">Menggunakan pakaian renang, dilarang merokok, anak harus didampingi orang tua</p>
+                <h5 class="fw-bold" style="color: #1c3451;">Rules</h5>
+                <p class="text-muted mb-0">Wear proper swimwear, no smoking, children must be accompanied by parents</p>
             </div>
         </div>
     </div>

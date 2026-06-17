@@ -372,7 +372,7 @@
                 </a>
                 <a href="{{ route('admin.testimonials.index') }}"
                    class="nav-link {{ request()->routeIs('admin.testimonials.*') ? 'active' : '' }}">
-                    <i class="fas fa-comment-dots"></i> Testimonial
+                    <i class="fas fa-comment-dots"></i> Testimonials
                 </a>
                 <a href="{{ route('admin.promos.index') }}"
                    class="nav-link {{ request()->routeIs('admin.promos.*') ? 'active' : '' }}">

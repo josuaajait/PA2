@@ -86,7 +86,15 @@
                                     <small class="text-muted text-uppercase fw-semibold">Type & Qty</small>
                                     <p class="mb-0 fw-semibold" style="color: #1c3451;">
                                         <i class="fas fa-ticket-alt me-1" style="color: #c1a067;"></i>
-                                        {{ ucfirst($ticket->ticket_type) }} ({{ $ticket->number_of_tickets }})
+                                        @php
+                                            $typeLabels = [
+                                                'adult' => 'Dewasa',
+                                                'child' => 'Anak',
+                                                'family' => 'Keluarga'
+                                            ];
+                                        @endphp
+                                        {{ $typeLabels[$ticket->ticket_type] ?? ucfirst($ticket->ticket_type) }} 
+                                        ({{ $ticket->number_of_tickets }})
                                     </p>
                                 </div>
                             </div>
@@ -108,32 +116,62 @@
                             </div>
                         </div>
                         
-                        <!-- Status Bar (Informasi status saja, tanpa tombol upload) -->
+                        <!-- Status Bar -->
                         <div class="row mt-3 pt-2 border-top">
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div>
                                         <small class="text-muted">Status Tiket:</small>
                                         @if($ticket->status == 'pending')
-                                            <span class="badge bg-warning text-dark ms-2">Pending</span>
+                                            <span class="badge bg-warning text-dark ms-2">
+                                                <i class="fas fa-clock me-1"></i> Pending
+                                            </span>
                                         @elseif($ticket->status == 'active')
-                                            <span class="badge bg-success ms-2">Aktif</span>
+                                            <span class="badge bg-success ms-2">
+                                                <i class="fas fa-check-circle me-1"></i> Aktif
+                                            </span>
                                         @elseif($ticket->status == 'used')
-                                            <span class="badge bg-secondary ms-2">Digunakan</span>
+                                            <span class="badge bg-secondary ms-2">
+                                                <i class="fas fa-check-double me-1"></i> Digunakan
+                                            </span>
+                                        @elseif($ticket->status == 'cancelled')
+                                            <span class="badge bg-danger ms-2">
+                                                <i class="fas fa-times-circle me-1"></i> Dibatalkan
+                                            </span>
                                         @else
-                                            <span class="badge bg-danger ms-2">{{ ucfirst($ticket->status) }}</span>
+                                            <span class="badge bg-secondary ms-2">{{ ucfirst($ticket->status) }}</span>
                                         @endif
                                     </div>
                                     <div>
                                         <small class="text-muted">Status Pembayaran:</small>
                                         @if($ticket->payment_status == 'unpaid')
-                                            <span class="badge bg-danger ms-2">Belum Bayar</span>
+                                            <span class="badge bg-danger ms-2">
+                                                <i class="fas fa-times-circle me-1"></i> Belum Bayar
+                                            </span>
+                                        @elseif($ticket->payment_status == 'waiting_payment')
+                                            <span class="badge bg-warning text-dark ms-2">
+                                                <i class="fas fa-clock me-1"></i> Menunggu Verifikasi
+                                            </span>
                                         @elseif($ticket->payment_status == 'payment_verified')
-                                            <span class="badge bg-info text-dark ms-2">Menunggu Verifikasi</span>
+                                            <span class="badge bg-info text-dark ms-2">
+                                                <i class="fas fa-check-circle me-1"></i> Diverifikasi
+                                            </span>
                                         @elseif($ticket->payment_status == 'paid')
-                                            <span class="badge bg-success ms-2">Lunas</span>
+                                            <span class="badge bg-success ms-2">
+                                                <i class="fas fa-check-circle me-1"></i> Lunas
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary ms-2">{{ ucfirst($ticket->payment_status) }}</span>
                                         @endif
                                     </div>
+                                    @if($ticket->used_at)
+                                    <div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i> 
+                                            Digunakan: {{ \Carbon\Carbon::parse($ticket->used_at)->format('d M Y H:i') }}
+                                        </small>
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -152,10 +190,19 @@
                     @endforelse
                 </div>
                 
-                <!-- Pagination -->
+                <!-- ========================================== -->
+                <!-- 🔥 PAGINATION YANG DIPERBAIKI -->
+                <!-- ========================================== -->
                 @if($tickets->hasPages())
                 <div class="card-footer bg-transparent border-top-0 pb-4 px-4">
-                    {{ $tickets->links() }}
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="text-muted small">
+                            Showing {{ $tickets->firstItem() ?? 0 }} to {{ $tickets->lastItem() ?? 0 }} of {{ $tickets->total() }} tickets
+                        </div>
+                        <div class="pagination-wrapper">
+                            {{ $tickets->appends(request()->query())->links('pagination::bootstrap-5') }}
+                        </div>
+                    </div>
                 </div>
                 @endif
             </div>
@@ -249,6 +296,16 @@
         opacity: 1;
     }
 
+    .ticket-item small.text-muted {
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .ticket-item .border-top {
+        border-color: #f0ebe0 !important;
+    }
+
     .btn-detail {
         background: white;
         color: #1c3451;
@@ -284,6 +341,90 @@
         box-shadow: 0 6px 16px rgba(193,160,103,0.3);
     }
 
+    /* ========================================== */
+    /* 🔥 PAGINATION STYLING */
+    /* ========================================== */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .pagination-wrapper .pagination {
+        margin-bottom: 0;
+        gap: 4px;
+    }
+
+    .pagination-wrapper .page-link {
+        border: 1.5px solid #e8e0d0;
+        border-radius: 10px !important;
+        padding: 8px 16px;
+        color: #1c3451;
+        background: white;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.2s;
+        margin: 0 2px;
+    }
+
+    .pagination-wrapper .page-link:hover {
+        background: #1c3451;
+        color: white;
+        border-color: #1c3451;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(28,52,81,0.2);
+        z-index: 2;
+    }
+
+    .pagination-wrapper .page-item.active .page-link {
+        background: linear-gradient(135deg, #1c3451, #01516e);
+        color: white;
+        border-color: #1c3451;
+        box-shadow: 0 4px 12px rgba(28,52,81,0.25);
+    }
+
+    .pagination-wrapper .page-item.disabled .page-link {
+        background: #f8f6f2;
+        color: #b0a890;
+        border-color: #f0ebe0;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .pagination-wrapper .page-item:first-child .page-link {
+        border-radius: 10px !important;
+    }
+
+    .pagination-wrapper .page-item:last-child .page-link {
+        border-radius: 10px !important;
+    }
+
+    /* Badge icons */
+    .badge i {
+        font-size: 11px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
     @media (max-width: 768px) {
         .ticket-item {
             padding: 16px;
@@ -296,6 +437,37 @@
         .btn-sidebar:hover {
             transform: translateY(-2px);
         }
+        
+        .card-header .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        /* Pagination responsive */
+        .pagination-wrapper {
+            justify-content: center !important;
+            width: 100%;
+        }
+        
+        .pagination-wrapper .page-link {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .card-footer .d-flex {
+            flex-direction: column;
+            align-items: center !important;
+            gap: 12px;
+        }
+        
+        .card-footer .text-muted {
+            text-align: center;
+        }
+        
+        .ticket-item .border-top {
+            margin-top: 12px !important;
+            padding-top: 12px !important;
+        }
     }
 
     /* Dark Mode */
@@ -306,6 +478,10 @@
 
     body.dark-mode .ticket-item:hover {
         border-color: #c1a067;
+    }
+
+    body.dark-mode .ticket-item .border-top {
+        border-color: #2d2d3a !important;
     }
 
     body.dark-mode .btn-sidebar {
@@ -333,6 +509,31 @@
     body.dark-mode .btn-detail:hover {
         background: #c1a067;
         color: #1c3451;
+    }
+
+    /* Dark Mode - Pagination */
+    body.dark-mode .pagination-wrapper .page-link {
+        background: #1e1e2a;
+        border-color: #2d2d3a;
+        color: #dce8f0;
+    }
+
+    body.dark-mode .pagination-wrapper .page-link:hover {
+        background: #c1a067;
+        color: #1c3451;
+        border-color: #c1a067;
+    }
+
+    body.dark-mode .pagination-wrapper .page-item.active .page-link {
+        background: linear-gradient(135deg, #c1a067, #a8894f);
+        color: #1c3451;
+        border-color: #c1a067;
+    }
+
+    body.dark-mode .pagination-wrapper .page-item.disabled .page-link {
+        background: #2d2d3a;
+        color: #5a5a6a;
+        border-color: #2d2d3a;
     }
 </style>
 @endpush

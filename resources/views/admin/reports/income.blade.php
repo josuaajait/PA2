@@ -371,7 +371,17 @@
                             @endif
                         </td>
                         <td class="fw-bold">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
-                        <td>{!! $payment->payment_status_label !!}</td>
+                        <td>
+                            @php
+                                $statusBadges = [
+                                    'paid'     => '<span class="badge bg-success">Lunas</span>',
+                                    'pending'  => '<span class="badge bg-warning">Pending</span>',
+                                    'failed'   => '<span class="badge bg-danger">Gagal</span>',
+                                    'refunded' => '<span class="badge bg-secondary">Refund</span>',
+                                ];
+                            @endphp
+                            {!! $statusBadges[$payment->payment_status] ?? '<span class="badge bg-secondary">'.ucfirst($payment->payment_status).'</span>' !!}
+                        </td>
                         <td><small>{{ $payment->payment_code }}</small></td>
                     </tr>
                     @empty

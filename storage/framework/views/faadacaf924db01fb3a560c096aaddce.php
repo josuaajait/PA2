@@ -1,14 +1,14 @@
-@extends('layouts.app')
 
-@section('title', 'My Reservations - Caldera')
 
-@section('content')
+<?php $__env->startSection('title', 'My Tickets - Caldera'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container py-5">
     <!-- Header -->
     <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold mb-2" style="font-family: 'Playfair Display', serif; color: #1c3451;">My Reservations</h1>
+        <h1 class="display-4 fw-bold mb-2" style="font-family: 'Playfair Display', serif; color: #1c3451;">My Tickets</h1>
         <div class="section-divider"></div>
-        <p class="lead text-muted">Manage your table bookings</p>
+        <p class="lead text-muted">Manage your pool ticket bookings</p>
     </div>
 
     <div class="row g-4">
@@ -17,25 +17,25 @@
             <div class="card border-0 shadow-sm caldera-card">
                 <div class="card-body text-center p-4">
                     <div class="profile-avatar mb-3">
-                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=1c3451&color=c1a067&size=100&rounded=true" 
+                        <img src="https://ui-avatars.com/api/?name=<?php echo e(Auth::user()->name); ?>&background=1c3451&color=c1a067&size=100&rounded=true" 
                              class="rounded-circle" 
                              width="90" 
                              height="90"
                              style="border: 3px solid #c1a067; padding: 3px;">
                     </div>
-                    <h5 class="fw-bold mb-1" style="color: #1c3451;">{{ Auth::user()->name }}</h5>
-                    <p class="text-muted small mb-3">{{ Auth::user()->email }}</p>
+                    <h5 class="fw-bold mb-1" style="color: #1c3451;"><?php echo e(Auth::user()->name); ?></h5>
+                    <p class="text-muted small mb-3"><?php echo e(Auth::user()->email); ?></p>
                     
                     <hr class="my-3" style="border-color: #f0ebe0;">
                     
                     <div class="d-grid gap-2">
-                        <a href="{{ route('customer.profile') }}" class="btn btn-sidebar">
+                        <a href="<?php echo e(route('customer.profile')); ?>" class="btn btn-sidebar">
                             <i class="fas fa-user me-2"></i> My Profile
                         </a>
-                        <a href="{{ route('customer.reservations') }}" class="btn btn-sidebar active">
+                        <a href="<?php echo e(route('customer.reservations')); ?>" class="btn btn-sidebar">
                             <i class="fas fa-calendar-alt me-2"></i> My Reservations
                         </a>
-                        <a href="{{ route('customer.tickets') }}" class="btn btn-sidebar">
+                        <a href="<?php echo e(route('customer.tickets')); ?>" class="btn btn-sidebar active">
                             <i class="fas fa-ticket-alt me-2"></i> My Tickets
                         </a>
                     </div>
@@ -49,129 +49,174 @@
                 <div class="card-header bg-transparent border-bottom-0 pt-4 px-4">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <h5 class="mb-0 fw-bold" style="color: #1c3451; font-family: 'Playfair Display', serif; font-size: 1.3rem;">
-                            <i class="fas fa-calendar-alt me-2" style="color: #c1a067;"></i> Booking History
+                            <i class="fas fa-ticket-alt me-2" style="color: #c1a067;"></i> Ticket History
                         </h5>
                         <span class="badge" style="background: #f0ebe0; color: #1c3451; padding: 8px 16px; border-radius: 20px;">
-                            <i class="fas fa-chart-line me-1"></i> Total: {{ $reservations->total() }} Reservations
+                            <i class="fas fa-chart-line me-1"></i> Total: <?php echo e($tickets->total()); ?> Tickets
                         </span>
                     </div>
                 </div>
                 
                 <div class="card-body p-4">
-                    @forelse($reservations as $reservation)
-                    <div class="reservation-item mb-3">
+                    <?php $__empty_1 = true; $__currentLoopData = $tickets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ticket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <div class="ticket-item mb-3">
                         <div class="row align-items-center g-3">
                             <div class="col-lg-3 col-md-12">
-                                <div class="booking-code">
-                                    <small class="text-muted text-uppercase fw-semibold">Booking Code</small>
+                                <div class="ticket-code">
+                                    <small class="text-muted text-uppercase fw-semibold">Ticket Code</small>
                                     <p class="fw-bold mb-0" style="color: #1c3451; font-size: 1rem;">
-                                        <i class="fas fa-tag me-1" style="color: #c1a067; font-size: 12px;"></i>
-                                        {{ $reservation->booking_code }}
+                                        <i class="fas fa-qrcode me-1" style="color: #c1a067; font-size: 12px;"></i>
+                                        <?php echo e($ticket->ticket_code); ?>
+
                                     </p>
                                 </div>
                             </div>
                             
                             <div class="col-lg-3 col-md-4 col-sm-6">
-                                <div class="date-time">
-                                    <small class="text-muted text-uppercase fw-semibold">Date & Time</small>
+                                <div class="visit-date">
+                                    <small class="text-muted text-uppercase fw-semibold">Visit Date</small>
                                     <p class="mb-0 fw-semibold" style="color: #1c3451;">
                                         <i class="fas fa-calendar-day me-1" style="color: #c1a067;"></i>
-                                        {{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}
+                                        <?php echo e(\Carbon\Carbon::parse($ticket->visit_date)->format('d M Y')); ?>
+
                                     </p>
-                                    <small class="text-muted">
-                                        <i class="far fa-clock me-1"></i>{{ $reservation->reservation_time }}
-                                    </small>
                                 </div>
                             </div>
                             
                             <div class="col-lg-2 col-md-4 col-sm-6">
-                                <div class="guests">
-                                    <small class="text-muted text-uppercase fw-semibold">Guests</small>
+                                <div class="quantity">
+                                    <small class="text-muted text-uppercase fw-semibold">Type & Qty</small>
                                     <p class="mb-0 fw-semibold" style="color: #1c3451;">
-                                        <i class="fas fa-users me-1" style="color: #c1a067;"></i>
-                                        {{ $reservation->number_of_guests }} people
+                                        <i class="fas fa-ticket-alt me-1" style="color: #c1a067;"></i>
+                                        <?php
+                                            $typeLabels = [
+                                                'adult' => 'Dewasa',
+                                                'child' => 'Anak',
+                                                'family' => 'Keluarga'
+                                            ];
+                                        ?>
+                                        <?php echo e($typeLabels[$ticket->ticket_type] ?? ucfirst($ticket->ticket_type)); ?> 
+                                        (<?php echo e($ticket->number_of_tickets); ?>)
                                     </p>
                                 </div>
                             </div>
                             
                             <div class="col-lg-2 col-md-4 col-sm-6">
-                                <div class="status">
-                                    <small class="text-muted text-uppercase fw-semibold">Status</small>
-                                    <div class="mt-1">
-                                        @php
-                                            $statusClass = match($reservation->status) {
-                                                'confirmed' => 'status-confirmed',
-                                                'pending' => 'status-pending',
-                                                'cancelled' => 'status-cancelled',
-                                                'completed' => 'status-completed',
-                                                default => 'status-default'
-                                            };
-                                            $statusText = match($reservation->status) {
-                                                'confirmed' => 'Confirmed',
-                                                'pending' => 'Pending',
-                                                'cancelled' => 'Cancelled',
-                                                'completed' => 'Completed',
-                                                default => ucfirst($reservation->status)
-                                            };
-                                        @endphp
-                                        <span class="status-badge {{ $statusClass }}">
-                                            <i class="fas 
-                                                @if($reservation->status == 'confirmed') fa-check-circle
-                                                @elseif($reservation->status == 'pending') fa-clock
-                                                @elseif($reservation->status == 'cancelled') fa-times-circle
-                                                @elseif($reservation->status == 'completed') fa-check-double
-                                                @else fa-info-circle
-                                                @endif me-1"></i>
-                                            {{ $statusText }}
-                                        </span>
-                                    </div>
+                                <div class="total-amount">
+                                    <small class="text-muted text-uppercase fw-semibold">Total Amount</small>
+                                    <p class="mb-0 fw-bold" style="color: #c1a067;">
+                                        Rp <?php echo e(number_format($ticket->total_amount, 0, ',', '.')); ?>
+
+                                    </p>
                                 </div>
                             </div>
                             
                             <div class="col-lg-2 col-md-12">
-                                <a href="{{ route('reservation.table.view', $reservation->booking_code) }}" 
+                                <a href="<?php echo e(route('reservation.ticket.view', $ticket->ticket_code)); ?>" 
                                    class="btn btn-detail w-100">
                                     <i class="fas fa-eye me-1"></i> Details
                                 </a>
                             </div>
                         </div>
+                        
+                        <!-- Status Bar -->
+                        <div class="row mt-3 pt-2 border-top">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <small class="text-muted">Status Tiket:</small>
+                                        <?php if($ticket->status == 'pending'): ?>
+                                            <span class="badge bg-warning text-dark ms-2">
+                                                <i class="fas fa-clock me-1"></i> Pending
+                                            </span>
+                                        <?php elseif($ticket->status == 'active'): ?>
+                                            <span class="badge bg-success ms-2">
+                                                <i class="fas fa-check-circle me-1"></i> Aktif
+                                            </span>
+                                        <?php elseif($ticket->status == 'used'): ?>
+                                            <span class="badge bg-secondary ms-2">
+                                                <i class="fas fa-check-double me-1"></i> Digunakan
+                                            </span>
+                                        <?php elseif($ticket->status == 'cancelled'): ?>
+                                            <span class="badge bg-danger ms-2">
+                                                <i class="fas fa-times-circle me-1"></i> Dibatalkan
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary ms-2"><?php echo e(ucfirst($ticket->status)); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Status Pembayaran:</small>
+                                        <?php if($ticket->payment_status == 'unpaid'): ?>
+                                            <span class="badge bg-danger ms-2">
+                                                <i class="fas fa-times-circle me-1"></i> Belum Bayar
+                                            </span>
+                                        <?php elseif($ticket->payment_status == 'waiting_payment'): ?>
+                                            <span class="badge bg-warning text-dark ms-2">
+                                                <i class="fas fa-clock me-1"></i> Menunggu Verifikasi
+                                            </span>
+                                        <?php elseif($ticket->payment_status == 'payment_verified'): ?>
+                                            <span class="badge bg-info text-dark ms-2">
+                                                <i class="fas fa-check-circle me-1"></i> Diverifikasi
+                                            </span>
+                                        <?php elseif($ticket->payment_status == 'paid'): ?>
+                                            <span class="badge bg-success ms-2">
+                                                <i class="fas fa-check-circle me-1"></i> Lunas
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary ms-2"><?php echo e(ucfirst($ticket->payment_status)); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if($ticket->used_at): ?>
+                                    <div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i> 
+                                            Digunakan: <?php echo e(\Carbon\Carbon::parse($ticket->used_at)->format('d M Y H:i')); ?>
+
+                                        </small>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="empty-state text-center py-5">
                         <div class="empty-icon mb-4">
-                            <i class="fas fa-calendar-alt fa-4x" style="color: #c1a067; opacity: 0.4;"></i>
+                            <i class="fas fa-ticket-alt fa-4x" style="color: #c1a067; opacity: 0.4;"></i>
                         </div>
-                        <h5 style="color: #1c3451; font-family: 'Playfair Display', serif;">No Reservations Yet</h5>
-                        <p class="text-muted mb-4">You haven't made any table reservations.</p>
-                        <a href="{{ route('reservation.table') }}" class="btn btn-book">
-                            <i class="fas fa-plus me-2"></i> Book a Table Now
+                        <h5 style="color: #1c3451; font-family: 'Playfair Display', serif;">No Tickets Yet</h5>
+                        <p class="text-muted mb-4">You haven't purchased any pool tickets.</p>
+                        <a href="<?php echo e(route('reservation.ticket')); ?>" class="btn btn-book">
+                            <i class="fas fa-shopping-cart me-2"></i> Buy Tickets Now
                         </a>
                     </div>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
                 
                 <!-- ========================================== -->
                 <!-- 🔥 PAGINATION YANG DIPERBAIKI -->
                 <!-- ========================================== -->
-                @if($reservations->hasPages())
+                <?php if($tickets->hasPages()): ?>
                 <div class="card-footer bg-transparent border-top-0 pb-4 px-4">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div class="text-muted small">
-                            Showing {{ $reservations->firstItem() ?? 0 }} to {{ $reservations->lastItem() ?? 0 }} of {{ $reservations->total() }} entries
+                            Showing <?php echo e($tickets->firstItem() ?? 0); ?> to <?php echo e($tickets->lastItem() ?? 0); ?> of <?php echo e($tickets->total()); ?> tickets
                         </div>
                         <div class="pagination-wrapper">
-                            {{ $reservations->appends(request()->query())->links('pagination::bootstrap-5') }}
+                            <?php echo e($tickets->appends(request()->query())->links('pagination::bootstrap-5')); ?>
+
                         </div>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
 
@@ -198,7 +243,6 @@
         box-shadow: 0 12px 28px rgba(28,52,81,0.12) !important;
     }
 
-    /* Sidebar Buttons */
     .btn-sidebar {
         background: white;
         color: #1c3451;
@@ -225,8 +269,7 @@
         box-shadow: 0 4px 12px rgba(28,52,81,0.2);
     }
 
-    /* Reservation Item */
-    .reservation-item {
+    .ticket-item {
         background: white;
         border: 1px solid #f0ebe0;
         border-radius: 16px;
@@ -236,7 +279,7 @@
         overflow: hidden;
     }
 
-    .reservation-item::before {
+    .ticket-item::before {
         content: '';
         position: absolute;
         left: 0;
@@ -248,65 +291,26 @@
         transition: opacity 0.25s;
     }
 
-    .reservation-item:hover {
+    .ticket-item:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 24px rgba(28,52,81,0.1);
         border-color: #c1a067;
     }
 
-    .reservation-item:hover::before {
+    .ticket-item:hover::before {
         opacity: 1;
     }
 
-    .reservation-item small.text-muted {
+    .ticket-item small.text-muted {
         font-size: 11px;
         letter-spacing: 0.5px;
         font-weight: 600;
     }
 
-    .booking-code p,
-    .date-time p,
-    .guests p {
-        margin-top: 4px;
+    .ticket-item .border-top {
+        border-color: #f0ebe0 !important;
     }
 
-    /* Status Badges */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        gap: 6px;
-    }
-
-    .status-confirmed {
-        background: #e8f5e9;
-        color: #2e7d32;
-    }
-
-    .status-pending {
-        background: #fff3e0;
-        color: #e65100;
-    }
-
-    .status-cancelled {
-        background: #ffebee;
-        color: #c62828;
-    }
-
-    .status-completed {
-        background: #e3f2fd;
-        color: #1565c0;
-    }
-
-    .status-default {
-        background: #f0ebe0;
-        color: #1c3451;
-    }
-
-    /* Detail Button */
     .btn-detail {
         background: white;
         color: #1c3451;
@@ -325,7 +329,6 @@
         box-shadow: 0 4px 12px rgba(28,52,81,0.2);
     }
 
-    /* Book Button */
     .btn-book {
         background: linear-gradient(135deg, #1c3451, #01516e);
         color: white;
@@ -344,7 +347,7 @@
     }
 
     /* ========================================== */
-    /* 🔥 PAGINATION STYLING KHUSUS CALDERA */
+    /* 🔥 PAGINATION STYLING */
     /* ========================================== */
     .pagination-wrapper {
         display: flex;
@@ -401,6 +404,11 @@
         border-radius: 10px !important;
     }
 
+    /* Badge icons */
+    .badge i {
+        font-size: 11px;
+    }
+
     /* Empty State */
     .empty-state {
         padding: 60px 20px;
@@ -423,7 +431,7 @@
 
     /* Responsive */
     @media (max-width: 768px) {
-        .reservation-item {
+        .ticket-item {
             padding: 16px;
         }
         
@@ -460,16 +468,25 @@
         .card-footer .text-muted {
             text-align: center;
         }
+        
+        .ticket-item .border-top {
+            margin-top: 12px !important;
+            padding-top: 12px !important;
+        }
     }
 
     /* Dark Mode */
-    body.dark-mode .reservation-item {
+    body.dark-mode .ticket-item {
         background: #1e1e2a;
         border-color: #2d2d3a;
     }
 
-    body.dark-mode .reservation-item:hover {
+    body.dark-mode .ticket-item:hover {
         border-color: #c1a067;
+    }
+
+    body.dark-mode .ticket-item .border-top {
+        border-color: #2d2d3a !important;
     }
 
     body.dark-mode .btn-sidebar {
@@ -499,26 +516,6 @@
         color: #1c3451;
     }
 
-    body.dark-mode .status-pending {
-        background: #2a1a0a;
-        color: #ffb74d;
-    }
-
-    body.dark-mode .status-confirmed {
-        background: #0a2a0a;
-        color: #81c784;
-    }
-
-    body.dark-mode .status-cancelled {
-        background: #2a0a0a;
-        color: #ef9a9a;
-    }
-
-    body.dark-mode .status-completed {
-        background: #0a1a2a;
-        color: #64b5f6;
-    }
-
     /* Dark Mode - Pagination */
     body.dark-mode .pagination-wrapper .page-link {
         background: #1e1e2a;
@@ -544,4 +541,5 @@
         border-color: #2d2d3a;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/customer/tickets.blade.php ENDPATH**/ ?>

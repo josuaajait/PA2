@@ -189,4 +189,31 @@ class PoolTicket extends Model
         
         return $labels[$this->payment_status] ?? '<span class="badge bg-info">' . $this->payment_status . '</span>';
     }
+
+    // app/Models/PoolTicket.php
+
+    // Tambahkan method ini di dalam class PoolTicket
+
+    /**
+     * Get payment proof URL
+     */
+    public function getPaymentProofUrlAttribute()
+    {
+        if ($this->payment_proof) {
+            // Jika disimpan di storage/app/public/payment_proofs/
+            if (str_starts_with($this->payment_proof, 'http')) {
+                return $this->payment_proof;
+            }
+            return asset('storage/' . $this->payment_proof);
+        }
+        return null;
+    }
+
+    /**
+     * Check if ticket has uploaded payment proof
+     */
+    public function hasPaymentProof()
+    {
+        return !is_null($this->payment_proof) && $this->payment_proof !== '';
+    }
 }

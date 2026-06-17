@@ -372,7 +372,7 @@
                 </a>
                 <a href="<?php echo e(route('admin.testimonials.index')); ?>"
                    class="nav-link <?php echo e(request()->routeIs('admin.testimonials.*') ? 'active' : ''); ?>">
-                    <i class="fas fa-comment-dots"></i> Testimonial
+                    <i class="fas fa-comment-dots"></i> Testimonials
                 </a>
                 <a href="<?php echo e(route('admin.promos.index')); ?>"
                    class="nav-link <?php echo e(request()->routeIs('admin.promos.*') ? 'active' : ''); ?>">

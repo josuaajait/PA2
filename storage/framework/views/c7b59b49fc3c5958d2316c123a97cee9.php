@@ -171,10 +171,10 @@
     <!-- Navbar Minimal -->
     <nav class="ticket-navbar">
         <div class="container d-flex justify-content-between align-items-center">
-            <a href="{{ route('branding.home') }}" class="caldera-brand">
+            <a href="<?php echo e(route('branding.home')); ?>" class="caldera-brand">
                 Caldera Resto<br>& Pool
             </a>
-            <a href="{{ route('customer.tickets') }}" class="btn-back-nav">
+            <a href="<?php echo e(route('customer.tickets')); ?>" class="btn-back-nav">
                 <i class="fas fa-arrow-left me-1"></i> Kembali ke Tiket Saya
             </a>
         </div>
@@ -203,7 +203,8 @@
                                 <small class="text-muted text-uppercase fw-semibold d-block mb-1">Kode Tiket Anda</small>
                                 <h3 class="fw-bold mb-0" style="color: #1c3451; letter-spacing: 2px;">
                                     <i class="fas fa-qrcode me-2" style="color: #c1a067;"></i>
-                                    {{ $ticket->ticket_code }}
+                                    <?php echo e($ticket->ticket_code); ?>
+
                                 </h3>
                             </div>
                         </div>
@@ -219,7 +220,8 @@
                                         <small class="text-muted d-block mb-1">Nama Customer</small>
                                         <p class="fw-bold mb-0" style="color: #1c3451;">
                                             <i class="fas fa-user me-1" style="color: #c1a067;"></i>
-                                            {{ $ticket->customer_name }}
+                                            <?php echo e($ticket->customer_name); ?>
+
                                         </p>
                                     </div>
                                 </div>
@@ -228,7 +230,8 @@
                                         <small class="text-muted d-block mb-1">Tanggal Kunjungan</small>
                                         <p class="fw-bold mb-0" style="color: #1c3451;">
                                             <i class="fas fa-calendar-day me-1" style="color: #c1a067;"></i>
-                                            {{ \Carbon\Carbon::parse($ticket->visit_date)->format('d F Y') }}
+                                            <?php echo e(\Carbon\Carbon::parse($ticket->visit_date)->format('d F Y')); ?>
+
                                         </p>
                                     </div>
                                 </div>
@@ -237,14 +240,15 @@
                                         <small class="text-muted d-block mb-1">Jenis Tiket</small>
                                         <p class="fw-bold mb-0" style="color: #1c3451;">
                                             <i class="fas fa-tag me-1" style="color: #c1a067;"></i>
-                                            @php
+                                            <?php
                                                 $ticketTypeLabels = [
                                                     'adult' => 'Dewasa',
                                                     'child' => 'Anak-anak',
                                                     'family' => 'Keluarga'
                                                 ];
-                                            @endphp
-                                            {{ $ticketTypeLabels[$ticket->ticket_type] ?? ucfirst($ticket->ticket_type) }}
+                                            ?>
+                                            <?php echo e($ticketTypeLabels[$ticket->ticket_type] ?? ucfirst($ticket->ticket_type)); ?>
+
                                         </p>
                                     </div>
                                 </div>
@@ -253,7 +257,7 @@
                                         <small class="text-muted d-block mb-1">Jumlah Tiket</small>
                                         <p class="fw-bold mb-0" style="color: #1c3451;">
                                             <i class="fas fa-shopping-cart me-1" style="color: #c1a067;"></i>
-                                            {{ $ticket->number_of_tickets }} tiket
+                                            <?php echo e($ticket->number_of_tickets); ?> tiket
                                         </p>
                                     </div>
                                 </div>
@@ -262,7 +266,8 @@
                                         <small class="text-muted d-block mb-1">Total Pembayaran</small>
                                         <p class="fw-bold mb-0" style="color: #c1a067; font-size: 1.2rem;">
                                             <i class="fas fa-money-bill me-1"></i>
-                                            Rp {{ number_format($ticket->total_amount, 0, ',', '.') }}
+                                            Rp <?php echo e(number_format($ticket->total_amount, 0, ',', '.')); ?>
+
                                         </p>
                                     </div>
                                 </div>
@@ -270,22 +275,22 @@
                         </div>
 
                         <!-- Status Pembayaran -->
-                        @if($ticket->payment_status == 'waiting_payment')
+                        <?php if($ticket->payment_status == 'waiting_payment'): ?>
                         <div class="alert alert-info mb-4">
                             <i class="fas fa-clock me-2"></i>
                             <strong>Status: Menunggu Verifikasi</strong><br>
                             Bukti pembayaran Anda sudah diupload dan sedang menunggu verifikasi admin.
                         </div>
-                        @elseif($ticket->payment_status == 'paid')
+                        <?php elseif($ticket->payment_status == 'paid'): ?>
                         <div class="alert alert-success mb-4">
                             <i class="fas fa-check-circle me-2"></i>
                             <strong>Status: Lunas</strong><br>
                             Pembayaran Anda sudah diverifikasi. Tiket sudah aktif.
                         </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Payment Information -->
-                        @if(!$ticket->payment_proof && $ticket->payment_status != 'paid')
+                        <?php if(!$ticket->payment_proof && $ticket->payment_status != 'paid'): ?>
                         <div class="alert-custom mb-4">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-credit-card fa-lg me-3" style="color: #c1a067;"></i>
@@ -311,15 +316,15 @@
                                 </div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Bukti yang Sudah Diupload -->
-                        @if($ticket->payment_proof)
-                        @php
+                        <?php if($ticket->payment_proof): ?>
+                        <?php
                             $paymentProofUrl = str_starts_with($ticket->payment_proof, 'http')
                                 ? $ticket->payment_proof
                                 : asset('storage/' . $ticket->payment_proof);
-                        @endphp
+                        ?>
                         <div class="card mb-4" style="border-left: 4px solid #c1a067; background: #f8f6f2;">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3">
@@ -327,70 +332,70 @@
                                     Bukti Pembayaran yang Telah Diupload
                                 </h6>
                                 <div class="row">
-                                    @if($ticket->bank_from)
+                                    <?php if($ticket->bank_from): ?>
                                     <div class="col-md-6 mb-2">
                                         <small class="text-muted d-block">Bank Asal Transfer</small>
-                                        <strong>{{ $ticket->bank_from }}</strong>
+                                        <strong><?php echo e($ticket->bank_from); ?></strong>
                                     </div>
-                                    @endif
-                                    @if($ticket->account_name)
+                                    <?php endif; ?>
+                                    <?php if($ticket->account_name): ?>
                                     <div class="col-md-6 mb-3">
                                         <small class="text-muted d-block">Nama Pemilik Rekening</small>
-                                        <strong>{{ $ticket->account_name }}</strong>
+                                        <strong><?php echo e($ticket->account_name); ?></strong>
                                     </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                                 <div class="text-center mt-2">
-                                    <a href="{{ $paymentProofUrl }}" target="_blank">
-                                        <img src="{{ $paymentProofUrl }}"
+                                    <a href="<?php echo e($paymentProofUrl); ?>" target="_blank">
+                                        <img src="<?php echo e($paymentProofUrl); ?>"
                                              class="img-fluid rounded shadow-sm border"
                                              style="max-height: 200px; cursor: pointer;"
                                              alt="Bukti Pembayaran">
                                     </a>
                                     <div class="mt-2">
-                                        <a href="{{ $paymentProofUrl }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        <a href="<?php echo e($paymentProofUrl); ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
                                             <i class="fas fa-external-link-alt"></i> Lihat Bukti Lengkap
                                         </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Important Note -->
-                        @if($ticket->payment_status != 'paid')
+                        <?php if($ticket->payment_status != 'paid'): ?>
                         <div class="alert alert-warning small mb-4">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <strong>Perhatian:</strong> Tiket hanya akan aktif setelah pembayaran diverifikasi oleh admin.
                         </div>
-                        @else
+                        <?php else: ?>
                         <div class="alert alert-success small mb-4">
                             <i class="fas fa-check-circle me-2"></i>
                             <strong>Tiket Aktif!</strong> Silakan tunjukkan kode tiket ini saat datang ke Caldera.
                         </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Action Buttons -->
                         <div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
-                            @if(!$ticket->payment_proof && $ticket->payment_status != 'paid')
+                            <?php if(!$ticket->payment_proof && $ticket->payment_status != 'paid'): ?>
                             <button type="button" class="btn btn-upload" data-bs-toggle="modal" data-bs-target="#paymentModal">
                                 <i class="fas fa-upload me-2"></i> Upload Bukti Bayar
                             </button>
-                            @elseif($ticket->payment_status == 'waiting_payment')
+                            <?php elseif($ticket->payment_status == 'waiting_payment'): ?>
                             <div class="alert alert-info mb-0 px-4 py-2">
                                 <i class="fas fa-spinner fa-spin me-2"></i> Menunggu Verifikasi Admin
                             </div>
-                            @elseif($ticket->payment_status == 'paid')
+                            <?php elseif($ticket->payment_status == 'paid'): ?>
                             <div class="alert alert-success mb-0 px-4 py-2">
                                 <i class="fas fa-check-circle me-2"></i> Pembayaran Lunas
                             </div>
-                            @endif
+                            <?php endif; ?>
 
-                            <a href="{{ route('customer.tickets') }}" class="btn btn-outline-custom">
+                            <a href="<?php echo e(route('customer.tickets')); ?>" class="btn btn-outline-custom">
                                 <i class="fas fa-ticket-alt me-2"></i> Lihat Semua Tiket Saya
                             </a>
 
-                            <a href="{{ route('branding.home') }}" class="btn btn-outline-custom">
+                            <a href="<?php echo e(route('branding.home')); ?>" class="btn btn-outline-custom">
                                 <i class="fas fa-home me-2"></i> Kembali ke Beranda
                             </a>
                         </div>
@@ -402,7 +407,7 @@
     </div>
 
     <!-- Modal Upload Pembayaran -->
-    @if(!$ticket->payment_proof && $ticket->payment_status != 'paid')
+    <?php if(!$ticket->payment_proof && $ticket->payment_status != 'paid'): ?>
     <div class="modal fade" id="paymentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 20px; border: none;">
@@ -413,17 +418,17 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('reservation.ticket.payment.upload') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <input type="hidden" name="ticket_code" value="{{ $ticket->ticket_code }}">
+                <form action="<?php echo e(route('reservation.ticket.payment.upload')); ?>" method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="ticket_code" value="<?php echo e($ticket->ticket_code); ?>">
                     <div class="modal-body px-4">
                         <div class="mb-3">
                             <label class="form-label fw-semibold" style="color: #1c3451;">Kode Tiket</label>
-                            <input type="text" class="form-control caldera-input" value="{{ $ticket->ticket_code }}" readonly>
+                            <input type="text" class="form-control caldera-input" value="<?php echo e($ticket->ticket_code); ?>" readonly>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold" style="color: #1c3451;">Total Pembayaran</label>
-                            <input type="text" class="form-control caldera-input" value="Rp {{ number_format($ticket->total_amount, 0, ',', '.') }}" readonly>
+                            <input type="text" class="form-control caldera-input" value="Rp <?php echo e(number_format($ticket->total_amount, 0, ',', '.')); ?>" readonly>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold" style="color: #1c3451;">Bank Asal Transfer</label>
@@ -466,8 +471,8 @@
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/reservation/ticket/view.blade.php ENDPATH**/ ?>

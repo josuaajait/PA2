@@ -14,7 +14,10 @@ class TestimonialController extends Controller
         $query = Testimonial::where('is_approved', true); // ← fix
 
         if ($request->filled('rating')) {
-            $query->where('rating', '>=', $request->rating);
+            $rating = $request->integer('rating');
+            if (in_array($rating, [1,2,3,4,5])) {
+                $query->where('rating', $rating);
+            }
         }
 
         if ($request->filled('service')) {

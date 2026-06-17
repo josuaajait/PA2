@@ -139,7 +139,7 @@
                 </a>
                 <a class="nav-custom-link <?php echo e(request()->routeIs('branding.testimonials*') ? 'active' : ''); ?>"
                    href="<?php echo e(route('branding.testimonials')); ?>">
-                    <i class="fas fa-comments me-1"></i>Testimoni
+                    <i class="fas fa-comments me-1"></i>Testimony
                 </a>
             </div>
 

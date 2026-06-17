@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Testimonials')
+@section('title', 'Testimonials - Caldera Resto & Pool')
 
 @section('content')
 <div class="container py-5">
@@ -167,10 +167,21 @@
         @endforelse
     </div>
 
-    <!-- Pagination -->
+    {{-- Baru --}}
+    @if($testimonials->hasPages())
     <div class="mt-5">
-        {{ $testimonials->links() }}
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="text-muted small">
+                Showing {{ $testimonials->firstItem() ?? 0 }} to {{ $testimonials->lastItem() ?? 0 }}
+                of {{ $testimonials->total() }} reviews
+            </div>
+            <div class="pagination-wrapper">
+                {{ $testimonials->appends(request()->query())->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
     </div>
+    @endif
+
 </div>
 @endsection
 
@@ -288,6 +299,107 @@
         .display-1 {
             font-size: 3rem;
         }
+    }
+
+    /* Pagination */
+.pagination-wrapper {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pagination-wrapper .pagination {
+    margin-bottom: 0;
+    gap: 4px;
+}
+
+.pagination-wrapper .page-link {
+    border: 1.5px solid #e8e0d0;
+    border-radius: 10px !important;
+    padding: 8px 16px;
+    color: #1c3451;
+    background: white;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s;
+    margin: 0 2px;
+}
+
+.pagination-wrapper .page-link:hover {
+    background: #1c3451;
+    color: white;
+    border-color: #1c3451;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(28,52,81,0.2);
+    z-index: 2;
+}
+
+.pagination-wrapper .page-item.active .page-link {
+    background: linear-gradient(135deg, #1c3451, #01516e);
+    color: white;
+    border-color: #1c3451;
+    box-shadow: 0 4px 12px rgba(28,52,81,0.25);
+}
+
+.pagination-wrapper .page-item.disabled .page-link {
+    background: #f8f6f2;
+    color: #b0a890;
+    border-color: #f0ebe0;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.pagination-wrapper .page-item:first-child .page-link,
+.pagination-wrapper .page-item:last-child .page-link {
+    border-radius: 10px !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pagination-wrapper {
+        justify-content: center !important;
+        width: 100%;
+    }
+
+    .pagination-wrapper .page-link {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .mt-5 .d-flex {
+        flex-direction: column;
+        align-items: center !important;
+        gap: 12px;
+    }
+
+    .mt-5 .text-muted {
+        text-align: center;
+    }
+    }
+
+    /* Dark Mode - Pagination */
+    body.dark-mode .pagination-wrapper .page-link {
+        background: #1e1e2a;
+        border-color: #2d2d3a;
+        color: #dce8f0;
+    }
+
+    body.dark-mode .pagination-wrapper .page-link:hover {
+        background: #c1a067;
+        color: #1c3451;
+        border-color: #c1a067;
+    }
+
+    body.dark-mode .pagination-wrapper .page-item.active .page-link {
+        background: linear-gradient(135deg, #c1a067, #a8894f);
+        color: #1c3451;
+        border-color: #c1a067;
+    }
+
+    body.dark-mode .pagination-wrapper .page-item.disabled .page-link {
+        background: #2d2d3a;
+        color: #5a5a6a;
+        border-color: #2d2d3a;
     }
 </style>
 @endpush

@@ -16,14 +16,14 @@
         <div class="col-lg-6 mb-4 mb-lg-0">
             <h2 class="fw-bold mb-3" style="color: #1c3451; font-family: 'Playfair Display', serif;">Our Story</h2>
             <p class="text-muted" style="text-align: justify; line-height: 1.8;">
-                Caldera Resto and Pool berdiri sejak tahun 2020 dengan konsep restoran keluarga yang dilengkapi fasilitas kolam renang. 
-                Berawal dari keinginan menciptakan tempat berkumpul yang nyaman untuk keluarga dan teman, Caldera kini telah menjadi 
-                salah satu destinasi favorit di kota.
+                Caldera Resto & Pool was established in 2020 with the concept of a family restaurant complemented by a swimming pool facility. 
+                Born from a desire to create a comfortable gathering place for families and friends, Caldera has now become 
+                one of the favorite destinations in the city.
             </p>
             <p class="text-muted mt-3" style="text-align: justify; line-height: 1.8;">
-                Kami berkomitmen untuk memberikan pelayanan terbaik, makanan berkualitas, dan pengalaman yang tak terlupakan 
-                bagi setiap pengunjung. Dengan suasana yang hangat dan pelayanan ramah, Caldera siap menjadi rumah kedua bagi Anda 
-                dan keluarga.
+                We are committed to providing the best service, quality food, and an unforgettable experience 
+                for every visitor. With a warm atmosphere and friendly service, Caldera is ready to become your second home 
+                for you and your family.
             </p>
             <div class="mt-4">
                 <a href="{{ route('reservation.table') }}" class="btn btn-caldera">
@@ -87,7 +87,7 @@
                     <h5 class="fw-bold mb-0" style="color: #1c3451;">Vision</h5>
                 </div>
                 <p class="text-muted mb-0" style="font-style: italic;">
-                    "Menjadi destinasi kuliner dan rekreasi terbaik di Indonesia yang dikenal dengan pelayanan prima dan pengalaman tak terlupakan bagi setiap pelanggan."
+                    "To become the premier culinary and recreational destination in Indonesia, known for excellent service and unforgettable experiences for every customer."
                 </p>
             </div>
         </div>
@@ -100,43 +100,14 @@
                     <h5 class="fw-bold mb-0" style="color: #1c3451;">Mission</h5>
                 </div>
                 <ul class="text-muted mb-0" style="padding-left: 20px;">
-                    <li class="mb-2">Menyediakan makanan berkualitas dengan harga terjangkau</li>
-                    <li class="mb-2">Memberikan pelayanan terbaik dan ramah kepada pelanggan</li>
-                    <li class="mb-2">Menciptakan suasana yang nyaman dan menyenangkan</li>
-                    <li>Mengembangkan inovasi menu dan fasilitas secara berkelanjutan</li>
+                    <li class="mb-2">To provide high-quality food at affordable prices</li>
+                    <li class="mb-2">To deliver the best and most friendly service to customers</li>
+                    <li class="mb-2">To create a comfortable and enjoyable atmosphere</li>
+                    <li>To continuously innovate menus and facilities sustainably</li>
                 </ul>
             </div>
         </div>
     </div>
-
-    <!-- Stats Section 
-    <div class="row g-4 mt-3 pt-3">
-        <div class="col-md-3 col-6 text-center">
-            <div class="stat-card p-3">
-                <h3 class="fw-bold mb-0" style="color: #c1a067;">5+</h3>
-                <small class="text-muted">Years of Excellence</small>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 text-center">
-            <div class="stat-card p-3">
-                <h3 class="fw-bold mb-0" style="color: #c1a067;">50+</h3>
-                <small class="text-muted">Menu Items</small>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 text-center">
-            <div class="stat-card p-3">
-                <h3 class="fw-bold mb-0" style="color: #c1a067;">10K+</h3>
-                <small class="text-muted">Happy Customers</small>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 text-center">
-            <div class="stat-card p-3">
-                <h3 class="fw-bold mb-0" style="color: #c1a067;">20+</h3>
-                <small class="text-muted">Expert Staff</small>
-            </div>
-        </div>
-    </div> -->
-    
 </div>
 @endsection
 
@@ -194,23 +165,6 @@
         color: #c1a067;
     }
 
-    /* Stat Cards */
-    .stat-card {
-        background: #f8f6f2;
-        border-radius: 16px;
-        transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-        background: #1c3451;
-        transform: translateY(-3px);
-    }
-
-    .stat-card:hover h3,
-    .stat-card:hover small {
-        color: white !important;
-    }
-
     /* Buttons */
     .btn-caldera {
         background: linear-gradient(135deg, #1c3451, #01516e);
@@ -251,19 +205,6 @@
     }
 
     /* Dark Mode */
-    body.dark-mode .stat-card {
-        background: #1e1e2a;
-    }
-
-    body.dark-mode .stat-card:hover {
-        background: #c1a067;
-    }
-
-    body.dark-mode .stat-card:hover h3,
-    body.dark-mode .stat-card:hover small {
-        color: #1c3451 !important;
-    }
-
     body.dark-mode .btn-outline-caldera {
         border-color: #c1a067;
         color: #c1a067;
@@ -272,6 +213,16 @@
     body.dark-mode .btn-outline-caldera:hover {
         background: #c1a067;
         color: #1c3451;
+    }
+
+    body.dark-mode .vision-card,
+    body.dark-mode .mission-card {
+        background: #1e1e2a;
+        border-color: #2d2d3a;
+    }
+
+    body.dark-mode .caldera-feature-card {
+        background: #1e1e2a;
     }
 </style>
 @endpush

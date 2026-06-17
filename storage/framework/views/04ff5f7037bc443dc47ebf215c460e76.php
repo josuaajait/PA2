@@ -1,6 +1,6 @@
 
 
-<?php $__env->startSection('title', 'Reservasi Meja'); ?>
+<?php $__env->startSection('title', 'Table Reservation - Caldera Resto & Pool'); ?>
 
 <?php $__env->startSection('content'); ?>
 <div class="container py-5">

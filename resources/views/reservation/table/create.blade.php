@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Reservasi Meja')
+@section('title', 'Table Reservation - Caldera Resto & Pool')
 
 @section('content')
 <div class="container py-5">

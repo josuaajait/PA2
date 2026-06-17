@@ -163,4 +163,46 @@ class TicketController extends Controller
         $ticket = PoolTicket::where('ticket_code', $ticketCode)->firstOrFail();
         return view('reservation.ticket.view', compact('ticket'));
     }
+
+    // app/Http/Controllers/Reservation/TicketController.php
+
+    // Tambahkan method ini:
+
+    public function uploadPaymentProof(Request $request)
+    {
+        $request->validate([
+            'ticket_code'    => 'required|exists:pool_tickets,ticket_code',
+            'bank_from'      => 'required|string',
+            'account_name'   => 'required|string|max:255',
+            'payment_proof'  => 'required|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB
+        ]);
+
+        $ticket = PoolTicket::where('ticket_code', $request->ticket_code)->firstOrFail();
+
+        // Cek apakah sudah pernah upload
+        if ($ticket->payment_proof && $ticket->payment_status !== 'rejected') {
+            return back()->with('error', 'Anda sudah mengupload bukti pembayaran. Silakan tunggu verifikasi admin.');
+        }
+
+        // Upload file
+        if ($request->hasFile('payment_proof')) {
+            $file = $request->file('payment_proof');
+            $fileName = time() . '_' . $ticket->ticket_code . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('payment_proofs/tickets', $fileName, 'public');
+            
+            $ticket->update([
+                'payment_proof'   => $path,
+                'payment_method'  => 'transfer',
+                'payment_status'  => 'waiting_payment', // Status menunggu verifikasi
+                'bank_from'       => $request->bank_from,
+                'account_name'    => $request->account_name,
+            ]);
+        }
+
+        // Kirim notifikasi ke admin (real-time)
+        // event(new NewPaymentUploadedEvent($ticket));
+
+        return redirect()->route('reservation.ticket.view', $ticket->ticket_code)
+            ->with('success', 'Bukti pembayaran berhasil diupload. Admin akan segera memverifikasi.');
+    }
 }
