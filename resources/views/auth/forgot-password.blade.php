@@ -19,7 +19,7 @@
                     @endif
 
                     <p class="text-muted text-center mb-4" style="color: #6c757d !important;">
-                        Masukkan email Anda, kami akan mengirimkan link reset password
+                        Masukkan email Anda, kami akan mengirimkan kode OTP untuk reset password
                     </p>
 
                     <form method="POST" action="{{ route('password.otp.send') }}">
@@ -33,7 +33,7 @@
                         </div>
                         <button type="submit" class="btn w-100" 
                                 style="background: #1c3451; color: white; border-radius: 40px; padding: 12px; font-weight: 600; transition: all 0.3s; border: none;">
-                            Kirim Link Reset
+                            Kirim Kode OTP
                         </button>
                     </form>
 

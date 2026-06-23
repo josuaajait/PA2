@@ -220,6 +220,7 @@ class NotificationController extends Controller
                 ->where('notifiable_type', 'App\Models\User')
                 ->where('notifiable_id', $user->id)
                 ->update(['read_at' => now()]);
+                
 
             return response()->json(['success' => true, 'message' => 'Notifikasi ditandai dibaca']);
         } catch (\Exception $e) {

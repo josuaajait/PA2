@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
         // Admin Super - bisa akses semuanya
         User::create([
             'name' => 'Super Admin Caldera',
-            'email' => 'admin@caldera.com',
+            'email' => 'testingprojects005@gmail.com',
             'password' => Hash::make('password123'),
             'role' => 'admin',
             'phone' => '081234567890',

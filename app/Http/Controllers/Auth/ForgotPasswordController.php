@@ -12,17 +12,14 @@ use Carbon\Carbon;
 
 class ForgotPasswordController extends Controller
 {
-    /**
-     * Tampilkan form input email
-     */
+    const OTP_EXPIRY_MINUTES = 10;
+    const RESEND_COOLDOWN_SECONDS = 60;
+
     public function showForgotForm()
     {
         return view('auth.forgot-password');
     }
 
-    /**
-     * Kirim OTP ke email
-     */
     public function sendOtp(Request $request)
     {
         $request->validate([
@@ -31,19 +28,28 @@ class ForgotPasswordController extends Controller
             'email.exists' => 'Email tidak terdaftar.',
         ]);
 
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user->is_active) {
+            return back()->withErrors(['email' => 'Akun tidak aktif. Hubungi admin.']);
+        }
+
+        $existing = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+
+        if ($existing && Carbon::parse($existing->created_at)->diffInSeconds(now()) < self::RESEND_COOLDOWN_SECONDS) {
+            $wait = self::RESEND_COOLDOWN_SECONDS - Carbon::parse($existing->created_at)->diffInSeconds(now());
+            return back()->withErrors(['email' => "Tunggu {$wait} detik sebelum minta OTP baru."]);
+        }
+
         $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Simpan OTP ke tabel password_reset_tokens
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],
             [
-                'email'      => $request->email,
-                'token'      => $otp,
+                'token'      => Hash::make($otp), // di-hash, bukan plain text
                 'created_at' => Carbon::now(),
             ]
         );
-
-        $user = User::where('email', $request->email)->first();
 
         Mail::raw(
             "Halo {$user->name},\n\nKode OTP reset password Anda: {$otp}\n\nBerlaku selama 10 menit.\n\nJika Anda tidak meminta reset password, abaikan email ini.",
@@ -57,9 +63,6 @@ class ForgotPasswordController extends Controller
                          ->with('success', 'Kode OTP telah dikirim ke ' . $request->email);
     }
 
-    /**
-     * Tampilkan form input OTP + password baru
-     */
     public function showOtpForm(Request $request)
     {
         return view('auth.reset-password-otp', [
@@ -67,9 +70,6 @@ class ForgotPasswordController extends Controller
         ]);
     }
 
-    /**
-     * Verifikasi OTP dan reset password
-     */
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -84,25 +84,21 @@ class ForgotPasswordController extends Controller
 
         $record = DB::table('password_reset_tokens')
             ->where('email', $request->email)
-            ->where('token', $request->otp)
             ->first();
 
-        if (!$record) {
+        if (! $record || ! Hash::check($request->otp, $record->token)) {
             return back()->withErrors(['otp' => 'Kode OTP tidak valid.'])->withInput();
         }
 
-        // Cek expired (10 menit)
-        if (Carbon::parse($record->created_at)->addMinutes(10)->isPast()) {
+        if (Carbon::parse($record->created_at)->addMinutes(self::OTP_EXPIRY_MINUTES)->isPast()) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             return back()->withErrors(['otp' => 'Kode OTP sudah kadaluarsa. Minta kode baru.'])->withInput();
         }
 
-        // Update password
         User::where('email', $request->email)->update([
             'password' => Hash::make($request->password),
         ]);
 
-        // Hapus token
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
         return redirect()->route('login')

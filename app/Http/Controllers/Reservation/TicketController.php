@@ -54,12 +54,14 @@ class TicketController extends Controller
     {
         // Log semua request
         Log::info('=== FULL REQUEST ===', $request->all());
+        Log::info('VERSI BARU DIPANGGIL - cek regex phone', ['phone' => $request->customer_phone]);
+    
         
         // Validasi
         $validated = $request->validate([
             'customer_name'     => 'required|string|max:255',
             'customer_email'    => 'required|email|max:255',
-            'customer_phone'    => 'required|string|max:20',
+            'customer_phone'   => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s()]+$/'],
             'visit_date'        => 'required|date|after_or_equal:today',
             'visit_time'        => 'nullable',
             'ticket_type'       => 'required|in:adult,child,family',

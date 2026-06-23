@@ -107,12 +107,18 @@
             border-radius: 10px;
             color: white;
             font-size: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
         }
         .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102,126,234,0.4);
             color: white;
+        }
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         .resend-text {
             text-align: center;
@@ -173,10 +179,10 @@
                         @for($i = 0; $i < 6; $i++)
                             <input
                                 type="text"
-                                maxlength="1"
+                                maxlength="{{ $i === 0 ? 6 : 1 }}"
                                 class="otp-digit {{ $errors->has('otp') ? 'is-invalid' : '' }}"
                                 inputmode="numeric"
-                                autocomplete="off"
+                                autocomplete="{{ $i === 0 ? 'one-time-code' : 'off' }}"
                             >
                         @endfor
                     </div>
@@ -195,6 +201,7 @@
                             class="form-control @error('password') is-invalid @enderror"
                             placeholder="Minimal 8 karakter"
                             required
+                            minlength="8"
                         >
                         <button type="button" class="btn-toggle-pw" onclick="togglePw('password', this)">
                             <i class="fas fa-eye"></i>
@@ -216,6 +223,7 @@
                             class="form-control"
                             placeholder="Ulangi password baru"
                             required
+                            minlength="8"
                         >
                         <button type="button" class="btn-toggle-pw" onclick="togglePw('password_confirmation', this)">
                             <i class="fas fa-eye"></i>
@@ -223,7 +231,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-submit">
+                <button type="submit" class="btn btn-submit" id="submit-btn" disabled>
                     <i class="fas fa-lock me-2"></i>Reset Password
                 </button>
             </form>
@@ -240,51 +248,64 @@
 <script>
     const digits = document.querySelectorAll('.otp-digit');
     const hidden = document.getElementById('otp-hidden');
+    const submitBtn = document.getElementById('submit-btn');
 
     function updateHidden() {
         hidden.value = [...digits].map(d => d.value).join('');
+        submitBtn.disabled = hidden.value.length < 6;
     }
 
-    // Isi ulang dari old value jika ada
+    function fillFrom(str, startIndex = 0) {
+        const clean = str.replace(/\D/g, '').slice(0, 6 - startIndex);
+        clean.split('').forEach(function (char, i) {
+            if (digits[startIndex + i]) digits[startIndex + i].value = char;
+        });
+        updateHidden();
+        const lastFilled = Math.min(startIndex + clean.length - 1, digits.length - 1);
+        if (lastFilled >= 0) digits[lastFilled].focus();
+    }
+
+    // Isi ulang dari old value jika ada (validasi gagal, form reload dengan input lama)
     const oldOtp = hidden.value;
     if (oldOtp) {
-        oldOtp.split('').forEach(function(char, i) {
-            if (digits[i]) digits[i].value = char;
-        });
+        fillFrom(oldOtp, 0);
     }
 
-    digits.forEach(function(input, index) {
-        input.addEventListener('keypress', function(e) {
+    digits.forEach(function (input, index) {
+        input.addEventListener('keypress', function (e) {
             if (!/[0-9]/.test(e.key)) e.preventDefault();
         });
 
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function () {
+            // Kotak pertama: tangani autofill OS/SMS yang mengisi semua 6 digit sekaligus
+            if (index === 0 && this.value.length > 1) {
+                fillFrom(this.value, 0);
+                return;
+            }
+
             this.value = this.value.replace(/\D/g, '').slice(0, 1);
+            this.classList.remove('is-invalid');
+
             if (this.value && index < digits.length - 1) {
                 digits[index + 1].focus();
             }
             updateHidden();
         });
 
-        input.addEventListener('keydown', function(e) {
+        input.addEventListener('keydown', function (e) {
             if (e.key === 'Backspace' && !this.value && index > 0) {
                 digits[index - 1].focus();
             }
         });
 
-        input.addEventListener('paste', function(e) {
+        input.addEventListener('paste', function (e) {
             e.preventDefault();
-            const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-            pasted.split('').forEach(function(char, i) {
-                if (digits[i]) digits[i].value = char;
-            });
-            updateHidden();
-            const lastFilled = Math.min(pasted.length, digits.length - 1);
-            digits[lastFilled].focus();
+            const pasted = e.clipboardData.getData('text');
+            fillFrom(pasted, index === 0 ? 0 : index);
         });
     });
 
-    document.getElementById('reset-form').addEventListener('submit', function() {
+    document.getElementById('reset-form').addEventListener('submit', function () {
         updateHidden();
     });
 

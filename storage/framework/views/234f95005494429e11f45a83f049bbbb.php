@@ -248,4 +248,4 @@
         </div>
     </div>
 </body>
-</html><?php /**PATH D:\PA2\resources\views/admin/auth/login.blade.php ENDPATH**/ ?>
+</html><?php /**PATH D:\xampp\htdocs\PA2_Kel6\resources\views/admin/auth/login.blade.php ENDPATH**/ ?>
