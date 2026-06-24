@@ -100,4 +100,58 @@ class ReservationController extends Controller
             'data' => $reservations
         ]);
     }
+
+    public function cancel(Request $request, $bookingCode)
+{
+    try {
+        // Validasi alasan pembatalan dari request body
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        // Cari reservasi berdasarkan booking_code milik user yang sedang login
+        $reservation = TableReservation::where('booking_code', $bookingCode)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Reservasi tidak ditemukan.'
+            ], 404);
+        }
+
+        // Opsional: Batasi agar hanya status 'pending' yang bisa dibatalkan
+        if ($reservation->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Reservasi sudah diproses dan tidak dapat dibatalkan.'
+            ], 400);
+        }
+
+        // Update status reservasi dan simpan alasan pembatalan
+        $reservation->update([
+            'status' => 'cancelled',
+            'cancellation_reason' => $request->input('reason', 'Dibatalkan oleh user')
+        ]);
+
+        // Opsional: Kirim notifikasi database internal
+        $user = Auth::user();
+        if ($user) {
+            $user->notify(new \App\Notifications\ReservationNotification($reservation, 'cancelled'));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reservasi berhasil dibatalkan.',
+            'data' => $reservation
+        ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
